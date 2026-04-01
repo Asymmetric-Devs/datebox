@@ -1,0 +1,140 @@
+{
+  "expo": {
+    "name": "Elepad",
+    "slug": "elepad",
+    "version": "1.0.0",
+    "scheme": "elepad",
+    "orientation": "portrait",
+    "icon": "./assets/images/ele-def-fondo-cuad.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elepadorg.elepad",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/ele-def-fondo-cuad.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.elepadorg.elepad",
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO",
+        "READ_MEDIA_VISUAL_USER_SELECTED"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/ele-def-fondo-cuad.png",
+          "imageWidth": 250,
+          "resizeMode": "contain",
+          "backgroundColor": "#F8F9FA"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permitir a Elepad acceder a tus fotos para elegir un avatar.",
+          "cameraPermission": "Permitir a Elepad usar la cámara para tomar una foto de perfil."
+        }
+      ],
+      "expo-font",
+      "expo-audio",
+      "expo-web-browser",
+      "expo-video",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/ele-def-fondo-cuad.png",
+          "color": "#8896B0",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-file-system",
+        {
+          "directories": [
+            "documents",
+            "cache"
+          ]
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Permitir a Elepad guardar tus recuerdos en la galería.",
+          "savePhotosPermission": "Permitir a Elepad guardar fotos y videos en tu galería.",
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": [
+            "audio",
+            "photo",
+            "video"
+          ]
+        }
+      ],
+      "expo-build-properties",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "RecentPhotos",
+              "label": "Recuerdos del grupo",
+              "minWidth": "250dp",
+              "minHeight": "100dp",
+              "description": "Muestra las fotos más recientes del grupo familiar",
+              "previewImage": "./assets/images/elepad-polaroid.png",
+              "targetCellWidth": 3,
+              "targetCellHeight": 3,
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "DailyActivities",
+              "label": "Actividades de Hoy",
+              "minWidth": "260dp",
+              "minHeight": "110dp",
+              "description": "Muestra la agenda del día del grupo familiar",
+              "previewImage": "./assets/images/elepad-task-list.png",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "resizeMode": "vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "owner": "elepad-org",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c6ab8f28-28e4-4fcb-b8bb-536f375d9553"
+      }
+    }
+  }
+}

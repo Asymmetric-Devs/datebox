@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./apps/mobile"
+    },
+    {
+      "path": "./packages/api-client"
+    }
+  ],
+  "compilerOptions": {},
+  "extends": "expo/tsconfig.base"
+}

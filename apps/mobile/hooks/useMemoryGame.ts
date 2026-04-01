@@ -1,0 +1,497 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import { CardState } from "@/components/MemoryGame/MemoryCard";
+import {
+  usePostPuzzlesMemory,
+  usePostAttemptsStart,
+  usePostAttemptsAttemptIdFinish,
+} from "@elepad/api-client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
+import { getTodayLocal } from "@/lib/dateHelpers";
+import { useAchievementPrediction, type PredictedAchievement } from "./useAchievementPrediction";
+
+export interface Card {
+  id: number;
+  symbol: string;
+  state: CardState;
+  pairId: number;
+}
+
+export interface GameStats {
+  moves: number;
+  timeElapsed: number;
+  isComplete: boolean;
+  score: number;
+}
+
+export interface UnlockedAchievement {
+  id: string;
+  title: string;
+  icon?: string | null;
+  description?: string | null;
+  points: number;
+}
+
+const SYMBOLS = [
+  "🐶",
+  "🐱",
+  "🐭",
+  "🐹",
+  "🐰",
+  "🦊",
+  "🐻",
+  "🐼",
+  "🐨",
+  "🐯",
+  "🦁",
+  "🐮",
+];
+
+interface UseMemoryGameProps {
+  mode: "4x4" | "4x6";
+}
+
+export const useMemoryGame = (props: UseMemoryGameProps) => {
+  const { mode } = props;
+  const { markGameCompleted, user } = useAuth();
+  const [cards, setCards] = useState<Card[]>([]);
+  const [flippedCards, setFlippedCards] = useState<number[]>([]);
+  const [moves, setMoves] = useState(0);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [score, setScore] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [puzzleId, setPuzzleId] = useState<string | null>(null);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<
+    PredictedAchievement[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [gameId, setGameId] = useState<string>(Date.now().toString());
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const hasFinishedAttempt = useRef(false);
+  const isStartingAttempt = useRef(false);
+
+  const queryClient = useQueryClient();
+
+  // Hook para predicción de logros
+  const { predictAchievements, validatePrediction } = useAchievementPrediction("memory");
+
+  // API Hooks
+  const createPuzzle = usePostPuzzlesMemory();
+  const startAttempt = usePostAttemptsStart();
+  const finishAttempt = usePostAttemptsAttemptIdFinish();
+
+  // Inicializar el tablero con persistencia
+  const initializeGame = useCallback(async () => {
+    // Generar un nuevo ID de juego para trackear completaciones
+    const newGameId = Date.now().toString();
+    setGameId(newGameId);
+    console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
+
+    // Limpiar estado anterior
+    setFlippedCards([]);
+    setMoves(0);
+    setTimeElapsed(0);
+    setIsComplete(false);
+    setIsGameStarted(false);
+    setAttemptId(null);
+    setPuzzleId(null);
+    setUnlockedAchievements([]);
+    hasFinishedAttempt.current = false;
+    isStartingAttempt.current = false;
+    setIsLoading(true);
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    startTimeRef.current = null;
+
+    try {
+      // Crear puzzle en el backend - ESPERAMOS la respuesta
+      console.log("🎮 Llamando a POST /puzzles/memory con modo:", mode);
+
+      const [rows, cols] = mode === "4x4" ? [4, 4] : [4, 6];
+      const difficulty = mode === "4x4" ? 1 : 2;
+
+      const puzzleData = await createPuzzle.mutateAsync({
+        data: {
+          rows,
+          cols,
+          difficulty,
+        },
+      });
+
+      console.log("📦 Datos recibidos del API:", puzzleData);
+
+      if (!puzzleData) {
+        console.error("❌ Respuesta vacía del API");
+        throw new Error("Failed to create puzzle");
+      }
+
+      // Verificar que sea una respuesta exitosa (status 201)
+      if ("status" in puzzleData && puzzleData.status !== 201) {
+        console.error("❌ Status de respuesta inválido:", puzzleData.status);
+        throw new Error("Failed to create puzzle");
+      }
+
+      // Extraer datos (puede estar en data o directamente en puzzleData)
+      const responseData = "data" in puzzleData ? puzzleData.data : puzzleData;
+
+      if (!responseData || typeof responseData !== "object") {
+        console.error("❌ Datos de respuesta inválidos");
+        throw new Error("Invalid response data");
+      }
+
+      const { puzzle, memoryGame } = responseData as {
+        puzzle: { id: string };
+        memoryGame: { layout: number[]; symbols: string[] };
+      };
+
+      if (!memoryGame) {
+        console.error("❌ No hay datos de memoryGame en la respuesta");
+        throw new Error("No memory game data received");
+      }
+
+      console.log("✅ Puzzle creado exitosamente:", puzzle.id);
+      setPuzzleId(puzzle.id);
+
+      // Construir las cartas desde la respuesta del backend
+      const gameCards: Card[] = memoryGame.layout.map(
+        (symbolIndex: number, index: number) => ({
+          id: index,
+          symbol: memoryGame.symbols[symbolIndex],
+          state: "hidden" as CardState,
+          pairId: symbolIndex,
+        }),
+      );
+
+      setCards(gameCards);
+      setIsLoading(false);
+      console.log("🎴 Cartas generadas desde API:", gameCards.length);
+    } catch (error) {
+      console.error(
+        "❌ Error initializing game with API, using fallback:",
+        error,
+      );
+      if (error instanceof Error) {
+        console.error("Error details:", error.message, error.stack);
+      }
+      // Fallback a generación local
+      const pairCount = mode === "4x4" ? 8 : 12;
+      const pairs = SYMBOLS.slice(0, pairCount);
+      const gameCards: Card[] = [];
+
+      pairs.forEach((symbol, index) => {
+        gameCards.push({
+          id: index * 2,
+          symbol,
+          state: "hidden" as CardState,
+          pairId: index,
+        });
+        gameCards.push({
+          id: index * 2 + 1,
+          symbol,
+          state: "hidden" as CardState,
+          pairId: index,
+        });
+      });
+
+      const shuffled = gameCards.sort(() => Math.random() - 0.5);
+      setCards(shuffled);
+      setIsLoading(false);
+    }
+  }, [createPuzzle]);
+
+  // Inicializar al montar (solo una vez)
+  const isInitializing = useRef(false);
+  const hasInitialized = useRef(false);
+
+  useEffect(() => {
+    if (!hasInitialized.current && !isInitializing.current) {
+      isInitializing.current = true;
+      hasInitialized.current = true;
+      initializeGame().finally(() => {
+        isInitializing.current = false;
+      });
+    }
+  }, [initializeGame]);
+
+  // Temporizador
+  useEffect(() => {
+    if (isGameStarted && !isComplete) {
+      timerRef.current = setInterval(() => {
+        setTimeElapsed((prev) => prev + 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isGameStarted, isComplete]);
+
+  // Voltear una carta
+  const flipCard = useCallback(
+    (cardId: number) => {
+      // No permitir voltear más de 2 cartas
+      if (flippedCards.length >= 2) return;
+
+      // No permitir voltear la misma carta dos veces
+      if (flippedCards.includes(cardId)) return;
+
+      // Iniciar el juego en el primer movimiento (OPTIMISTA - no bloquea)
+      if (!isGameStarted) {
+        setIsGameStarted(true);
+        startTimeRef.current = Date.now();
+
+        // Iniciar el intento en el backend de forma NO BLOQUEANTE
+        if (puzzleId && !attemptId && !isStartingAttempt.current) {
+          isStartingAttempt.current = true;
+
+          // Ejecutar en background sin await
+          startAttempt
+            .mutateAsync({
+              data: {
+                puzzleId,
+                gameType: "memory",
+              },
+            })
+            .then((attemptData) => {
+              if (attemptData) {
+                const responseData =
+                  "data" in attemptData ? attemptData.data : attemptData;
+                const newAttemptId = (responseData as { id: string }).id;
+                setAttemptId(newAttemptId);
+                console.log("✅ Intento iniciado:", newAttemptId);
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error starting attempt:", error);
+              // TODO: Mostrar snackbar de error si es necesario
+              // Por ahora solo logueamos, el juego continúa
+            });
+        }
+      }
+
+      const newFlippedCards = [...flippedCards, cardId];
+      setFlippedCards(newFlippedCards);
+
+      // Actualizar el estado de la carta INMEDIATAMENTE
+      setCards((prevCards) =>
+        prevCards.map((card) =>
+          card.id === cardId
+            ? { ...card, state: "visible" as CardState }
+            : card,
+        ),
+      );
+
+      // Si se voltearon 2 cartas, verificar si coinciden
+      if (newFlippedCards.length === 2) {
+        setMoves((prev) => prev + 1);
+
+        const [firstId, secondId] = newFlippedCards;
+        const firstCard = cards.find((c) => c.id === firstId);
+        const secondCard = cards.find((c) => c.id === secondId);
+
+        if (firstCard && secondCard && firstCard.pairId === secondCard.pairId) {
+          // ¡Coinciden!
+          setTimeout(() => {
+            setCards((prevCards) =>
+              prevCards.map((card) =>
+                card.id === firstId || card.id === secondId
+                  ? { ...card, state: "matched" as CardState }
+                  : card,
+              ),
+            );
+            setFlippedCards([]);
+          }, 500);
+        } else {
+          // No coinciden, voltear de nuevo después de 1 segundo
+          setTimeout(() => {
+            setCards((prevCards) =>
+              prevCards.map((card) =>
+                card.id === firstId || card.id === secondId
+                  ? { ...card, state: "hidden" as CardState }
+                  : card,
+              ),
+            );
+            setFlippedCards([]);
+          }, 1000);
+        }
+      }
+    },
+    [cards, flippedCards, isGameStarted, puzzleId, attemptId, startAttempt],
+  );
+
+  // Verificar si el juego está completo
+  useEffect(() => {
+    // Solo verificar si el juego ya está iniciado y hay un attemptId
+    // Esto previene que se dispare al cargar un juego nuevo
+    if (
+      cards.length > 0 &&
+      cards.every((card) => card.state === "matched") &&
+      isGameStarted &&
+      !hasFinishedAttempt.current
+    ) {
+      console.log(
+        "🎯 Todas las cartas matched, marcando juego como completo. GameId:",
+        gameId,
+      );
+      setIsComplete(true);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      // Finalizar el intento en el backend (solo una vez)
+      const finishGameAttempt = async () => {
+        if (attemptId && startTimeRef.current && !hasFinishedAttempt.current && user) {
+          hasFinishedAttempt.current = true;
+
+          try {
+            const durationMs = Date.now() - startTimeRef.current;
+            const durationSeconds = Math.floor(durationMs / 1000);
+
+            // Fórmula Base: 1000 - 5 * seg - 10 * mov
+            const timePenalty = durationSeconds * 5;
+            const movesPenalty = moves * 10;
+            const baseScore = 1000 - timePenalty - movesPenalty;
+
+            // Multiplicador: 1.5 para 4x6, 1.0 para 4x4
+            const multiplier = mode === "4x6" ? 1.5 : 1.0;
+
+            const score = Math.max(
+              0,
+              Math.floor(baseScore * multiplier),
+            );
+            setScore(score);
+
+            console.log(`📝 Resultados: Tiempo: ${durationSeconds}s - Movimientos: ${moves} - Modo: ${mode}`);
+            console.log(`🧮 Calculo: (1000 - (${durationSeconds} * 5) - (${moves} * 10)) * ${multiplier}`);
+            console.log(`  Final Score: ${score}`);
+
+            // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend
+            const predicted = predictAchievements({
+              gameType: "memory",
+              gameName: "memory", // Memoria solo tiene un tipo
+              success: true,
+              score,
+              moves,
+              durationMs,
+              userId: user.id,
+            });
+
+            console.log(`🔮 Logros predichos: ${predicted.length}`);
+
+            // Mostrar logros predichos INMEDIATAMENTE
+            if (predicted.length > 0) {
+              setUnlockedAchievements(predicted);
+            }
+
+            // 🔥 Actualización optimista de la racha ANTES de llamar al backend
+            await markGameCompleted();
+
+            // Llamar al backend en segundo plano
+            const finishResponse = await finishAttempt.mutateAsync({
+              attemptId,
+              data: {
+                success: true,
+                moves,
+                durationMs,
+                score,
+                clientDate: getTodayLocal(),
+              },
+            });
+
+            console.log("✅ Intento finalizado con score:", score);
+
+            const backendResponseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+
+            const backendScore = backendResponseData && "score" in backendResponseData ? backendResponseData.score : undefined;
+
+            console.log(`📱 Puntaje - mobile: ${score}`);
+            console.log(`☁️ Puntaje - back: ${backendScore}`);
+
+            if (backendScore !== undefined) {
+              if (backendScore === score) {
+                console.log("✅ COINCIDEN");
+              } else {
+                console.log("❌ NO COINCIDEN");
+              }
+            }
+
+            // Invalidar queries de rachas para refrescar datos (sincronización final)
+            queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
+            queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
+
+            // Validar predicción con respuesta real del backend
+            const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+            if (responseData && "unlockedAchievements" in responseData) {
+              const realAchievements = (responseData.unlockedAchievements || []) as PredictedAchievement[];
+
+              console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
+
+              // Validar si la predicción fue correcta
+              const isCorrect = validatePrediction(predicted, realAchievements);
+
+              if (!isCorrect) {
+                console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
+                // Actualizar con los logros reales
+                setUnlockedAchievements(realAchievements);
+
+                // Notificar logros que no fueron predichos
+                realAchievements.forEach((achievement) => {
+                  if (!predicted.some((p) => p.id === achievement.id)) {
+                    console.log(`🆕 Logro no predicho: ${achievement.title}`);
+                  }
+                });
+              } else {
+                console.log("✅ Predicción correcta, sin cambios");
+              }
+            }
+          } catch (error) {
+            console.error("❌ Error finishing attempt:", error);
+          }
+        }
+      };
+
+      finishGameAttempt();
+    }
+  }, [
+    cards,
+    attemptId,
+    moves,
+    finishAttempt,
+    isGameStarted,
+    gameId,
+  ]);
+
+  const resetGame = useCallback(() => {
+    hasInitialized.current = false;
+    // Invalidar achievements para recargar los logros actuales del usuario
+    queryClient.invalidateQueries({ queryKey: ["/achievements/user/memory"] });
+    initializeGame();
+  }, [initializeGame, queryClient]);
+
+  const stats: GameStats = {
+    moves,
+    timeElapsed,
+    isComplete,
+    score,
+  };
+
+  return {
+    cards,
+    flipCard,
+    resetGame,
+    stats,
+    isProcessing: flippedCards.length >= 2,
+    unlockedAchievements,
+    isLoading,
+    gameId,
+  };
+};

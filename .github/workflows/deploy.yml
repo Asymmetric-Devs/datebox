@@ -1,0 +1,79 @@
+name: Deploy Mobile and API
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📂 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: ♻️ Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: 🏗️ Install dependencies
+        run: npm ci
+
+      # ------------------------------------------------------
+      # Deploy Mobile app to EAS Hosting (web)
+      # ------------------------------------------------------
+      - name: 📦 Build api-client package
+        run: npm run build
+
+      - name: 📦 Export for web
+        run: npx -w apps/mobile expo export --platform web
+        env:
+          EXPO_PUBLIC_API_URL: ${{ secrets.API_URL }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: 🔧 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          packager: npm
+          token: ${{ secrets.EAS_TOKEN }}
+
+      - name: 🚀 Deploy to EAS Hosting
+        working-directory: apps/mobile
+        run: eas deploy --prod
+
+      # ------------------------------------------------------
+      # Deploy API to Cloudflare Workers and Update Supabase
+      # ------------------------------------------------------
+      - name: 📦 Bundle Hono API as a serverless function
+        run: npm -w apps/api run build:edge
+
+      - name: 🔑 Push secrets to Cloudflare
+        run: |
+          echo "$SUPABASE_URL" | npx -w apps/api wrangler secret put SUPABASE_URL --config wrangler.toml
+          echo "$SUPABASE_SERVICE_ROLE_KEY" | npx -w apps/api wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.toml
+          echo "$GEMINI_API_KEY" | npx -w apps/api wrangler secret put GEMINI_API_KEY --config wrangler.toml
+          echo "$SPOTIFY_CLIENT_ID" | npx -w apps/api wrangler secret put SPOTIFY_CLIENT_ID --config wrangler.toml
+          echo "$SPOTIFY_CLIENT_SECRET" | npx -w apps/api wrangler secret put SPOTIFY_CLIENT_SECRET --config wrangler.toml
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 🚀 Publish to Cloudflare Workers
+        run: npx -w apps/api wrangler deploy --config wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

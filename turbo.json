@@ -1,0 +1,37 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "fix:mobile": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        "src/gen/**",
+        "openapi.json"
+      ],
+      "dependsOn": ["^build"]
+    },
+    "build:edge": {
+      "dependsOn": ["build"],
+      "outputs": ["cloudflare-worker.js"]
+    },
+    "lint": {},
+    "clean": {
+      "cache": false
+    },
+    "gen": {}
+  }
+}

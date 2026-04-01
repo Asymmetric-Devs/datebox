@@ -1,0 +1,539 @@
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { AttentionGameCore, COLORS_MAP, ColorName } from "./game";
+import { Button, Portal, Dialog } from "react-native-paper";
+import { router } from "expo-router";
+import { COLORS, STYLES } from "@/styles/base";
+import CancelButton from "@/components/shared/CancelButton";
+import { useFocusGame } from "@/hooks/useFocusGame";
+import { GameLoadingView } from "@/components/shared";
+
+type Props = {
+  rounds?: number;
+  onComplete?: (stats: {
+    correct: number;
+    rounds: number;
+    errors: number;
+    score: number;
+    durationMs: number;
+    achievements?: Array<{
+      id: string;
+      title: string;
+      icon?: string | null;
+      description?: string | null;
+      points: number;
+    }>;
+  }) => void;
+  onRestartRef?: React.MutableRefObject<(() => void) | null>;
+};
+
+export default function AttentionGame({
+  rounds = 10,
+  onComplete,
+  onRestartRef,
+}: Props) {
+  const core = useMemo(() => new AttentionGameCore(), []);
+  const [, setTick] = useState(0);
+  const [score, setScore] = useState({ correct: 0, rounds: rounds });
+  const [lives, setLives] = useState(3);
+  const [lastResult, setLastResult] = useState<boolean | null>(null);
+
+  const [showQuitDialog, setShowQuitDialog] = useState(false);
+
+  const [currentRound, setCurrentRound] = useState(1);
+  const [gameId, setGameId] = useState<string>(Date.now().toString());
+  const [isGameComplete, setIsGameComplete] = useState(false);
+  const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+  const [gameEndStats, setGameEndStats] = useState<{
+    correct: number;
+    rounds: number;
+    errors: number;
+    score: number;
+    durationMs: number;
+    achievements?: Array<{
+      id: string;
+      title: string;
+      icon?: string | null;
+      description?: string | null;
+      points: number;
+    }>;
+  } | null>(null);
+
+  const hasCalledOnComplete = useRef(false);
+  const prevGameId = useRef<string>(gameId);
+
+  // Hook de Focus Game para manejar API
+  const focus = useFocusGame({
+    rounds,
+  });
+
+  // Detectar cuando cambia el gameId INMEDIATAMENTE
+  if (prevGameId.current !== gameId) {
+    console.log(
+      "🔄 GameId cambió de",
+      prevGameId.current,
+      "a",
+      gameId,
+      "- Reseteando flags INMEDIATAMENTE",
+    );
+    prevGameId.current = gameId;
+    hasCalledOnComplete.current = false;
+  }
+
+  // Resetear el flag cuando se reinicia el juego
+  useEffect(() => {
+    if (!isGameComplete) {
+      hasCalledOnComplete.current = false;
+    }
+  }, [isGameComplete]);
+
+  // Effect para llamar onComplete cuando el juego termina
+  useEffect(() => {
+    if (gameEndStats && !hasCalledOnComplete.current) {
+      hasCalledOnComplete.current = true;
+      onComplete?.(gameEndStats);
+    }
+  }, [gameEndStats, onComplete]);
+
+  useEffect(() => {
+    core.startRound();
+    setTick((t) => t + 1);
+  }, [core]);
+
+  const prompt = core.currentPrompt;
+
+  const restartGame = useCallback(() => {
+    // 1. Resetear estados locales PRIMERO
+    setScore({ correct: 0, rounds });
+    setLives(3);
+    setLastResult(null);
+    setShowQuitDialog(false);
+    setCurrentRound(1);
+    setIsGameComplete(false);
+    setHasStartedPlaying(false);
+    setGameEndStats(null);
+
+    // 2. Resetear el core del juego
+    core.reset();
+    core.startRound();
+    setTick((t) => t + 1);
+
+    // 3. Generar nuevo ID de juego (dispara el sync)
+    const newGameId = Date.now().toString();
+    setGameId(newGameId);
+    console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
+
+    // 4. Resetear el juego en el hook
+    focus.resetGame();
+  }, [core, rounds, focus]);
+
+  // Asignar la función restartGame al ref para que pueda ser llamada desde el padre
+  useEffect(() => {
+    if (onRestartRef) {
+      onRestartRef.current = restartGame;
+    }
+  }, [restartGame, onRestartRef]);
+
+  const handleQuit = useCallback(() => {
+    setShowQuitDialog(true);
+  }, []);
+
+  const confirmQuit = useCallback(() => {
+    setShowQuitDialog(false);
+    router.back();
+  }, []);
+
+  const handleSelection = (selection: ColorName) => {
+    if (!prompt || showQuitDialog) return;
+
+    // Iniciar el timer en la PRIMERA interacción del usuario
+    if (!hasStartedPlaying) {
+      setHasStartedPlaying(true);
+      focus.startTimer();
+      console.log("⏱️ Timer iniciado en primera interacción");
+    }
+
+    const correct = core.handleSelection(selection);
+    setLastResult(correct);
+
+    const newCorrectScore = score.correct + (correct ? 1 : 0);
+    setScore({ correct: newCorrectScore, rounds });
+    setCurrentRound((prev) => prev + 1);
+    setTick((t) => t + 1);
+
+    // Lógica de juego
+    if (!correct) {
+      setLives((prev) => {
+        const remaining = prev - 1;
+        if (remaining <= 0) {
+          // PERDIÓ - Guardar los stats para que se llame onComplete en el useEffect
+          const errors = rounds - newCorrectScore;
+          setGameEndStats({
+            correct: newCorrectScore,
+            rounds,
+            errors,
+            score: 0, // Score es 0 al perder
+            durationMs: focus.getDuration(),
+            achievements: [], // No hay logros al perder
+          });
+
+          // Finalizar el intento en el backend (no bloqueante)
+          focus.finishGame(
+            { correct: newCorrectScore, rounds },
+            false // perdió
+          ).then(() => {
+            setIsGameComplete(true);
+          }).catch((error) => {
+            console.error("❌ Error al finalizar juego:", error);
+            setIsGameComplete(true);
+          });
+        } else {
+          // Sigue jugando tras error
+          setTimeout(() => {
+            core.next();
+            core.startRound();
+            setLastResult(null);
+            setTick((t) => t + 1);
+          }, 350);
+        }
+        return remaining;
+      });
+    } else {
+      // Acierto
+      if (currentRound === rounds) {
+        const errors = rounds - newCorrectScore;
+        const durationMs = focus.getDuration();
+        const calculatedScore = Math.max(
+          0,
+          Math.floor(1000 - (durationMs / 1000) * 15 - errors * 100)
+        );
+
+        // Predecir logros SÍNCRONAMENTE
+        const predictedAchievements = focus.predictAchievementsSync({
+          correct: newCorrectScore,
+          rounds,
+          durationMs
+        });
+
+        // Guardar los stats para que se llame onComplete en el useEffect
+        setGameEndStats({
+          correct: newCorrectScore,
+          rounds,
+          errors,
+          score: calculatedScore,
+          durationMs,
+          achievements: predictedAchievements,
+        });
+
+        setIsGameComplete(true);
+
+        // Backend en background
+        focus.finishGame(
+          { correct: newCorrectScore, rounds, durationMs },
+          true
+        ).catch((error) => console.error("❌ Error:", error));
+      } else {
+        // Sigue jugando tras acierto
+        setTimeout(() => {
+          core.next();
+          core.startRound();
+          setLastResult(null);
+          setTick((t) => t + 1);
+        }, 350);
+      }
+    }
+  };
+
+  // Mostrar loading a pantalla completa
+  if (focus.isLoading) {
+    return <GameLoadingView message="Preparando el juego..." />;
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Estadísticas superiores */}
+      <View style={styles.statsCard}>
+        <View style={styles.statsContent}>
+          <View style={styles.stat}>
+            <Text style={styles.statLabel}>Ronda</Text>
+            <Text style={styles.statValue}>
+              {Math.min(currentRound, rounds)} / {rounds}
+            </Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statLabel}>Aciertos</Text>
+            <Text style={styles.statValue}>{score.correct}</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statLabel}>Vidas</Text>
+            <Text style={styles.statValue}>{lives}</Text>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Área del Prompt (palabra) */}
+        <View
+          style={[
+            styles.promptBox,
+            {
+              backgroundColor: "rgba(0,0,0,0.05)",
+              borderWidth: lastResult === null ? 0 : 4,
+              borderColor:
+                lastResult === null
+                  ? "transparent"
+                  : lastResult
+                    ? "#4CAF50"
+                    : "#E53935",
+            },
+          ]}
+        >
+          {prompt ? (
+            <Text style={[styles.promptText, { color: prompt.fillColor }]}>
+              {prompt.word}
+            </Text>
+          ) : (
+            <Text style={styles.promptText}>Pulsa iniciar</Text>
+          )}
+        </View>
+
+        {/* Opciones de colores */}
+        <View style={styles.grid}>
+          {Object.keys(COLORS_MAP).map((k) => {
+            const key = k as ColorName;
+            const bg = COLORS_MAP[key];
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.colorButton, { backgroundColor: bg }]}
+                onPress={() => handleSelection(key)}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.colorLabel,
+                    { color: bg === "#FFFFFF" ? "#000" : "#fff" },
+                  ]}
+                >
+                  {key}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      {/* Botones de control inferiores */}
+      <View style={styles.controls}>
+        <Button
+          mode="contained"
+          onPress={restartGame}
+          icon="refresh"
+          style={styles.actionButton}
+          buttonColor={COLORS.primary}
+        >
+          Reiniciar
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={handleQuit}
+          icon="exit-to-app"
+          style={styles.actionButton}
+          textColor={COLORS.error}
+        >
+          Abandonar
+        </Button>
+      </View>
+
+      <Portal>
+        <Dialog
+          visible={showQuitDialog}
+          onDismiss={() => setShowQuitDialog(false)}
+          style={styles.dialogContainer}
+        >
+          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+            ¿Salir de la partida?
+          </Dialog.Title>
+          <Dialog.Content style={{ paddingBottom: 8 }}>
+            <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
+              Si abandonas ahora, perderás tu progreso actual. ¿Estás seguro de que quieres salir?
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 12,
+              paddingHorizontal: 20,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <CancelButton onPress={() => setShowQuitDialog(false)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                mode="contained"
+                onPress={confirmQuit}
+                buttonColor={COLORS.primary}
+                style={{ borderRadius: 12 }}
+              >
+                Abandonar
+              </Button>
+            </View>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 0,
+    alignItems: "center",
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  statsCard: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    marginHorizontal: 16,
+    elevation: 0,
+  },
+  statsContent: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  stat: {
+    alignItems: "center",
+  },
+  statLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 24,
+    color: COLORS.primary,
+    fontWeight: "bold",
+  },
+  promptBox: {
+    width: "100%",
+    height: 140,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
+    marginBottom: 24,
+    marginTop: 16,
+  },
+  promptText: {
+    fontSize: 48,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    textShadowColor: "rgba(0, 0, 0, 0.1)",
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+    width: "100%",
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  colorButton: {
+    width: "48%",
+    aspectRatio: 1.5,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  colorLabel: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  controls: {
+    flexDirection: "column",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  actionButton: {
+    width: "100%",
+    borderRadius: 12,
+  },
+  dialogContainer: {
+    backgroundColor: COLORS.background,
+    width: "90%",
+    alignSelf: "center",
+    borderRadius: 16,
+    paddingVertical: 14,
+  },
+  resultsContainer: {
+    alignItems: "center",
+  },
+  resultsText: {
+    textAlign: "center",
+    marginBottom: 16,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  resultStats: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    gap: 16,
+  },
+  resultStat: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: COLORS.backgroundSecondary,
+    padding: 16,
+    borderRadius: 12,
+  },
+  resultIcon: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  resultLabel: {
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+    fontSize: 12,
+  },
+  resultValue: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  dialogActions: {
+    flexDirection: "column",
+    gap: 8,
+    padding: 16,
+  },
+  dialogButton: {
+    width: "100%",
+    borderRadius: 12,
+  },
+});

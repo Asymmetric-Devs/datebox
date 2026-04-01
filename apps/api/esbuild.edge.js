@@ -1,0 +1,71 @@
+import { build } from "esbuild";
+
+// This scripts bundles the Hono API for the Cloudflare Workers environment.
+
+const outfile = "cloudflare-worker.js";
+
+await build({
+  entryPoints: ["src/app.ts"],
+  outfile,
+  bundle: true,
+  format: "esm",
+  platform: "neutral", // not Nodejs
+  // These packages are ESM-only and use bare specifiers, or have Node.js dependencies, so we need to mark them as external.
+  external: [
+    "@supabase/supabase-js",
+    "@hono/zod-openapi",
+    "googleapis",
+    "@google/genai",
+    "@cloudflare/workers-types",
+    "dotenv",
+    "fs",
+    "os",
+    "path",
+    "crypto",
+    "pdf-lib",
+    "node:os",
+    "node:path",
+    "node:fs",
+    "node:child_process",
+    "node:events",
+    "node:stream",
+    "node:http",
+    "node:https",
+    "node:url",
+    "node:process",
+    "node:readline",
+    "node:assert",
+    "node:fs/promises",
+    "node:child_process",
+    "node:stream",
+    "node:util",
+    "events",
+    "http",
+    "https",
+    "net",
+    "tls",
+    "stream",
+    "url",
+    "zlib",
+    "debug",
+    "cosmiconfig",
+    "once",
+    "proxy-agent",
+    "extract-zip",
+    "yauzl",
+    "fd-slicer",
+    "pump",
+    "end-of-stream",
+    "util",
+    "assert",
+    "yargs",
+    "y18n",
+    "events-universal",
+    "get-stream",
+    "yargs-parser",
+    "ws",
+    "ics",
+  ],
+});
+
+console.log(`✅ Bundled the API as a Cloudflare Worker at ${outfile}`);

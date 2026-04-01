@@ -1,0 +1,14 @@
+name = "api"
+main = "cloudflare-worker.js"
+compatibility_date = "2025-08-16"
+
+compatibility_flags = ["nodejs_compat"]
+
+# Cron trigger for pending activities notifications
+# Runs every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
+[triggers]
+crons = ["0 */1 * * *"]
+
+[observability]
+enabled = true
+head_sampling_rate = 1  # store 100% percent of logs

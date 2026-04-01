@@ -1,0 +1,42 @@
+{
+  "name": "@elepad/api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/app.ts",
+  "types": "src/app.ts",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node dist/src/server.js",
+    "build": "tsc && npm run gen:openapi",
+    "build:edge": "node esbuild.edge.js",
+    "dev": "tsx watch src/server.ts",
+    "lint": "eslint . && tsc --noEmit",
+    "clean": "rm -rf dist",
+    "format": "prettier --write .",
+    "gen": "npm run gen:openapi && npm run gen:types",
+    "gen:openapi": "tsx src/emit-openapi.ts",
+    "gen:types": "supabase gen types typescript --project-id sdnmoweppzszpxyggdyg > src/supabase-types.ts"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20260207.0",
+    "@google/genai": "^1.38.0",
+    "@hono/node-server": "^1.13.7",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.1.0",
+    "@supabase/supabase-js": "^2.55.0",
+    "@types/node": "^25.0.10",
+    "dotenv": "^17.2.1",
+    "googleapis": "^144.0.0",
+    "hono": "^4.6.0",
+    "ics": "^3.8.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "typescript": "~5.8.3"
+  },
+  "packageManager": "npm@11.5.2"
+}
