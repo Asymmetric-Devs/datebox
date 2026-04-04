@@ -1,21 +1,30 @@
-import { View, StyleSheet, ViewStyle, TouchableOpacity, FlatList, Modal } from "react-native";
+import { View, StyleSheet, ViewStyle, TouchableOpacity, FlatList } from "react-native";
 import { Image } from "expo-image";
 import { Text } from "react-native-paper";
 import { FONT, COLORS } from "@/styles/base";
 import { useGetMemories } from "@elepad/api-client";
 import { useMemo } from "react";
+import sticker11 from "@/assets/images/styles/_ (11).jpeg";
+import sticker12 from "@/assets/images/styles/_ (12).jpeg";
+import sticker13 from "@/assets/images/styles/_ (13).jpeg";
+import sticker14 from "@/assets/images/styles/_ (14).jpeg";
+import sticker17 from "@/assets/images/styles/_ (17).jpeg";
+import sticker18 from "@/assets/images/styles/_ (18).jpeg";
+import sticker19 from "@/assets/images/styles/_ (19).jpeg";
+import stickerSaturn from "@/assets/images/styles/stickers.jpeg";
+import stickerStar from "@/assets/images/styles/png.jpeg";
 
 /** List of sticker images available as book covers. */
 export const STICKER_IMAGES = [
-  require("@/assets/images/styles/_ (11).jpeg"),
-  require("@/assets/images/styles/_ (12).jpeg"),
-  require("@/assets/images/styles/_ (13).jpeg"),
-  require("@/assets/images/styles/_ (14).jpeg"),
-  require("@/assets/images/styles/_ (17).jpeg"),
-  require("@/assets/images/styles/_ (18).jpeg"),
-  require("@/assets/images/styles/_ (19).jpeg"),
-  require("@/assets/images/styles/stickers.jpeg"),
-  require("@/assets/images/styles/png.jpeg"),
+  sticker11,
+  sticker12,
+  sticker13,
+  sticker14,
+  sticker17,
+  sticker18,
+  sticker19,
+  stickerSaturn,
+  stickerStar,
 ] as const;
 
 /** Parse a color field value and return the sticker index (or null if not a sticker). */
