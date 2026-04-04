@@ -7,10 +7,9 @@ import { useTourStep } from "@/hooks/useTourStep";
 interface UseGamesTourProps {
   activeTab: string;
   loading: boolean;
-  isElder: boolean;
 }
 
-export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps) => {
+export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
   const router = useRouter();
   const tour = useTour({ tourId: 'games' });
   const { setPreparing, state: tourState } = useTourContext();
@@ -76,7 +75,6 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
   useEffect(() => {
     if (activeTab === 'juegos') {
       const checkAndStartTour = async () => {
-        if (!isElder) return; // Solo para elders
         if (loading) return;
         if (tour.isActive) return;
         if (tourState.isPreparing) return;

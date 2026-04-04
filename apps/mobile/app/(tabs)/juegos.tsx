@@ -100,7 +100,6 @@ export default function JuegosScreen() {
   const { headerRef, shopRef, historyRef, shopFabRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
     activeTab,
     loading,
-    isElder: true,
   });
 
   if (loading) {

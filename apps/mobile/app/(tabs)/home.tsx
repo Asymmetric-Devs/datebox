@@ -593,7 +593,7 @@ const HomeScreen = () => {
         <View style={styles.section} ref={activityRef}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Última actividad</Text>
-            {lastAttempt && !Array.isArray(lastAttempt) && (
+            {lastAttempt && (
               <Button
                 mode="text"
                 onPress={() => router.push("/history")}
@@ -614,7 +614,7 @@ const HomeScreen = () => {
               </View>
               <SkeletonBox width={70} height={60} borderRadius={14} />
             </View>
-          ) : lastAttempt && !Array.isArray(lastAttempt) ? (
+          ) : lastAttempt ? (
             <Pressable
               style={[styles.gameCard, { marginTop: 0 }]}
               onPress={() => router.push("/history")}
