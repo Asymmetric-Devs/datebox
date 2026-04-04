@@ -4,8 +4,8 @@ import { NavigationState } from "react-native-tab-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS } from "@/styles/base";
 
-// ~15% opacity for the active tab indicator background using primary color
-const activeIndicatorColor = "rgba(136, 150, 176, 0.15)"; // #8896b0 with opacity
+// ~12% opacity for the active tab indicator background using primary (black) color
+const activeIndicatorColor = "rgba(0, 0, 0, 0.10)";
 
 type TabRoute = {
   key: string;

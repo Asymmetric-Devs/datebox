@@ -10,7 +10,7 @@ import { COLORS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import SidebarNavigation from "@/components/navigation/SidebarNavigation";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
-import { elderRoutes, nonElderRoutes, TabRoute } from "@/components/navigation/navigationConfig";
+import { routes, TabRoute } from "@/components/navigation/navigationConfig";
 
 import { LoadingUser } from "@/components/shared";
 import { TabProvider, useTabContext } from "@/context/TabContext";
@@ -41,11 +41,6 @@ function TabLayoutContent() {
   const router = useRouter();
   const navigation = useNavigation();
   const { userElepad, userElepadLoading } = useAuth();
-  const isElder = userElepad?.elder === true;
-
-  const routes = useMemo(() =>
-    isElder ? elderRoutes : nonElderRoutes
-    , [isElder]);
 
   const [index, setIndex] = useState(() => {
     // Inicializar el tab correcto basándose en los parámetros de ruta para evitar un "flash" del tab 0 (Home)

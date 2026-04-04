@@ -78,28 +78,9 @@ const HomeScreen = () => {
     },
   );
 
-  // Calculate date range for last 24 hours (memoized to avoid constant recalculation)
-  const dateRange = useMemo(() => {
-    const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    return {
-      start: twentyFourHoursAgo.toISOString(),
-      end: now.toISOString(),
-    };
-  }, []); // Empty deps - solo calcular una vez al montar
-
-  // Fetch recent attempts
-  // - Si es elder: su último intento personal
-  // - Si es familiar: últimos intentos de elder del grupo en las últimas 24h
+  // Fetch last attempt
   const attemptsQuery = useGetAttempts(
-    userElepad?.elder
-      ? { limit: 1 }
-      : {
-          limit: 3,
-          elderOnly: true,
-          startDate: dateRange.start,
-          endDate: dateRange.end,
-        },
+    { limit: 1 },
     {
       query: {
         enabled: !!userElepad,
@@ -207,18 +188,15 @@ const HomeScreen = () => {
       .slice(0, 3);
   }, [activitiesQuery.data]);
 
-  const lastAttempt = useMemo(():
-    | AttemptWithUser
-    | AttemptWithUser[]
-    | null => {
+  const lastAttempt = useMemo((): AttemptWithUser | null => {
     if (!attemptsQuery.data) return null;
     const data = attemptsQuery.data;
     const attempts = Array.isArray(data)
       ? data
       : (data as { data?: unknown }).data || [];
-    if (!Array.isArray(attempts)) return [];
-    return userElepad?.elder ? attempts[0] || null : attempts;
-  }, [attemptsQuery.data, userElepad?.elder]);
+    if (!Array.isArray(attempts)) return null;
+    return attempts[0] || null;
+  }, [attemptsQuery.data]);
 
   const lastMemory = useMemo(() => {
     if (!memoriesQuery.data) return null;
@@ -303,8 +281,6 @@ const HomeScreen = () => {
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
 
-  const userRole = userElepad?.elder ? "Adulto Mayor" : "Familiar";
-
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -338,15 +314,11 @@ const HomeScreen = () => {
               {isLoading ? (
                 <View style={{ gap: 4, marginTop: 4 }}>
                   <SkeletonBox width={150} height={24} borderRadius={4} />
-                  <SkeletonBox width={100} height={16} borderRadius={4} />
                 </View>
               ) : (
                 <View style={styles.userNameContainer}>
                   <Text style={styles.userName} numberOfLines={1}>
                     {displayName}
-                  </Text>
-                  <Text style={styles.userRole} numberOfLines={1}>
-                    ({userRole})
                   </Text>
                 </View>
               )}
@@ -435,11 +407,9 @@ const HomeScreen = () => {
         </View>
 
         {/* Contador de Racha - Solo para usuarios elder */}
-        {userElepad?.elder && (
-          <View ref={streakRef}>
-            <StreakCounter />
-          </View>
-        )}
+        <View ref={streakRef}>
+          <StreakCounter />
+        </View>
 
         {/* Próximos Eventos */}
         <View style={styles.section} ref={eventsRef}>
@@ -622,18 +592,11 @@ const HomeScreen = () => {
         {/* Actividad Reciente */}
         <View style={styles.section} ref={activityRef}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {userElepad?.elder ? "Mi última actividad" : "Última actividad"}
-            </Text>
-            {Array.isArray(lastAttempt) && lastAttempt.length > 0 && (
+            <Text style={styles.sectionTitle}>Última actividad</Text>
+            {lastAttempt && (
               <Button
                 mode="text"
-                onPress={() =>
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: { tab: "juegos" },
-                  })
-                }
+                onPress={() => router.push("/history")}
                 labelStyle={styles.sectionLink}
                 compact
               >
@@ -651,139 +614,52 @@ const HomeScreen = () => {
               </View>
               <SkeletonBox width={70} height={60} borderRadius={14} />
             </View>
-          ) : userElepad?.elder ? (
-            // Elder: mostrar solo su último intento
-            lastAttempt && !Array.isArray(lastAttempt) ? (
-              <Pressable
-                style={[styles.gameCard, { marginTop: 0 }]}
-                onPress={() => router.push("/history")}
-              >
-                <View style={styles.gameIcon}>
-                  <Image
-                    source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
-                    style={{ width: 40, height: 40, resizeMode: "contain" }}
-                  />
-                </View>
-                <View style={styles.gameInfo}>
-                  <Text style={styles.gameName}>
-                    {getGameInfo(lastAttempt.gameType || "").name}
-                  </Text>
-                  <Text style={styles.gameTime}>
-                    {formatInUserTimezone(
-                      lastAttempt.startedAt,
-                      "d 'de' MMMM, HH:mm",
-                      userElepad?.timezone,
-                    )}
-                  </Text>
-                </View>
-                <View style={styles.gameScore}>
-                  <Text style={styles.scoreLabel}>PUNTOS</Text>
-                  <Text style={styles.scoreValue}>
-                    {lastAttempt.score || 0}
-                  </Text>
-                </View>
-              </Pressable>
-            ) : (
-              <View style={[styles.emptySection, { marginTop: 0 }]}>
-                <Text style={styles.emptyText}>Aún no has jugado</Text>
-                <Button
-                  mode="outlined"
-                  onPress={() => router.push("/juegos")}
-                  style={styles.emptyButtonOutline}
-                  textColor={COLORS.primary}
-                  icon="gamepad-variant"
-                >
-                  Explorar juegos
-                </Button>
+          ) : lastAttempt ? (
+            <Pressable
+              style={[styles.gameCard, { marginTop: 0 }]}
+              onPress={() => router.push("/history")}
+            >
+              <View style={styles.gameIcon}>
+                <Image
+                  source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
+                  style={{ width: 40, height: 40, resizeMode: "contain" }}
+                />
               </View>
-            )
-          ) : // Familiar: mostrar múltiples intentos de elder
-          Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-            <View style={{ gap: 5, marginTop: 0 }}>
-              {lastAttempt.map((attempt: AttemptWithUser) => (
-                <Pressable
-                  key={attempt.id}
-                  style={styles.gameCard}
-                  onPress={() => {
-                    router.navigate({
-                      pathname: "/(tabs)/home",
-                      params: {
-                        tab: "juegos",
-                      },
-                    });
-                  }}
-                >
-                  <View style={styles.gameIcon}>
-                    <Image
-                      source={GAME_IMAGES[attempt.gameType || "memory"]}
-                      style={{ width: 40, height: 40, resizeMode: "contain" }}
-                    />
-                  </View>
-                  <View style={styles.gameInfo}>
-                    <Text style={styles.gameName}>
-                      {getGameInfo(attempt.gameType || "").name}
-                    </Text>
-                    <Text style={styles.gameTime}>
-                      {formatInUserTimezone(
-                        attempt.startedAt,
-                        "d 'de' MMMM, HH:mm",
-                        userElepad?.timezone,
-                      )}
-                    </Text>
-                    {attempt.user && (
-                      <View style={styles.playerInfo}>
-                        {attempt.user.avatarUrl ? (
-                          <Avatar.Image
-                            size={20}
-                            source={{ uri: attempt.user.avatarUrl }}
-                            style={styles.playerAvatar}
-                          />
-                        ) : (
-                          <Avatar.Text
-                            size={20}
-                            label={attempt.user.displayName
-                              .substring(0, 2)
-                              .toUpperCase()}
-                            style={styles.playerAvatar}
-                          />
-                        )}
-                        <Text style={styles.playerName}>
-                          {attempt.user.displayName}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.gameScore}>
-                    <Text style={styles.scoreLabel}>PUNTOS</Text>
-                    <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
+              <View style={styles.gameInfo}>
+                <Text style={styles.gameName}>
+                  {getGameInfo(lastAttempt.gameType || "").name}
+                </Text>
+                <Text style={styles.gameTime}>
+                  {formatInUserTimezone(
+                    lastAttempt.startedAt,
+                    "d 'de' MMMM, HH:mm",
+                    userElepad?.timezone,
+                  )}
+                </Text>
+              </View>
+              <View style={styles.gameScore}>
+                <Text style={styles.scoreLabel}>PUNTOS</Text>
+                <Text style={styles.scoreValue}>
+                  {lastAttempt.score || 0}
+                </Text>
+              </View>
+            </Pressable>
           ) : (
             <View style={[styles.emptySection, { marginTop: 0 }]}>
-              <Text style={styles.emptyText}>
-                No hay actividad reciente 
-              </Text>
+              <Text style={styles.emptyText}>Aún no has jugado</Text>
               <Button
                 mode="outlined"
-                onPress={() => {
-                  if (userElepad?.elder) {
-                    router.push("/history");
-                  } else {
-                    router.navigate({
-                      pathname: "/(tabs)/home",
-                      params: {
-                        tab: "juegos",
-                      },
-                    });
-                  }
-                }}
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: { tab: "juegos" },
+                  })
+                }
                 style={styles.emptyButtonOutline}
                 textColor={COLORS.primary}
-                icon="chart-line"
+                icon="gamepad-variant"
               >
-                Ver estadísticas
+                Explorar juegos
               </Button>
             </View>
           )}

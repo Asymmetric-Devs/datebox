@@ -5,12 +5,18 @@ export type TabRoute = {
   unfocusedIcon: string;
 };
 
-export const elderRoutes: TabRoute[] = [
+export const routes: TabRoute[] = [
   {
     key: "home",
     title: "Inicio",
     focusedIcon: "home",
     unfocusedIcon: "home-outline",
+  },
+  {
+    key: "recuerdos",
+    title: "Recuerdos",
+    focusedIcon: "image-multiple",
+    unfocusedIcon: "image-multiple-outline",
   },
   {
     key: "calendar",
@@ -24,37 +30,9 @@ export const elderRoutes: TabRoute[] = [
     focusedIcon: "puzzle",
     unfocusedIcon: "puzzle-outline",
   },
-  {
-    key: "recuerdos",
-    title: "Recuerdos",
-    focusedIcon: "image-multiple",
-    unfocusedIcon: "image-multiple-outline",
-  },
 ];
 
-export const nonElderRoutes: TabRoute[] = [
-  {
-    key: "home",
-    title: "Inicio",
-    focusedIcon: "home",
-    unfocusedIcon: "home-outline",
-  },
-  {
-    key: "calendar",
-    title: "Calendario",
-    focusedIcon: "calendar-month",
-    unfocusedIcon: "calendar-month-outline",
-  },
-  {
-    key: "juegos",
-    title: "Estadísticas",
-    focusedIcon: "chart-line",
-    unfocusedIcon: "chart-line-variant",
-  },
-  {
-    key: "recuerdos",
-    title: "Recuerdos",
-    focusedIcon: "image-multiple",
-    unfocusedIcon: "image-multiple-outline",
-  },
-];
+/** @deprecated Use `routes` instead — there is no longer a differentiation between elder and non-elder users. */
+export const elderRoutes = routes;
+/** @deprecated Use `routes` instead — there is no longer a differentiation between elder and non-elder users. */
+export const nonElderRoutes = routes;
