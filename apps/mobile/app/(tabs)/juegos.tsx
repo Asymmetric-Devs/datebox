@@ -15,7 +15,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
-import HistoryScreen from "../history";
 import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
@@ -94,19 +93,15 @@ function GameCard({
 }
 
 export default function JuegosScreen() {
-  const { loading, userElepad } = useAuth();
+  const { loading } = useAuth();
   const { activeTab } = useTabContext();
 
   // --- Tour Setup ---
-  const isElder = userElepad?.elder === true;
-
   const { headerRef, shopRef, historyRef, shopFabRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
     activeTab,
     loading,
-    isElder,
+    isElder: true,
   });
-
-  // const [actionsMenuVisible, setActionsMenuVisible] = useState(false);
 
   if (loading) {
     return (
@@ -114,12 +109,6 @@ export default function JuegosScreen() {
         <ActivityIndicator />
       </View>
     );
-  }
-
-
-  // Si es ayudante, mostrar las estadísticas dentro de las tabs
-  if (!isElder) {
-    return <HistoryScreen activeTab={activeTab} />;
   }
 
   return (

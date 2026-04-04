@@ -20,48 +20,47 @@ export const LAYOUT = {
   bottomNavHeight: 110,
 } as const;
 
-/** Centralized color palette for the app - Custom Elepad design.
- * Base palette: ["#5b507a","#5b618a","#9eadc8"]
- * Plus: white (#FFFFFF), black (#000000), gray tones
+/** Centralized color palette for the app - Datebox y2k/8-bit minimalist design.
+ * Core palette: black (#000000), white (#FFFFFF), light gray tones
  */
 export const COLORS = {
-  // Primary colors from palette
-  primary: "#9a9ece", // Deep purple from palette
-  secondary: "#424a70", // Medium purple-blue from palette
-  border: "#E5E5EA", // Light gray
+  // Primary colors — black & white minimal
+  primary: "#000000", // Pure black
+  secondary: "#222222", // Near-black for secondary elements
+  border: "#E0E0E0", // Light gray border
 
   // Backgrounds
   background: "#FFFFFF",
-  backgroundSecondary: "#F2F2F7", // Light gray
-  backgroundTertiary: "#9eadc8", // Light blue from palette
-  card: "#F2F2F7", // Light gray for cards
+  backgroundSecondary: "#F5F5F5", // Off-white
+  backgroundTertiary: "#EBEBEB", // Light gray
+  card: "#F5F5F5", // Light gray for cards
   white: "#FFFFFF",
-  success: "#6B8DD6", // Azul violáceo que combina con el tema principal
+  success: "#2D2D2D", // Dark gray for success states
 
   // Text hierarchy - High contrast
   text: "#000000", // Black
-  textSecondary: "#7374a7", // Deep purple from palette
-  textLight: "#424a70", // Medium purple-blue from palette
-  textPlaceholder: "#6f7e93", // Light blue from palette
+  textSecondary: "#555555", // Medium gray
+  textLight: "#888888", // Light gray
+  textPlaceholder: "#AAAAAA", // Placeholder gray
 
-  // Danger/Error colors - use secondary from palette
-  red: "#5b618a", // Use secondary color instead of red
-  error: "#5b618a", // Use secondary color for errors/danger
+  // Danger/Error colors
+  red: "#1A1A1A", // Near-black
+  error: "#1A1A1A", // Near-black for errors
 
   // States
-  accent: "#9eadc8", // Light blue from palette
+  accent: "#333333", // Dark accent
 
   // Borders and separators
-  separator: "#E5E5EA", // Light gray
+  separator: "#E0E0E0", // Light gray
 
   // Custom shades for specific UI elements
   purple: {
-    light: "#D1D3E8",
-    dark: "#5b507a",
+    light: "#F0F0F0",
+    dark: "#111111",
   },
   gray: {
-    medium: "#9eadc8",
-    light: "#F2F2F7",
+    medium: "#CCCCCC",
+    light: "#F5F5F5",
   },
 } as const;
 

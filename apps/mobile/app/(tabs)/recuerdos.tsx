@@ -62,7 +62,7 @@ import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
 import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
-import BookCover from "@/components/Recuerdos/BookCover";
+import BookCover, { StickerPicker, encodeStickerColor, parseStickerIndex } from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
 import { StyledTextInput } from "@/components/shared";
@@ -268,7 +268,7 @@ export default function RecuerdosScreen() {
   );
   const [bookFormTitle, setBookFormTitle] = useState("");
   const [bookFormDescription, setBookFormDescription] = useState("");
-  const [bookFormColor, setBookFormColor] = useState<string>(COLORS.primary);
+  const [bookFormStickerIndex, setBookFormStickerIndex] = useState<number>(0);
   const [bookToDelete, setBookToDelete] = useState<MemoriesBook | null>(null);
 
   const [currentStep, setCurrentStep] = useState<
@@ -838,7 +838,7 @@ export default function RecuerdosScreen() {
     setEditingBook(null);
     setBookFormTitle("");
     setBookFormDescription("");
-    setBookFormColor(COLORS.primary);
+    setBookFormStickerIndex(0);
     setBookDialogVisible(true);
   };
 
@@ -846,7 +846,7 @@ export default function RecuerdosScreen() {
     setBookDialogMode("edit");
     setBookFormTitle(book.title || "");
     setBookFormDescription(book.description || "");
-    setBookFormColor(book.color || COLORS.primary);
+    setBookFormStickerIndex(parseStickerIndex(book.color) ?? 0);
     setEditingBook(book);
     setBookDialogVisible(true);
   };
@@ -854,18 +854,11 @@ export default function RecuerdosScreen() {
   const submitBookDialog = async () => {
     const title = bookFormTitle.trim();
     const description = bookFormDescription.trim();
-    const color = bookFormColor;
+    const color = encodeStickerColor(bookFormStickerIndex);
 
     if (!title) {
       showToast({
         message: "El nombre del baúl es obligatorio",
-        type: "error",
-      });
-      return;
-    }
-    if (!color) {
-      showToast({
-        message: "El color del baúl es obligatorio",
         type: "error",
       });
       return;
@@ -1053,7 +1046,7 @@ export default function RecuerdosScreen() {
               <Text style={modalStyles.title}>
                 {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
               </Text>
-              <View style={{ marginTop: 16, marginBottom: 24 }}>
+              <View style={{ marginTop: 16, marginBottom: 8 }}>
                 <StyledTextInput
                   label="Nombre"
                   value={bookFormTitle}
@@ -1067,6 +1060,10 @@ export default function RecuerdosScreen() {
                   multiline
                   numberOfLines={3}
                   marginBottom={12}
+                />
+                <StickerPicker
+                  selectedIndex={bookFormStickerIndex}
+                  onSelect={setBookFormStickerIndex}
                 />
               </View>
               <View style={modalStyles.actions}>
