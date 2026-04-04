@@ -17,10 +17,10 @@ import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
 import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
 import type { ImageSourcePropType } from "react-native";
-import memoryImage from "@/assets/images/memory2.png";
-import netImage from "@/assets/images/net2.png";
-import sudokuImage from "@/assets/images/sudoku2.png";
-import focusImage from "@/assets/images/focus2.png";
+import memoryImage from "@/assets/images/styles/stickers.jpeg";
+import netImage from "@/assets/images/styles/png.jpeg";
+import sudokuImage from "@/assets/images/styles/_ (12).jpeg";
+import focusImage from "@/assets/images/styles/_ (13).jpeg";
 
 interface GameCardProps {
   emoji?: string;

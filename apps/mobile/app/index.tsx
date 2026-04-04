@@ -5,7 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
-import EleImage from "@/assets/images/ele-def.png";
+import BrandImage from "@/assets/images/styles/stickers.jpeg";
 import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
@@ -55,7 +55,7 @@ export default function IndexRedirect() {
       return (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
              <Image
-                source={EleImage}
+               source={BrandImage}
                 style={{ width: 100, height: 100, marginBottom: 20 }}
                 resizeMode="contain"
              />
@@ -92,11 +92,11 @@ export default function IndexRedirect() {
       <View style={STYLES.container}>
         <View style={[STYLES.logoWrap, { marginTop: logoMarginTop }]}>
           <Image
-            source={EleImage}
+            source={BrandImage}
             style={[STYLES.logo, { width: logoSize, height: logoSize }]}
             resizeMode="contain"
           />
-          <Text style={[STYLES.brand, { fontSize: brandFontSize }]}> Elepad </Text>
+          <Text style={[STYLES.brand, { fontSize: brandFontSize }]}> Datebox </Text>
         </View>
         <View style={STYLES.separatorWrap}>
           <View style={STYLES.separator} />

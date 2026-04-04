@@ -22,15 +22,15 @@ import { COLORS, FONT, SHADOWS } from "@/styles/base";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 /**
- * Imágenes de la mascota Elepad según el nivel de racha
+ * Imágenes decorativas según el nivel de racha
  */
-const ELEPAD_IMAGES = {
+const STREAK_IMAGES = {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  bronze: require("../assets/images/EleRacha/FrioPared.png"), // 0-2 días
+  bronze: require("../assets/images/styles/stickers.jpeg"), // 0-2 días
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  silver: require("../assets/images/EleRacha/NormalPared.png"), // 3-29 días
+  silver: require("../assets/images/styles/_ (12).jpeg"), // 1-6 días
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  gold: require("../assets/images/EleRacha/FuegoPared.png"), // 30+ días
+  gold: require("../assets/images/styles/_ (13).jpeg"), // 7+ días
 };
 
 /**
@@ -46,13 +46,13 @@ const IMAGE_SIZE_NORMAL = SCREEN_WIDTH * 0.9;
  * Retorna la configuración de imagen y estilo según la racha actual.
  * @param streakCount Número de días de racha
  */
-const getElepadConfig = (
+const getStreakImageConfig = (
   streakCount: number,
 ): { source: ImageSourcePropType; style: ImageStyle } => {
   // NIVEL ORO (>= 7 días) - Fuego
   if (streakCount >= 7) {
     return {
-      source: ELEPAD_IMAGES.gold,
+      source: STREAK_IMAGES.gold,
       style: {
         width: IMAGE_SIZE_LARGE,
         height: IMAGE_SIZE_LARGE,
@@ -64,7 +64,7 @@ const getElepadConfig = (
   // NIVEL PLATA (1 - 6 días) - Normal
   if (streakCount >= 1) {
     return {
-      source: ELEPAD_IMAGES.silver,
+      source: STREAK_IMAGES.silver,
       style: {
         width: IMAGE_SIZE_NORMAL,
         height: IMAGE_SIZE_NORMAL,
@@ -75,7 +75,7 @@ const getElepadConfig = (
   }
   // NIVEL BRONCE (< 1 día) - Frio
   return {
-    source: ELEPAD_IMAGES.bronze,
+    source: STREAK_IMAGES.bronze,
     style: {
       width: IMAGE_SIZE_LARGE,
       height: IMAGE_SIZE_LARGE,
@@ -211,7 +211,7 @@ export default function StreakCounter() {
   if (!streak) return null;
 
   const currentStreak = streak.currentStreak;
-  const elepadConfig = getElepadConfig(currentStreak);
+  const streakImageConfig = getStreakImageConfig(currentStreak);
 
   return (
     <View style={styles.container}>
@@ -274,13 +274,13 @@ export default function StreakCounter() {
             </View>
           </View>
 
-          {/* Columna Derecha: Elepad */}
+          {/* Columna Derecha: Racha */}
           <View style={styles.imageColumn}>
             <Image
-              source={elepadConfig.source}
+              source={streakImageConfig.source}
               style={{
                 resizeMode: "contain",
-                ...elepadConfig.style,
+                ...streakImageConfig.style,
               }}
             />
           </View>

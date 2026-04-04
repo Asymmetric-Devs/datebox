@@ -1,7 +1,7 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward, Download } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import eleSvg from '/ele-def.png';
+import brandImage from '/datebox-brand.jpeg';
 
 
 export default function Hero() {
@@ -75,7 +75,7 @@ export default function Hero() {
                   display: 'inline-block',
                 }}
               >
-                {t('hero.elepad')}
+                Datebox
               </Box>
             </Typography>
 
@@ -159,8 +159,8 @@ export default function Hero() {
             >
               <Box
                 component="img"
-                src={eleSvg}
-                alt="Elepad"
+                src={brandImage}
+                alt="Datebox"
                 sx={{
                   width: '84%',
                   height: '84%',

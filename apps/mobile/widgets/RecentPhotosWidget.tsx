@@ -6,7 +6,7 @@ import {
   OverlapWidget,
   ImageWidgetSource,
 } from "react-native-android-widget";
-import itemPlaceholder from "../assets/images/ele-def-fondo-cuad.png";
+import itemPlaceholder from "../assets/images/logoazul.png";
 
 interface RecentPhotosWidgetProps {
   imageBase64?: string;
@@ -33,7 +33,7 @@ export function RecentPhotosWidget({
         flexDirection: "column",
       }}
       clickAction="OPEN_URI"
-      clickActionData={{  uri: `elepad://(tabs)/recuerdos?memoryId=${memoryId}` }}
+      clickActionData={{  uri: `datebox://(tabs)/recuerdos?memoryId=${memoryId}` }}
     >
     <FlexWidget
       style={{

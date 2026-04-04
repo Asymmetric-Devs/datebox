@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Elepad",
-    "slug": "elepad",
+    "name": "Datebox",
+    "slug": "datebox",
     "version": "1.0.0",
-    "scheme": "elepad",
+    "scheme": "datebox",
     "orientation": "portrait",
-    "icon": "./assets/images/ele-def-fondo-cuad.png",
+    "icon": "./assets/images/styles/stickers.jpeg",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/ele-def-fondo-cuad.png",
+        "foregroundImage": "./assets/images/styles/stickers.jpeg",
         "backgroundColor": "#ffffff"
       },
       "package": "com.elepadorg.elepad",
@@ -40,14 +40,14 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/styles/stickers.jpeg"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/ele-def-fondo-cuad.png",
+          "image": "./assets/images/styles/stickers.jpeg",
           "imageWidth": 250,
           "resizeMode": "contain",
           "backgroundColor": "#F8F9FA"
@@ -67,7 +67,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/ele-def-fondo-cuad.png",
+          "icon": "./assets/images/styles/stickers.jpeg",
           "color": "#8896B0",
           "sounds": []
         }

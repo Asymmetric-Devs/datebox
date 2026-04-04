@@ -96,7 +96,7 @@ export default function LogIn() {
       }
 
       const redirectTo = makeRedirectUri({
-        scheme: "elepad",
+        scheme: "datebox",
         path: "(tabs)/home",
       });
       console.log("Redirect URI (native):", redirectTo);
