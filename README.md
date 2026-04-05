@@ -1,16 +1,16 @@
-# Elepad
+# datebox.
 
 <p align="center">
   <b>¡Conectá con tus seres queridos mediante amor y tecnología!</b>
 </p>
 
 <p align="center">
-  <img src="apps/mobile/assets/images/ele-def.png" alt="Ele, el elefante de Elepad" width="250" />
+  <img src="apps/mobile/assets/images/logo/datebox.png" alt="Ele, el elefante de Elepad" width="250" />
 </p>
 
 Elepad es una aplicación móvil diseñada para que los adultos mayores se mantengan conectados con sus familias, compartiendo actividades, recuerdos y juegos cognitivos en una plataforma intuitiva.
 
-1. 📱 Descargá Elepad desde la Play Store.
+1. 📱 Descargá datebox desde la Play Store.
 2. 👨‍👩‍👧‍👦 Creá un grupo familiar.
 3. 📆 Registrá actividades en tu calendario semanal.
 4. 🧩 Resolvé desafíos para ejercitar la mente.

@@ -22,7 +22,7 @@ type Props = {
 const DAYS_OF_WEEK = ["D", "L", "Ma", "Mi", "J", "V", "S"];
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const nuevoDiaRachaImage = require("../assets/images/styles/stickers.jpeg");
+const nuevoDiaRachaImage = require("../assets/images/logo/datebox.png");
 
 const CONFETTI_COLORS = [
   "#FFD700",

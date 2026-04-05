@@ -5,7 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
-import BrandImage from "@/assets/images/styles/stickers.jpeg";
+import BrandImage from "@/assets/images/logo/datebox.png";
 import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";

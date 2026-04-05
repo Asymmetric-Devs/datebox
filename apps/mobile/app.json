@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "scheme": "datebox",
     "orientation": "portrait",
-    "icon": "./assets/images/styles/stickers.jpeg",
+    "icon": "./assets/images/logo/datebox.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/styles/stickers.jpeg",
+        "foregroundImage": "./assets/images/logo/datebox.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.elepadorg.elepad",
@@ -40,14 +40,14 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/styles/stickers.jpeg"
+      "favicon": "./assets/images/logo/datebox.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/styles/stickers.jpeg",
+          "image": "./assets/images/logo/datebox.png",
           "imageWidth": 250,
           "resizeMode": "contain",
           "backgroundColor": "#F8F9FA"
@@ -67,7 +67,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/styles/stickers.jpeg",
+          "icon": "./assets/images/logo/datebox.png",
           "color": "#8896B0",
           "sounds": []
         }

@@ -26,11 +26,11 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
  */
 const STREAK_IMAGES = {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  bronze: require("../assets/images/styles/stickers.jpeg"), // 0-2 días
+  bronze: require("../assets/images/logo/datebox.png"), // 0-2 días
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  silver: require("../assets/images/styles/_ (12).jpeg"), // 1-6 días
+  silver: require("../assets/images/logo/datebox.png"), // 1-6 días
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  gold: require("../assets/images/styles/_ (13).jpeg"), // 7+ días
+  gold: require("../assets/images/logo/datebox.png"), // 7+ días
 };
 
 /**
