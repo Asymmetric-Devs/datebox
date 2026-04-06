@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Animated, Easing } from "react-native";
 import { Text } from "react-native-paper";
-import eleIdea from "@/assets/images/ele-celular-loading.png";
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 import { COLORS, FONT } from "@/styles/base";
 
 /**
@@ -46,7 +46,7 @@ export const LoadingUser: React.FC = () => {
   return (
     <View style={styles.container}>
       <Animated.Image
-        source={eleIdea}
+        source={dateboxLogo}
         style={[styles.image, { transform: [{ scale: scaleAnim }] }]}
         resizeMode="contain"
       />

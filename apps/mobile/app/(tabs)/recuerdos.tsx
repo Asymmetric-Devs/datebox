@@ -63,7 +63,7 @@ import { BackButton } from "@/components/shared/BackButton";
 import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
 import BookCover, { StickerPicker, encodeStickerColor, parseStickerIndex } from "@/components/Recuerdos/BookCover";
-import eleEmpthy from "@/assets/images/ele-fotografiando.png";
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 import { useToast } from "@/components/shared/Toast";
 import { StyledTextInput } from "@/components/shared";
 import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
@@ -1282,7 +1282,7 @@ export default function RecuerdosScreen() {
               style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
             >
               <Image
-                source={eleEmpthy}
+                source={dateboxLogo}
                 style={{
                   width: 180,
                   height: 180,
@@ -1778,7 +1778,7 @@ export default function RecuerdosScreen() {
           }}
         >
           <Image
-            source={eleEmpthy}
+              source={dateboxLogo}
             style={{
               width: emptyLogoSize,
               height: emptyLogoSize,

@@ -14,8 +14,7 @@ import { Text, IconButton, ActivityIndicator } from "react-native-paper";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
-import eleDef from "@/assets/images/ele-def.png";
-import eleLoading from "@/assets/images/ele-celular-loading.png";
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 
 
 const screenWidth = Dimensions.get("window").width;
@@ -179,7 +178,7 @@ const RecuerdoItemComponent = React.memo(
               />
               <ActivityIndicator
                 size="small"
-                color={COLORS.primary}
+                source={dateboxLogo}
                 style={{ position: "absolute", bottom: 6 }}
               />
             </View>
@@ -247,7 +246,7 @@ const RecuerdoItemComponent = React.memo(
               ) : (
                 <Image
                   source={
-                    item.tipo === "video" ? eleDef : { uri: item.miniatura }
+                    item.tipo === "video" ? dateboxLogo : { uri: item.miniatura }
                   }
                   style={{
                     width: "100%",
@@ -256,7 +255,6 @@ const RecuerdoItemComponent = React.memo(
                   }}
                   contentFit="cover"
                   transition={200}
-                  cachePolicy="memory-disk"
                 />
               )}
               {item.tipo === "video" && (

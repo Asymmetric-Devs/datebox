@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { COLORS, FONT, SHADOWS } from '@/styles/base';
-import eleImage from '@/assets/images/ele-tip-pro.png';
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TOOLTIP_WIDTH = Math.min(SCREEN_WIDTH * 0.85, 340);
@@ -33,7 +33,7 @@ export const TourTooltip: React.FC<TourTooltipProps> = ({
     <View style={styles.container}>
       {/* Mascot */}
       <View style={styles.mascotContainer}>
-        <Image source={eleImage} style={styles.mascotImage} resizeMode="contain" />
+        <Image source={dateboxLogo} style={styles.mascotImage} resizeMode="contain" />
       </View>
 
       {/* Speech Bubble */}

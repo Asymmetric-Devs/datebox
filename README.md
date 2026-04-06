@@ -1,125 +1,46 @@
-# datebox.
+# datebox
 
 <p align="center">
-  <b>¡Conectá con tus seres queridos mediante amor y tecnología!</b>
+  <img src="apps/mobile/assets/images/logo/datebox-sinfondo.png" alt="Datebox" width="220" />
 </p>
 
-<p align="center">
-  <img src="apps/mobile/assets/images/logo/datebox.png" alt="Ele, el elefante de Elepad" width="250" />
-</p>
+Datebox es una app para organizar planes, compartir recuerdos, actividades y momentos importantes en un solo lugar. Úsalo con tu pareja, amigos o familia 
 
-Elepad es una aplicación móvil diseñada para que los adultos mayores se mantengan conectados con sus familias, compartiendo actividades, recuerdos y juegos cognitivos en una plataforma intuitiva.
+## Proyecto
 
-1. 📱 Descargá datebox desde la Play Store.
-2. 👨‍👩‍👧‍👦 Creá un grupo familiar.
-3. 📆 Registrá actividades en tu calendario semanal.
-4. 🧩 Resolvé desafíos para ejercitar la mente.
-5. 🎯 ¡Conectá con tus seres queridos mediante amor y tecnología!
+- Planificación
+  - Especificación de Requisitos de Software: https://docs.google.com/document/d/1R3vB02NTxqxi9H_KYEBNzvEl6xEbmV-Q1nAyWVGubfI
+  - Planificación: https://docs.google.com/document/d/1NqHx6Go_-peDly_qNYltLgTfeM6FCRMo5ZNa35w0yvI
+  - Diagramas técnicos (DER): https://drive.google.com/file/d/1_6j1oftihcGSm7DQh2r-obAzsL51-S-g
+- Gestión del proyecto
+  - Backlog: https://github.com/orgs/elepad-org/projects/2/views/3
+  - Roadmap: https://github.com/orgs/elepad-org/projects/2/views/2
+  - Tablero: https://github.com/orgs/elepad-org/projects/2/views/1
+- Diseño
+  - Canva (User Story Map): https://www.canva.com/design/DAGtndSDPec/fhyqoHBOG9PvgYRHk9xqmA/edit
+  - Figma (mockups): https://www.figma.com/design/rQOZ89Fed9UmfvBsExJyAo/Elepad-Mobile-App
 
-Elepad ofrece una interfaz diseñada para todas las edades.
-
-¿Tenés preguntas o sugerencias? ¡Nos encantaría escucharte!
-
-- Email: [proyectoelepad@gmail.com](mailto:proyectoelepad@gmail.com)
-
-## 🗺️ Proyecto
-
-La planificación del proyecto se puede ver en varias partes:
-
-- **Planificación**
-  - [Especificación de Requisitos de Software](https://docs.google.com/document/d/1R3vB02NTxqxi9H_KYEBNzvEl6xEbmV-Q1nAyWVGubfI).
-  - [Planificación](https://docs.google.com/document/d/1NqHx6Go_-peDly_qNYltLgTfeM6FCRMo5ZNa35w0yvI).
-  - [Diagramas técnicos](https://drive.google.com/file/d/1_6j1oftihcGSm7DQh2r-obAzsL51-S-g) (DER).
-- **Gestión del proyecto**
-  - [Backlog](https://github.com/orgs/elepad-org/projects/2/views/3).
-  - [Roadmap](https://github.com/orgs/elepad-org/projects/2/views/2) (avance del proyecto).
-  - [Tablero](https://github.com/orgs/elepad-org/projects/2/views/1) (de la release actual).
-- **Diseño**
-  - [Canva](https://www.canva.com/design/DAGtndSDPec/fhyqoHBOG9PvgYRHk9xqmA/edit) (User Story Map).
-  - [Figma](https://www.figma.com/design/rQOZ89Fed9UmfvBsExJyAo/Elepad-Mobile-App) (mockups de las vistas principales).
-
-En cada release se subirán las historias de usuario de esa release al [listado de Issues](https://github.com/elepad-org/Elepad/issues?q=is%3Aissue) de este repositorio.
-
-## 👨‍💻 Desarrollo
-
-Se aplicarán **técnicas ágiles** y **prácticas DevOps** para trabajar de manera productiva y asíncrona. Los cinco miembros del equipo se mantendrán en comunicación constante durante el desarrollo de Elepad.
-
-### 📂 Estructura del Repositorio
+## Estructura del repositorio
 
 ```yaml
-├── apps/            # Aplicaciones
-│   ├── api/           # Servidor back end con Hono y OpenAPI
-│   └── mobile/        # App móvil con React Native y Expo
-├── packages/        # Paquetes comunes a las aplicaciones
-│   ├── api-client/    # Hooks de Tanstack Query generados con orval
-│   └── assets/        # Imágenes de la marca Elepad
-└── supabase/        # Para gestionar Supabase en entorno local
+├── apps/             # Aplicaciones
+│   ├── api/            # Backend API
+│   └── mobile/         # App móvil
+├── packages/         # Paquetes compartidos
+│   ├── api-client/     # Cliente API generado
+│   └── assets/         # Recursos de marca
+└── supabase/         # Configuración y migraciones
 ```
 
-Utilizamos una estructura de monorepo con [Turborepo](https://turborepo.com/docs) como sistema de build. Esto permite ejecutar procesos en varias subcarpetas a la vez. Con un solo comando `turbo run dev` se levanta el servidor back end y la app mobile.
+## Desarrollo
 
-El código de `packages/api-client` es autogenerado por orval, una herramienta que lee la descripción OpenAPI (en formato JSON) de nuestra API para generar un cliente con Tanstack Query.
-
-### ✅ Convenciones
-
-Si bien la planificación se debe documentar en español, en lo posible se intentará **desarrollar en inglés** para adoptar convenciones de la industria.
-
-Los commits pueden referenciar GitHub Issues: si hacemos `git commit -m "feat: implement #3"`, el `#3` será un enlace al Issue número 3 (elepad-org/Elepad#3).
-
-En lo posible, los **mensajes de commits** tendrán la estructura `<type>: <description>` donde:
-
-- `<type>`: indica el tipo de cambio. Puede ser `fix`, `feat`, `refactor`, `docs`, `test`, `ci`, etc.
-- `<description>`: es un breve resumen de los cambios. Se escribe en infinitivo, describiendo lo que el commit va a hacer.
-
-Referencia: [https://www.conventionalcommits.org/](https://www.conventionalcommits.org/).
-
-Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
-
-- `prod`: para disparar despliegues.
-- `main`: la rama principal a donde apuntan las PRs. Debe tener código funcional ya que será desplegado.
-- `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
-- `fix/`: para correcciones de errores (por ejemplo, `fix/fix-header-bug`).
-- `chore/`: para tareas que no implican cambios en el código, como actualización de dependencias o documentación (por ejemplo, `chore/update-deps`).
-
-Referencia: [https://conventional-branch.github.io/](https://conventional-branch.github.io/).
-
-Las ramas se unen a main mediante Pull Requests. Es recomendable tildar la opción **"Squash commits"** al completar una PR para que el historial de commits sea más legible.
-
-Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar con un comentario que diga `// TODO:` para que luego se lo pueda encontrar fácilmente. Ej: `// TODO: optimize this method's time complexity to O(n)`.
-
-### 🔨 Herramientas
-
-- **Lenguajes, frameworks y librerías**: Node.js, JavaScript, TypeScript, Hono, React Native, React Native Paper, Expo.
-- **Dev tools**: npm, Turborepo, eslint, Prettier, OpenAPI, husky.
-- **Servicios**: [Supabase](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) (Database, Storage, Auth), [Google Cloud](https://console.cloud.google.com/auth/clients?project=elepad-mobile) (OAuth), [Expo EAS](https://expo.dev/accounts/elepad-org/projects/elepad), [Cloudflare Workers](https://dash.cloudflare.com/6eee324495e2fe7945478ecec8158c8e/workers-and-pages).
-
-Se utiliza Husky para configurar hooks de Git:
-
-- Formatear el código con Prettier antes de un `git commit`.
-
-## 🚀 Despliegue
-
-A continuación se muestra cómo configurar el entorno de desarrollo y cómo desplegar la app.
-
-### 🏗️ Entorno de Desarrollo
-
-Pasos manuales previos:
-
-- Crear un proyecto en Supabase para vincularlo desde la `supabase` CLI.
-- Aplicar las migraciones a la base de datos de Supabase.
-- Configurar un OAuth Client en Google Cloud para establecer la variable de entorno SUPABASE_AUTH_GOOGLE_CLIENT_ID.
-- En Supabase Auth, configurar las URLs de redirección y activar a Google como un Auth Provider.
-
-Ahora:
-
-1. Clonar el repositorio:
+1. Instalar dependencias
 
    ```bash
-   git clone https://github.com/elepad-org/Elepad.git
-   cd Elepad
+   npm install
    ```
 
-2. Definir archivos `.env` con variables de entorno según los siguientes archivos de ejemplo:
+2. Configurar variables de entorno usando los ejemplos
 
    ```bash
    # apps/api/.env.example
@@ -127,77 +48,15 @@ Ahora:
    # supabase/.env.example
    ```
 
-3. Instalar dependencias y configurar Supabase:
-
-   ```bash
-   npm install
-   npx supabase login
-   npx supabase link --project-ref sdnmoweppzszpxyggdyg
-   ```
-
-   Se usa un [proyecto de desarrollo](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) de Supabase. Si se prefiere tener un stack local con Docker, se puede ejecutar `npx supabase start` para levantarlo y `npx supabase db pull` para actualizar la base de datos local.
-   Nota: para el despliegue se utiliza otro [proyecto de producción](https://supabase.com/dashboard/org/oabegetinldkjgxchssx).
-
-4. Levantar la app en modo desarrollo:
+3. Levantar el entorno
 
    ```bash
    npm run dev
    ```
 
-5. Compilar y ejecutar la versión construida:
+## Contacto
 
-   ```bash
-   npm run build
-   npm run start
-   ```
-
-Si se desea trabajar desde el **devcontainer** configurado, se debe agregar `sudo` a algunos comandos de `supabase` ya que la CLI gestiona contenedores por fuera del contenedor.
-
-### 📲 Development Builds
-
-Expo Go es una app móvil que permite a los desarrolladores probar sus apps Expo sin necesidad de instalarlas en su dispositivo.
-La desventaja es que no se integra bien con servicios de autenticación como Google Sign-In.
-Como alternativa se pueden usar **development builds**, las cuales son más complejas de configurar pero funcionan como una app 100% nuestra, por lo que podemos configurar Google Sign-In.
-
-Utilizamos Expo EAS para construir nuestras [**developments builds**](https://expo.dev/accounts/elepad-org/projects/elepad/development-builds).
-Para ello es necesario configurar unas [variables de entorno](https://expo.dev/accounts/elepad-org/settings/environment-variables).
-Estas variables de entorno pueden variar según el entorno local de cada miembro del equipo (por ejemplo, la IP de `EXPO_PUBLIC_API_URL` va a ser distinta).
-Para que cada miembro pueda crear una dev build con sus propias variables de entorno, en EAS se define un environment distinto para cada uno.
-En `apps/mobile/eas.json` se definen las variables de entorno de cada environment (por ejemplo, `development-agustinbravop`).
-
-### 📦 Despliegue Manual
-
-Para desplegar la aplicación a la nube por primera vez es necesario realizar algunos pasos a mano. Se asume que ya se tiene:
-
-- Un entorno de desarrollo configurado.
-- Un OAuth Client en Google Cloud.
-- Un proyecto en Supabase.
-
-Es necesario:
-
-1. Crear una cuenta en Cloudflare para poder desplegar la API como un [Cloudflare Worker](https://dash.cloudflare.com/6eee324495e2fe7945478ecec8158c8e/workers/services/view/api/production/metrics). Luego, ejecutar:
-
-   ```bash
-   npx -w apps/api wrangler login
-   npx -w apps/api turbo run build:edge
-   npx -w apps/api wrangler deploy
-   npx -w apps/api wrangler secret put SUPABASE_URL
-   npx -w apps/api wrangler secret put SUPABASE_SERVICE_ROLE_KEY
-   ```
-
-2. Crear una cuenta en Expo Application Services (EAS) para crear un [proyecto](https://expo.dev/accounts/elepad-org/projects/elepad) y desplegar la app mobile a la web. Luego, configurar las variables de entorno en el dashboard. Finalmente, crear un nuevo despliegue con:
-
-   ```bash
-   npx -w apps/mobile eas login
-   npx -w apps/mobile expo export --platform web
-   npx -w apps/mobile eas deploy
-   ```
-
-### 🤖 Despliegue con GitHub Actions
-
-Una vez que las cuentas y proyectos de cada nube están creados y configurados, se utiliza GitHub Actions como pipeline de CI/CD para despliegues automáticos. El workflow `deploy.yml` despliega:
-
-- La API Hono a Cloudflare Workers ([https://api.elepad.workers.dev/](https://api.elepad.workers.dev/)).
+- Email: proyectoelepad@gmail.com
 - La app mobile a EAS Hosting ([https://ele.expo.app/](https://ele.expo.app/)).
 
 Desde GitHub Actions se actualizan todas las variables de entorno de cada nube. Es necesario definir en este repositorio los siguientes secrets:

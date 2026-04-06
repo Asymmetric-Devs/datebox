@@ -24,7 +24,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { useGetFamilyGroupIdGroupMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
-import eleEnmarcadoImage from "@/assets/images/ele-enmarcado.png";
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
+import asymmetricLogo from "@/assets/images/logo/asymmetric-logo.png";
 import ProfileHeader from "@/components/ProfileHeader";
 import PolaroidPreview from "@/components/Recuerdos/PolaroidPreview";
 import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton, EditProfileModal } from "@/components/shared";
@@ -351,7 +352,7 @@ export default function ConfiguracionScreen() {
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
-              title="Grupo familiar"
+              title="DateGroup"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: "center" }}
@@ -372,6 +373,26 @@ export default function ConfiguracionScreen() {
           >
             Cerrar sesión
           </Button>
+        </View>
+
+        <View
+          style={{
+            alignItems: "center",
+            marginTop: 86,
+            marginBottom: 6,
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 0,
+          }}
+        >
+          <Text style={{ color: COLORS.textSecondary }}>
+            Powered by
+          </Text>
+          <Image
+            source={asymmetricLogo}
+            style={{ width: 32, height: 30 }}
+            contentFit="contain"
+          />
         </View>
         <Portal>
           <Dialog
@@ -583,7 +604,7 @@ export default function ConfiguracionScreen() {
             ) : (
               <View style={{ alignItems: "center", paddingVertical: 24, paddingHorizontal: 16 }}>
                 <Image
-                  source={eleEnmarcadoImage}
+                  source={asymmetricLogo}
                   style={{ width: 180, height: 180, marginBottom: 16 }}
                   contentFit="contain"
                 />

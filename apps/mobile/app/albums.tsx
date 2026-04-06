@@ -18,7 +18,7 @@ import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import { BackButton } from "@/components/shared/BackButton";
-import eleEmpthy from "@/assets/images/EleUltimatePack/ele-polaroids-pensativo.png";
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 import { usePendingAlbums, PendingAlbum } from "@/hooks/usePendingAlbums";
 
 const unwrapAlbums = (response: unknown): Album[] => {
@@ -240,7 +240,7 @@ export default function AlbumsScreen() {
           </View>
         ) : listData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Image source={eleEmpthy} style={styles.emptyImage} />
+            <Image source={dateboxLogo} style={styles.emptyImage} />
             <Text style={STYLES.heading}>No hay álbumes aún</Text>
             <Text style={styles.emptyText}>
               Crea álbumes con narrativas generadas por IA a partir de tus

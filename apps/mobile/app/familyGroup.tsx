@@ -533,7 +533,7 @@ export default function FamilyGroup() {
                             },
                           ]}
                         >
-                          (Grupo Familiar)
+                          (DateGroup)
                         </Text>
                       </View>
                     </View>

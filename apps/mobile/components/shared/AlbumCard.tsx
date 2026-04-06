@@ -15,7 +15,7 @@ import { useToast } from "@/components/shared/Toast";
 import { usePdfDownload } from "@/hooks/usePdfDownload";
 import { useQueryClient } from "@tanstack/react-query";
 import AlbumCover from "@/components/Recuerdos/AlbumCover";
-import eleAlbumHogar from "@/assets/images/ele-album-hogar.png";
+import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 
 interface AlbumCardProps {
   id: string;
@@ -163,7 +163,7 @@ export default function AlbumCard({
     return (
       <View style={[styles.card, { opacity: 0.85 }]}>
         <View style={styles.coverWrapper}>
-          <AlbumCover title={title} coverImageUrl={eleAlbumHogar} compact={compact} />
+          <AlbumCover title={title} coverImageUrl={dateboxLogo} compact={compact} />
           {/* Loading overlay */}
           <View style={styles.pendingOverlay}>
             <ActivityIndicator
