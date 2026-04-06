@@ -1,10 +1,8 @@
 # datebox
-
+Es una app para organizar planes, compartir recuerdos, actividades y momentos importantes en un solo lugar. Úsalo con tu pareja, amigos o familia. 
 <p align="center">
-  <img src="apps/mobile/assets/images/logo/datebox-sinfondo.png" alt="Datebox" width="220" />
+  <img src="apps/mobile/assets/images/logo/datebox-sinfondo.png" alt="Datebox" width="380" />
 </p>
-
-Datebox es una app para organizar planes, compartir recuerdos, actividades y momentos importantes en un solo lugar. Úsalo con tu pareja, amigos o familia 
 
 ## Proyecto
 
@@ -56,7 +54,7 @@ Datebox es una app para organizar planes, compartir recuerdos, actividades y mom
 
 ## Contacto
 
-- Email: proyectoelepad@gmail.com
+- Email: asymmetricdevs@gmail.com
 - La app mobile a EAS Hosting ([https://ele.expo.app/](https://ele.expo.app/)).
 
 Desde GitHub Actions se actualizan todas las variables de entorno de cada nube. Es necesario definir en este repositorio los siguientes secrets:
