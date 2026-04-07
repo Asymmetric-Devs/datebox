@@ -25,11 +25,14 @@ const GroupContext = createContext<GroupContextType | undefined>(undefined);
 export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [selectedGroupId, _setSelectedGroupId] = useState<string | null>(null);
-  const { data: groups, isLoading, refetch } = useGetGroupsMe({
+  const { data: response, isLoading, refetch } = useGetGroupsMe({
     query: {
       enabled: !!user,
     },
   });
+
+  // Extract the actual groups array from the response
+  const groups = (response && 'data' in response && Array.isArray(response.data)) ? response.data : null;
 
   // Load persisted selection on mount
   useEffect(() => {

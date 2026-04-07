@@ -12,7 +12,6 @@ import { Text, ActivityIndicator, Button, SegmentedButtons, IconButton } from "r
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
-import { useAuth } from "@/hooks/useAuth";
 import { useGetMemories, Album, useGetGroupsGroupIdMembers, GetGroupsGroupIdMembers200 } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
@@ -42,7 +41,6 @@ const unwrapAlbums = (response: unknown): Album[] => {
 };
 
 export default function AlbumsScreen() {
-  const { userElepad } = useAuth();
   const { selectedGroupId: groupId } = useGroup();
   const router = useRouter();
 

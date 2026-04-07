@@ -142,9 +142,9 @@ export default function NewAccount() {
              await refreshUserElepad(); 
              // Try to refresh groups if inside a provider
              try {
-               const { refreshGroups } = require("@/context/GroupContext").useGroup();
+               const { refreshGroups } = (await import("@/context/GroupContext")).useGroup();
                await refreshGroups();
-             } catch(e) {
+             } catch {
                console.log("Group context not available yet");
              }
           }
@@ -178,9 +178,9 @@ export default function NewAccount() {
             // Refresh user data
             await refreshUserElepad();
             try {
-              const { refreshGroups } = require("@/context/GroupContext").useGroup();
+              const { refreshGroups } = (await import("@/context/GroupContext")).useGroup();
               await refreshGroups();
-            } catch(e) {
+            } catch {
                console.log("Group context not available yet");
             }
           }

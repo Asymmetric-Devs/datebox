@@ -22,7 +22,6 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
-import { useGetGroupsGroupIdMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import asymmetricLogo from "@/assets/images/logo/asymmetric-logo.png";
 import ProfileHeader from "@/components/ProfileHeader";
@@ -62,7 +61,7 @@ export default function ConfiguracionScreen() {
     updateUserTimezone,
   } = useAuth();
   
-  const { selectedGroupId, setSelectedGroupId, availableGroups, isLoading: isLoadingGroups } = useGroup();
+  const { selectedGroupId, setSelectedGroupId, availableGroups } = useGroup();
   const [groupMenuVisible, setGroupMenuVisible] = useState(false);
   // shop hooks for frames
   const inventoryResponse = useGetShopInventory();
