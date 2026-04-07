@@ -4,6 +4,7 @@ import {
   NewGroupSchema,
   UpdateGroupSchema,
   TransferOwnershipSchema,
+  UserGroupSchema,
 } from "./schema";
 import { GroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
@@ -23,6 +24,32 @@ groupApp.use("/groups/*", async (c, next) => {
   c.set("groupService", groupService);
   await next();
 });
+
+groupApp.openapi(
+  {
+    method: "get",
+    path: "/groups/me",
+    tags: ["groups"],
+    middleware: [withAuth],
+    responses: {
+      200: {
+        description: "List of user groups",
+        content: {
+          "application/json": {
+            schema: z.array(UserGroupSchema),
+          },
+        },
+      },
+      401: openApiErrorResponse("Unauthorized"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const user = c.var.user;
+    const groups = await c.var.groupService.listUserGroups(user.id);
+    return c.json(groups, 200);
+  },
+);
 
 groupApp.openapi(
   {

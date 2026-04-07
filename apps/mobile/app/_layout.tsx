@@ -20,6 +20,7 @@ import { COLORS } from "@/styles/base";
 import { ToastProvider } from "@/components/shared/Toast";
 import { TourProvider } from "@/components/tour/TourProvider";
 import { TourOverlay } from "@/components/tour/TourOverlay";
+import { GroupProvider } from "@/context/GroupContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,7 +83,8 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <PaperProvider theme={paperTheme}>
+            <GroupProvider>
+              <PaperProvider theme={paperTheme}>
               <ToastProvider>
                 <NavigationThemeProvider value={navTheme}>
                   <StreakListener />
@@ -196,7 +198,8 @@ export default function RootLayout() {
                   </TourProvider>
                 </NavigationThemeProvider>
               </ToastProvider>
-            </PaperProvider>
+              </PaperProvider>
+            </GroupProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

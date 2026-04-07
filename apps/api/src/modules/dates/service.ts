@@ -98,10 +98,10 @@ export class DateService {
       // Send notification to group members if different from creator
       if (payload.groupId) {
         const { data: members } = await this.supabase
-          .from("users")
-          .select("id")
+          .from("group_members")
+          .select("userId")
           .eq("groupId", payload.groupId)
-          .neq("id", payload.createdBy);
+          .neq("userId", payload.createdBy);
 
         if (members && members.length > 0) {
           const { data: creator } = await this.supabase
@@ -113,9 +113,9 @@ export class DateService {
           if (creator) {
             const memberPromises = members.map((member) => 
               this.notificationsService.createNotification({
-                userId: member.id,
+                userId: member.userId!,
                 actorId: payload.createdBy,
-                eventType: "activity_assigned", // keeping event type string for compatibility
+                eventType: "activity_assigned",
                 entityType: "date",
                 entityId: data.id,
                 title: "Nueva cita agregada al grupo",

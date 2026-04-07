@@ -24,6 +24,7 @@ import DropdownSelect from "@/components/shared/DropdownSelect";
 import { BackButton } from "@/components/shared/BackButton";
 import { useStatisticsTour } from "@/hooks/tours/useStatisticsTour";
 import AttemptCard from "@/components/Historial/AttemptCard";
+import { useGroup } from "@/context/GroupContext";
 
 const PAGE_SIZE = 50;
 
@@ -48,6 +49,7 @@ type Props = {
 
 export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: Props) {
   const { userElepad } = useAuth();
+  const { selectedGroupId: groupId } = useGroup();
 
   const [selectedGame, setSelectedGame] = useState("all");
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
@@ -60,7 +62,6 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
   const [hasMore, setHasMore] = useState(true);
 
   const isHelper = !userElepad?.elder;
-  const groupId = userElepad?.groupId;
 
   // Determine the title based on view parameter
   const getTitle = () => {

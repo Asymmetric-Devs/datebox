@@ -53,6 +53,14 @@ export interface UpdateUser {
   timezone?: string;
 }
 
+export interface UserGroup {
+  id: string;
+  name: string;
+  role: string;
+  joinedAt: string | null;
+  ownerUserId: string;
+}
+
 export interface NewGroup {
   /** @minLength 1 */
   name: string;
@@ -1577,6 +1585,164 @@ export const usePatchUsersIdAvatar = <TError = Error, TContext = unknown>(
     queryClient
   );
 };
+
+export type getGroupsMeResponse200 = {
+  data: UserGroup[];
+  status: 200;
+};
+
+export type getGroupsMeResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type getGroupsMeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getGroupsMeResponseSuccess = getGroupsMeResponse200 & {
+  headers: Headers;
+};
+export type getGroupsMeResponseError = (
+  | getGroupsMeResponse401
+  | getGroupsMeResponse500
+) & {
+  headers: Headers;
+};
+
+export type getGroupsMeResponse =
+  | getGroupsMeResponseSuccess
+  | getGroupsMeResponseError;
+
+export const getGetGroupsMeUrl = () => {
+  return `/groups/me`;
+};
+
+export const getGroupsMe = async (
+  options?: RequestInit
+): Promise<getGroupsMeResponse> => {
+  return rnFetch<getGroupsMeResponse>(getGetGroupsMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetGroupsMeQueryKey = () => {
+  return [`/groups/me`] as const;
+};
+
+export const getGetGroupsMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getGroupsMe>>,
+  TError = Error
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getGroupsMe>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetGroupsMeQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getGroupsMe>>> = ({
+    signal,
+  }) => getGroupsMe({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getGroupsMe>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetGroupsMeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getGroupsMe>>
+>;
+export type GetGroupsMeQueryError = Error;
+
+export function useGetGroupsMe<
+  TData = Awaited<ReturnType<typeof getGroupsMe>>,
+  TError = Error
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getGroupsMe>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGroupsMe>>,
+          TError,
+          Awaited<ReturnType<typeof getGroupsMe>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGroupsMe<
+  TData = Awaited<ReturnType<typeof getGroupsMe>>,
+  TError = Error
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getGroupsMe>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGroupsMe>>,
+          TError,
+          Awaited<ReturnType<typeof getGroupsMe>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGroupsMe<
+  TData = Awaited<ReturnType<typeof getGroupsMe>>,
+  TError = Error
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getGroupsMe>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetGroupsMe<
+  TData = Awaited<ReturnType<typeof getGroupsMe>>,
+  TError = Error
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getGroupsMe>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetGroupsMeQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export type postGroupsCreateResponse201 = {
   data: void;

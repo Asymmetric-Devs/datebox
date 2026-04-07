@@ -140,6 +140,13 @@ export default function NewAccount() {
              // Esperamos un poco y refrescamos.
              await new Promise((resolve) => setTimeout(resolve, 500));
              await refreshUserElepad(); 
+             // Try to refresh groups if inside a provider
+             try {
+               const { refreshGroups } = require("@/context/GroupContext").useGroup();
+               await refreshGroups();
+             } catch(e) {
+               console.log("Group context not available yet");
+             }
           }
         } catch (err: unknown) {
           console.error("Error creating family group:", err);
@@ -168,8 +175,14 @@ export default function NewAccount() {
           } else {
             // Wait a bit for the database to update
             await new Promise((resolve) => setTimeout(resolve, 500));
-            // Refresh user data to get the new groupId
+            // Refresh user data
             await refreshUserElepad();
+            try {
+              const { refreshGroups } = require("@/context/GroupContext").useGroup();
+              await refreshGroups();
+            } catch(e) {
+               console.log("Group context not available yet");
+            }
           }
         } catch (err: unknown) {
           console.error("Error linking to family group:", err);

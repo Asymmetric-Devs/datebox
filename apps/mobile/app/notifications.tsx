@@ -76,6 +76,7 @@ import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
 import { Portal } from "react-native-paper";
 import { useToast } from "@/components/shared/Toast";
+import { useGroup } from "@/context/GroupContext";
 
 const PAGE_SIZE = 20;
 
@@ -155,6 +156,7 @@ export default function NotificationsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { userElepad } = useAuth();
+  const { selectedGroupId } = useGroup();
   const toast = useToast();
   const [page, setPage] = useState(0);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
@@ -184,12 +186,12 @@ export default function NotificationsScreen() {
     }
   }, [activityDetailDialogVisible]);
 
-  // Fetch family members for displaying names in mentions
+  // Fetch group members for displaying names in mentions
   const membersQuery = useGetGroupsGroupIdMembers(
-    userElepad?.groupId || "",
+    selectedGroupId || "",
     {
       query: {
-        enabled: !!userElepad?.groupId,
+        enabled: !!selectedGroupId,
       },
     },
   );

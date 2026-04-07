@@ -70,6 +70,7 @@ import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
 
 import { useRecuerdosTour } from "@/hooks/tours/useRecuerdosTour";
 import { useTabContext } from "@/context/TabContext";
+import { useGroup } from "@/context/GroupContext";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
@@ -178,8 +179,9 @@ export default function RecuerdosScreen() {
 
   const { mutateAsync: addReaction } = useAddReaction();
   const { activeTab } = useTabContext();
+  const { selectedGroupId } = useGroup();
 
-  const groupId = userElepad?.groupId || "";
+  const groupId = selectedGroupId || "";
 
   const membersQuery = useGetGroupsGroupIdMembers(groupId, {
     query: { enabled: !!groupId },
@@ -629,7 +631,8 @@ export default function RecuerdosScreen() {
       }
     },
     onSuccess: () => {
-      // Invalidate global memories query for Home
+      // Invalidar query global de memorias (para el Home)
+      // La key generada por orval es ['/memories', params]. Usamos partial matching.
       queryClient.invalidateQueries({ queryKey: ["/memories"] });
 
       showToast({ message: "Canción agregada exitosamente", type: "success" });

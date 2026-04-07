@@ -35,18 +35,18 @@ export class MemoriesService {
 
   private async assertUserInGroup(userId: string, groupId: string) {
     const { data, error } = await this.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", userId)
+      .from("group_members")
+      .select("id")
+      .eq("userId", userId)
+      .eq("groupId", groupId)
       .single();
 
     if (error) {
-      console.error("Error fetching user for group check:", error);
-      throw new ApiException(500, "Error fetching user");
-    }
-
-    if (!data?.groupId || data.groupId !== groupId) {
-      throw new ApiException(403, "Forbidden");
+      if (error.code === "PGRST116") {
+        throw new ApiException(403, "User is not a member of this group");
+      }
+      console.error("Error fetching group membership for check:", error);
+      throw new ApiException(500, "Error fetching membership");
     }
   }
 

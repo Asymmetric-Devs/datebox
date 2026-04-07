@@ -10,6 +10,7 @@ import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
 import { supabase } from "@/lib/supabase";
+import { useGroup } from "@/context/GroupContext";
 
 export default function IndexRedirect() {
   const { session, loading, userElepad, userElepadLoading } = useAuth();
@@ -26,16 +27,16 @@ export default function IndexRedirect() {
   const logoMarginTop = screenHeight * 0.12; // 12% del alto de pantalla
   const brandFontSize = screenWidth * 0.16; // 16% del ancho de pantalla
 
+  const { selectedGroupId, isLoading: groupsLoading } = useGroup();
+  
   useEffect(() => {
-    // Si ya hay sesión Y usuario elepad cargado con grupo, intentar redirigir
-    // Esto es un "safety net" por si el redirect de useAuth falló o si el usuario
-    // ya estaba cargado al montar este componente.
-    if (session && !loading && userElepad && userElepad.groupId && !hasRedirected.current) {
-       console.log("🏠 Redirigiendo a home desde index (sesión y usuario listos)");
+    // Si ya hay sesión Y usuario elepad cargado Y el contexto de grupos cargó uno, intentar redirigir
+    if (session && !loading && !userElepadLoading && userElepad && selectedGroupId && !hasRedirected.current) {
+       console.log("🏠 Redirigiendo a home desde index (sesión, usuario y grupo listos)");
        hasRedirected.current = true;
        router.replace("/(tabs)/home");
     }
-  }, [session, loading, userElepad, router]);
+  }, [session, loading, userElepadLoading, userElepad, router, selectedGroupId, groupsLoading]);
 
 
   if (loading) {

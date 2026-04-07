@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { SkeletonBox } from "@/components/shared";
+import { useGroup } from "@/context/GroupContext";
 import {
   useGetDatesGroupGroupId,
   useGetAttempts,
@@ -64,6 +65,7 @@ const getGameInfo = (gameType: string) => {
 
 const HomeScreen = () => {
   const { userElepad, userElepadLoading } = useAuth();
+  const { selectedGroupId } = useGroup();
   const isLoading = userElepadLoading || !userElepad;
   const router = useRouter();
   const { unreadCount } = useNotifications();
@@ -71,10 +73,10 @@ const HomeScreen = () => {
 
   // Fetch today's activities
   const activitiesQuery = useGetDatesGroupGroupId(
-    userElepad?.groupId || "",
+    selectedGroupId || "",
     {
       query: {
-        enabled: !!userElepad?.groupId,
+        enabled: !!selectedGroupId,
       },
     },
   );
@@ -92,20 +94,20 @@ const HomeScreen = () => {
 
   // Fetch recent memories
   const memoriesQuery = useGetMemories(
-    { limit: 1, groupId: userElepad?.groupId || "" },
+    { limit: 1, groupId: selectedGroupId || "" },
     {
       query: {
-        enabled: !!userElepad?.groupId,
+        enabled: !!selectedGroupId,
       },
     },
   );
 
   // Fetch family members
   const membersQuery = useGetGroupsGroupIdMembers(
-    userElepad?.groupId || "",
+    selectedGroupId || "",
     {
       query: {
-        enabled: !!userElepad?.groupId,
+        enabled: !!selectedGroupId,
       },
     },
   );
@@ -249,7 +251,7 @@ const HomeScreen = () => {
 
   // Invalidar queries cuando cambia el groupId
   useEffect(() => {
-    if (userElepad?.groupId) {
+    if (selectedGroupId) {
       // Invalidar las queries relacionadas con el grupo para forzar refetch
       // La key generada por orval es ['/memories', params]
       queryClient.invalidateQueries({ queryKey: ["/memories"] });
@@ -260,18 +262,18 @@ const HomeScreen = () => {
         queryKey: ["getGroupIdGroupMembers"],
       });
     }
-  }, [userElepad?.groupId, queryClient]);
+  }, [selectedGroupId, queryClient]);
 
   const { refetch: refetchAttempts } = attemptsQuery;
   const { refetch: refetchMemories } = memoriesQuery;
 
   useFocusEffect(
     useCallback(() => {
-      if (userElepad?.groupId) {
+      if (selectedGroupId) {
         refetchAttempts();
         refetchMemories();
       }
-    }, [userElepad?.groupId, refetchAttempts, refetchMemories]),
+    }, [selectedGroupId, refetchAttempts, refetchMemories]),
   );
 
   const displayName =

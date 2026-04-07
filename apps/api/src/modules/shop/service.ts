@@ -40,17 +40,17 @@ export class ShopService {
    * Get which users in a family group own a specific item
    */
   async getItemOwnership(itemId: string, groupId: string) {
-    // Get all users in the family group
+    // Get all users in the group via group_members
     const { data: groupMembers, error: groupError } = await this.supabase
-      .from("users")
-      .select("id")
+      .from("group_members")
+      .select("userId")
       .eq("groupId", groupId);
 
     if (groupError) {
       throw new Error(`Error fetching group members: ${groupError.message}`);
     }
 
-    const memberIds = groupMembers?.map(m => m.id) || [];
+    const memberIds = groupMembers?.map(m => m.userId).filter(Boolean) as string[];
 
     // Get which of these users own the item
     const { data: owners, error: ownerError } = await this.supabase
@@ -128,7 +128,7 @@ export class ShopService {
 
     const { data: userData, error: userError } = await this.supabase
       .from("users")
-      .select("points_balance, elder, groupId")
+      .select("points_balance, elder")
       .eq("id", userId)
       .single();
 
@@ -145,7 +145,7 @@ export class ShopService {
     if (recipientUserId) {
       const { data: recipientData, error: recipientError } = await this.supabase
         .from("users")
-        .select("id, groupId, elder")
+        .select("id, elder")
         .eq("id", recipientUserId)
         .single();
 
@@ -153,9 +153,11 @@ export class ShopService {
         throw new HTTPException(404, { message: "Recipient user not found" });
       }
 
-      // Validar que esté en el mismo grupo familiar
-      if (recipientData.groupId !== userData.groupId) {
-        throw new HTTPException(403, { message: "Recipient must be in the same family group" });
+      // Validar que compartan al menos un grupo
+      const { data: sharedGroups } = await this.supabase.rpc("is_same_group", { target_user_id: recipientUserId });
+
+      if (!sharedGroups) {
+        throw new HTTPException(403, { message: "Recipient must be in the same group" });
       }
 
       // Validar que el receptor NO sea abuelo

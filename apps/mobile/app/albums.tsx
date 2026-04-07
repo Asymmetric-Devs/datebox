@@ -20,6 +20,7 @@ import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import { BackButton } from "@/components/shared/BackButton";
 import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 import { usePendingAlbums, PendingAlbum } from "@/hooks/usePendingAlbums";
+import { useGroup } from "@/context/GroupContext";
 
 const unwrapAlbums = (response: unknown): Album[] => {
   let cursor: unknown = response;
@@ -42,8 +43,8 @@ const unwrapAlbums = (response: unknown): Album[] => {
 
 export default function AlbumsScreen() {
   const { userElepad } = useAuth();
+  const { selectedGroupId: groupId } = useGroup();
   const router = useRouter();
-  const groupId = userElepad?.groupId || "";
 
   const [albumDialogVisible, setAlbumDialogVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,7 +58,7 @@ export default function AlbumsScreen() {
   // Fetch memories for the album creation
   const { data: memoriesResponse } = useGetMemories(
     {
-      groupId,
+      groupId: groupId ?? undefined,
       limit: 100,
     },
     {
@@ -72,7 +73,7 @@ export default function AlbumsScreen() {
     : [];
 
   // Fetch family members for the preview
-  const membersQuery = useGetGroupsGroupIdMembers(groupId, {
+  const membersQuery = useGetGroupsGroupIdMembers(groupId || "", {
     query: { enabled: !!groupId },
   });
 

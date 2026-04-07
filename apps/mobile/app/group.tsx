@@ -42,14 +42,14 @@ import CancelButton from "@/components/shared/CancelButton";
 import SaveButton from "@/components/shared/SaveButton";
 import { useToast } from "@/components/shared/Toast";
 import { StyledTextInput } from "@/components/shared";
+import { useGroup } from "@/context/GroupContext";
 
 export default function Group() {
   const { userElepad, refreshUserElepad } = useAuth();
+  const { selectedGroupId: groupId, refreshGroups } = useGroup();
   const { showToast } = useToast();
   const [invitationCode, setInvitationCode] =
     useState<getGroupsGroupIdInviteResponse>();
-
-  const groupId = userElepad?.groupId;
 
   // Debug: Log user data when component mounts or userElepad changes
   useEffect(() => {
@@ -276,6 +276,7 @@ export default function Group() {
       });
 
       await membersQuery.refetch();
+      await refreshGroups(); // Refresh in case ownership impacts UI
 
       showToast({
         message: `${selectedNewOwner.displayName} es ahora el nuevo administrador del grupo.`,
@@ -330,10 +331,11 @@ export default function Group() {
         },
       });
 
-      // 3. Refrescar datos del usuario
+      // 3. Refrescar datos
       await refreshUserElepad();
+      await refreshGroups();
 
-      // 4. Limpiar estados del grupo anterior
+      // 4. Limpiar estados
       setInvitationCode(undefined);
       setAdvancedOptionsExpanded(false);
       setExitOptionsVisible(false);
@@ -400,10 +402,11 @@ export default function Group() {
         },
       });
 
-      // 3. Refrescar datos del usuario
+      // 3. Refrescar datos
       await refreshUserElepad();
+      await refreshGroups();
 
-      // 4. Limpiar estados del grupo anterior
+      // 4. Limpiar estados
       setInvitationCode(undefined);
       setAdvancedOptionsExpanded(false);
       setExitOptionsVisible(false);
@@ -456,6 +459,7 @@ export default function Group() {
       if (membersQuery.refetch) {
         await membersQuery.refetch();
       }
+      await refreshGroups(); // Refresh group list to update name in switcher
     } catch (e: unknown) {
       const msg =
         e instanceof Error

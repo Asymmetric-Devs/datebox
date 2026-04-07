@@ -176,17 +176,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           if (data && (status === 200 || status === undefined)) {
             const tempUser = data as ElepadUser;
 
-            // Verificamos si tiene groupId (esencial para la app)
-            if (tempUser.groupId) {
-              u = tempUser;
-              break; // ¡ÉXITO COMPLETO!
-            } else {
-              console.log(`👤 Usuario encontrado pero sin Grupo. (Intento ${attempts}/${maxAttempts}) - Esperando vinculación...`);
-              // Backoff: Si ya existe el usuario pero no el grupo, esperamos más tiempo (2s)
-              // para no saturar la red mientras se crea el grupo.
-              await new Promise((r) => setTimeout(r, 2000));
-              continue;
-            }
+            // En la nueva arquitectura multi-grupo, no bloqueamos si no hay groupId
+            // ya que el usuario puede pertenecer a varios o a ninguno inicialmente.
+            u = tempUser;
+            break; // ¡ÉXITO!
           }
           // Caso 2: 404 Not Found
           else if (status === 404) {
@@ -593,7 +586,7 @@ export type ElepadUser = {
   email: string;
   displayName: string;
   avatarUrl?: string;
-  groupId?: string;
+  groupId?: string; // @deprecated Use GroupContext instead
   elder: boolean;
   timezone?: string;
   activeFrameUrl?: string;

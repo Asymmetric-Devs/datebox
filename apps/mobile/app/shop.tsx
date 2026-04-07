@@ -36,10 +36,12 @@ import { useToast } from "@/components/shared/Toast";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import DropdownSelect from "@/components/shared/DropdownSelect";
+import { useGroup } from "@/context/GroupContext";
 
 export default function ShopScreen() {
   const router = useRouter();
   const { userElepad: user, refreshUserElepad } = useAuth();
+  const { selectedGroupId } = useGroup();
   const { showToast } = useToast();
   const [selectedItem, setSelectedItem] = React.useState<{
     id: string;
@@ -84,9 +86,9 @@ export default function ShopScreen() {
 
   // Obtener miembros del grupo familiar
   const groupMembersResponse = useGetGroupsGroupIdMembers(
-    user?.groupId ?? "",
+    selectedGroupId ?? "",
     {
-      query: { enabled: !!user?.groupId },
+      query: { enabled: !!selectedGroupId },
     },
   );
   const groupMembersData = normalizeData(groupMembersResponse.data) as

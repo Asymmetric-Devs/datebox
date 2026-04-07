@@ -48,3 +48,15 @@ export const TransferOwnershipSchema = z
   .openapi("TransferOwnership");
 
 export type TransferOwnership = z.infer<typeof TransferOwnershipSchema>;
+
+export const UserGroupSchema = z
+  .object({
+    id: z.string().uuid(),
+    name: z.string(),
+    role: z.string(),
+    joinedAt: z.string().nullable(),
+    ownerUserId: z.string().uuid(),
+  })
+  .openapi("UserGroup");
+
+export type UserGroup = z.infer<typeof UserGroupSchema>;

@@ -147,21 +147,33 @@ async function handleDailyActivitiesWidget(
       .eq("id", userId)
       .single();
 
-    if (!userRow?.groupId) {
-      widgetProps.error = "No se encontró el grupo familiar";
+    // Get target groupId: prioritize AsyncStorage selection, fallback to userRow.groupId
+    let targetGroupId = "";
+    try {
+      targetGroupId = await AsyncStorage.getItem("SELECTED_GROUP_ID") || "";
+    } catch (e) {
+      console.log("Widget: failed to read SELECTED_GROUP_ID", e);
+    }
+
+    if (!targetGroupId) {
+       targetGroupId = userRow?.groupId || "";
+    }
+
+    if (!targetGroupId) {
+      widgetProps.error = "Selecciona un grupo en la app";
       props.renderWidget(<Widget {...widgetProps} />);
       return;
     }
 
     console.log(
-      "Widget DailyActivities: groupId",
-      userRow.groupId,
+      "Widget DailyActivities: targetGroupId",
+      targetGroupId,
       "elder:",
-      userRow.elder,
+      userRow?.elder,
     );
 
     // Set isElder in props
-    widgetProps.isElder = userRow.elder;
+    widgetProps.isElder = userRow?.elder ?? false;
 
     // Fetch activities from API
     const apiUrl = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.5:8787";
@@ -170,7 +182,7 @@ async function handleDailyActivitiesWidget(
     try {
       console.log(`Widget DailyActivities: API call...`);
       const response = await fetch(
-        `${apiUrl}/activities/familyCode/${userRow.groupId}`,
+        `${apiUrl}/activities/familyCode/${targetGroupId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -217,7 +229,7 @@ async function handleDailyActivitiesWidget(
         );
 
         // Filter by role if user is elder
-        if (userRow.elder === true) {
+        if (userRow?.elder === true) {
           todayActivities = todayActivities.filter((activity) => {
             return (
               activity.createdBy === userId || activity.assignedTo === userId
@@ -237,7 +249,7 @@ async function handleDailyActivitiesWidget(
         });
 
         const res = await fetch(
-          `${apiUrl}/group/${userRow.groupId}/members`,
+          `${apiUrl}/group/${targetGroupId}/members`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -348,26 +360,42 @@ async function handlePhotoWidgets(
 
       const userId = session.user.id; // Use session ID which is available even if getUser fails (though RLS might fail)
 
-      // Get user's groupId
+    // Get target groupId
+    let targetGroupId = "";
+    try {
+      targetGroupId = await AsyncStorage.getItem("SELECTED_GROUP_ID") || "";
+    } catch (e) {
+       console.log("Widget: failed to read SELECTED_GROUP_ID", e);
+    }
+
+    if (!targetGroupId) {
       const { data: userRow } = await supabase
         .from("users")
         .select("groupId")
         .eq("id", userId)
         .single();
+      targetGroupId = userRow?.groupId || "";
+    }
 
-      console.log("Widget: groupId", userRow?.groupId);
+    if (!targetGroupId) {
+       widgetProps.error = "Selecciona un grupo en la app";
+       props.renderWidget(<Widget {...widgetProps} />);
+       return;
+    }
 
-      // Fetch recent memories via API (bypassing direct RLS potential issues)
-      const apiUrl =
-        process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.5:8787";
-      const token = session.access_token;
-      let rawMemories: WidgetMemory[] = [];
-      let queryError: { message: string } | null | unknown = null;
+    console.log("Widget: targetGroupId", targetGroupId);
 
-      try {
-        console.log(`Widget: API call...`);
-        const response = await fetch(
-          `${apiUrl}/memories?limit=10&groupId=${userRow?.groupId}`,
+    // Fetch recent memories via API
+    const apiUrl =
+      process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.5:8787";
+    const token = session.access_token;
+    let rawMemories: WidgetMemory[] = [];
+    let queryError: { message: string } | null | unknown = null;
+
+    try {
+      console.log(`Widget: API call...`);
+      const response = await fetch(
+        `${apiUrl}/memories?limit=10&groupId=${targetGroupId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

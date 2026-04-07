@@ -298,6 +298,45 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          groupId: string | null
+          id: string
+          joinedAt: string | null
+          role: string | null
+          userId: string | null
+        }
+        Insert: {
+          groupId?: string | null
+          id?: string
+          joinedAt?: string | null
+          role?: string | null
+          userId?: string | null
+        }
+        Update: {
+          groupId?: string | null
+          id?: string
+          joinedAt?: string | null
+          role?: string | null
+          userId?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_groupId_fkey"
+            columns: ["groupId"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           code: string | null
@@ -1137,6 +1176,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_member_of: { Args: { group_uuid: string }; Returns: boolean }
       is_same_group: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {

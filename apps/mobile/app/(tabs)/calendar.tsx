@@ -7,6 +7,7 @@ import { useTabContext } from "@/context/TabContext";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
 import { useActivitiesRealtime } from "@/hooks/useActivitiesRealtime";
+import { useGroup } from "@/context/GroupContext";
 import {
   usePostDates,
   usePatchDatesId,
@@ -28,9 +29,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 function CalendarScreenContent() {
   const { userElepad } = useAuth();
+  const { selectedGroupId } = useGroup();
   const params = useLocalSearchParams();
   const router = useRouter();
-  const familyCode = userElepad?.groupId ?? "";
+  const familyCode = selectedGroupId ?? "";
   const idUser = userElepad?.id ?? "";
   const queryClient = useQueryClient();
 
@@ -41,8 +43,12 @@ function CalendarScreenContent() {
 
   const [editing, setEditing] = useState<Partial<DateEvent> | null>(null);
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
-  const activitiesQuery = useGetDatesGroupGroupId(familyCode);
-  const membersQuery = useGetGroupsGroupIdMembers(familyCode);
+  const activitiesQuery = useGetDatesGroupGroupId(familyCode, {
+    query: { enabled: !!familyCode }
+  });
+  const membersQuery = useGetGroupsGroupIdMembers(familyCode, {
+    query: { enabled: !!familyCode }
+  });
 
   const [selectedDay, setSelectedDay] = useState<string>(getTodayLocal());
 

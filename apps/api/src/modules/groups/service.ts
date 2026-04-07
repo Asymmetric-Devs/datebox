@@ -12,19 +12,20 @@ export class GroupService {
   async create(newGroup: NewGroup) {
     const created = await this.createGroup(
       newGroup.ownerUserId,
-      `Grupo de ${newGroup.name}`,
+      newGroup.name,
     );
 
-    const userUpdate = await this.supabase
-      .from("users")
-      .update({
+    const { error: memberError } = await this.supabase
+      .from("group_members")
+      .insert({
+        userId: newGroup.ownerUserId,
         groupId: created.id,
-      })
-      .eq("id", newGroup.ownerUserId);
+        role: "owner",
+      });
 
-    if (userUpdate.error) {
-      console.error("Error creating the group: ", userUpdate.error);
-      throw new ApiException(500, "Error creating the group");
+    if (memberError) {
+      console.error("Error creating group membership: ", memberError);
+      throw new ApiException(500, "Error creating group membership");
     }
 
     return true;
@@ -77,19 +78,20 @@ export class GroupService {
       throw new ApiException(400, "The invitation code has expired");
     }
 
-    const userUpdate = await this.supabase
-      .from("users")
-      .update({
+    const { error: memberError } = await this.supabase
+      .from("group_members")
+      .insert({
+        userId: groupData.userId,
         groupId: data.id,
-      })
-      .eq("id", groupData.userId);
+        role: "member",
+      });
 
-    if (userUpdate.error) {
-      console.error("Error linking the user with the group: ", userUpdate.error);
-      throw new ApiException(
-        500,
-        "Error linking the user with the group",
-      );
+    if (memberError) {
+      if (memberError.code === "23505") {
+        throw new ApiException(400, "User is already a member of this group");
+      }
+      console.error("Error linking the user with the group: ", memberError);
+      throw new ApiException(500, "Error linking the user with the group");
     }
 
     return true;
@@ -118,8 +120,8 @@ export class GroupService {
     }
 
     const { data: members, error: membersErr } = await this.supabase
-      .from("users")
-      .select("id, displayName, avatarUrl, elder")
+      .from("group_members")
+      .select("users (id, displayName, avatarUrl, elder)")
       .eq("groupId", groupId);
 
     if (membersErr) {
@@ -127,7 +129,12 @@ export class GroupService {
       throw new ApiException(500, "Error fetching group members");
     }
 
-    const membersList = members ?? [];
+    const membersList = (members ?? []).map(m => m.users).filter(Boolean) as Array<{
+      id: string;
+      displayName: string;
+      avatarUrl: string | null;
+      elder: boolean;
+    }>;
     const memberIds = membersList.map((m) => m.id);
 
     let framesMap: Record<string, string> = {};
@@ -242,49 +249,39 @@ export class GroupService {
       throw new ApiException(400, "Cannot transfer ownership to the same user");
     }
 
-    const { data: newOwner, error: newOwnerErr } = await this.supabase
-      .from("users")
-      .select("id, groupId, displayName")
-      .eq("id", newOwnerId)
+    const { data: membership, error: membershipErr } = await this.supabase
+      .from("group_members")
+      .select("id")
+      .eq("groupId", groupId)
+      .eq("userId", newOwnerId)
       .single();
 
-    if (newOwnerErr) {
-      console.error("Error fetching new owner:", newOwnerErr);
-      throw new ApiException(500, "Error validating new owner");
-    }
-
-    if (!newOwner) {
-      throw new ApiException(404, "New owner user not found");
-    }
-
-    if (newOwner.groupId !== groupId) {
+    if (membershipErr || !membership) {
       throw new ApiException(400, "New owner must be a member of the group");
     }
 
-    const { data, error } = await this.supabase
-      .from("groups")
-      .update({ ownerUserId: newOwnerId })
-      .eq("id", groupId)
-      .select("id, name, ownerUserId, createdAt")
-      .single();
+    // Update roles in group_members
+    await this.supabase
+      .from("group_members")
+      .update({ role: "member" })
+      .eq("groupId", groupId)
+      .eq("userId", currentOwnerId);
 
-    if (error) {
-      console.error("Error transferring ownership:", error);
-      throw new ApiException(500, "Error transferring ownership");
-    }
-
-    if (!data) {
-      throw new ApiException(500, "Failed to transfer ownership");
-    }
-
-    console.info(
-      `[Groups] Ownership of group ${groupId} transferred from ${currentOwnerId} to ${newOwnerId} at ${new Date().toISOString()}`,
-    );
+    await this.supabase
+      .from("group_members")
+      .update({ role: "owner" })
+      .eq("groupId", groupId)
+      .eq("userId", newOwnerId);
 
     return {
-      group: data,
+      group: {
+        id: group.id,
+        name: group.name,
+        ownerUserId: newOwnerId,
+        createdAt: new Date().toISOString(), // Fallback if missing
+      },
       previousOwner: { id: currentOwnerId },
-      newOwner: { id: newOwnerId, displayName: newOwner.displayName },
+      newOwner: { id: newOwnerId, displayName: "New Owner" },
     };
   }
 
@@ -322,30 +319,23 @@ export class GroupService {
       );
     }
 
-    const { data: user, error: userErr } = await this.supabase
-      .from("users")
-      .select("id, groupId, displayName")
-      .eq("id", userId)
+    const { data: membership, error: membershipErr } = await this.supabase
+      .from("group_members")
+      .select("id")
+      .eq("groupId", groupId)
+      .eq("userId", userId)
       .single();
 
-    if (userErr) {
-      console.error("Error fetching user: ", userErr);
-      throw new ApiException(500, "Error fetching the user");
-    }
-    if (!user) {
-      throw new ApiException(404, "User not found");
-    }
-
-    if (user.groupId !== groupId) {
+    if (membershipErr || !membership) {
       throw new ApiException(404, "User is not a member of this group");
     }
 
     if (userId === group.ownerUserId && isSelfRemoval) {
       const { data: otherMembers, error: membersErr } = await this.supabase
-        .from("users")
+        .from("group_members")
         .select("id")
         .eq("groupId", groupId)
-        .neq("id", userId);
+        .neq("userId", userId);
 
       if (membersErr) {
         console.error("Error checking other members: ", membersErr);
@@ -361,12 +351,14 @@ export class GroupService {
     }
 
     const { error: unlinkErr } = await this.supabase
-      .from("users")
-      .update({ groupId: null })
-      .eq("id", userId);
+      .from("group_members")
+      .delete()
+      .eq("groupId", groupId)
+      .eq("userId", userId);
+
     if (unlinkErr) {
-      console.error("Error unlinking user from group: ", unlinkErr);
-      throw new ApiException(500, "Error unlinking the user from the group");
+      console.error("Error removing user from group: ", unlinkErr);
+      throw new ApiException(500, "Error removing the user from the group");
     }
 
     console.info(
@@ -383,52 +375,55 @@ export class GroupService {
       };
     }
 
-    const created = await this.createPersonalGroupForUser(
-      userId,
-      user.displayName,
-    );
-    if (!created) {
+    const { data: userToRemove } = await this.supabase
+      .from("users")
+      .select("displayName")
+      .eq("id", userId)
+      .single();
+
+    const createdGroupName = `Grupo de ${userToRemove?.displayName ?? "Usuario"}`;
+    const createdGroup = await this.createGroup(userId, createdGroupName);
+    const membershipCreated = await this.create({
+        ownerUserId: userId,
+        name: createdGroupName
+    });
+
+    if (!membershipCreated) {
       throw new ApiException(
         500,
         "User was removed from the group but failed to create a personal group",
       );
     }
 
-    const { error: reassignErr } = await this.supabase
-      .from("users")
-      .update({ groupId: created.id })
-      .eq("id", userId);
-    if (reassignErr) {
-      console.error(
-        "Error assigning new personal group to user: ",
-        reassignErr,
-      );
-      throw new ApiException(500, "Error assigning new personal group to user");
-    }
-
     console.info(
-      `[Groups] Created personal group ${created.id} ("${created.name}") for user ${userId} and reassigned at ${new Date().toISOString()}`,
+      `[Groups] Created personal group ${createdGroup.id} ("${createdGroup.name}") for user ${userId} and reassigned at ${new Date().toISOString()}`,
     );
 
     return {
       removedFromGroupId: groupId,
       userId,
-      createdNewGroup: { id: created.id, name: created.name },
+      createdNewGroup: { id: createdGroup.id, name: createdGroup.name },
     };
   }
 
-  private async createPersonalGroupForUser(
-    userId: string,
-    displayName?: string,
-  ): Promise<{ id: string; name: string } | null> {
-    const name = `Grupo de ${displayName ?? "Usuario"}`;
-    try {
-      const data = await this.createGroup(userId, name);
-      return data;
-    } catch (e) {
-      console.error("Error creating personal group: ", e);
-      return null;
+  async listUserGroups(userId: string) {
+    const { data, error } = await this.supabase
+      .from("group_members")
+      .select("role, joinedAt, groups (id, name, ownerUserId)")
+      .eq("userId", userId);
+
+    if (error) {
+      console.error("Error listing user groups:", error);
+      throw new ApiException(500, "Error listing user groups");
     }
+
+    return (data ?? []).map(m => ({
+      id: m.groups?.id,
+      name: m.groups?.name,
+      role: m.role,
+      joinedAt: m.joinedAt,
+      ownerUserId: m.groups?.ownerUserId,
+    }));
   }
 
   private async createGroup(
@@ -455,27 +450,33 @@ export class GroupService {
     }
 
     try {
-      const { data: users, error } = await this.supabase
+      const { data: currentGroups } = await this.supabase
+        .from("group_members")
+        .select("groupId")
+        .eq("userId", currentUserId);
+
+      const { data: targetGroups } = await this.supabase
+        .from("group_members")
+        .select("groupId")
+        .eq("userId", targetUserId);
+
+      if (!currentGroups || !targetGroups) return false;
+
+      const currentIds = new Set(currentGroups.map(g => g.groupId));
+      const sharedGroups = targetGroups.filter(g => currentIds.has(g.groupId));
+
+      if (sharedGroups.length === 0) {
+        return false;
+      }
+
+      // Check if current user is an elder (they are restricted)
+      const { data: currentUser } = await this.supabase
         .from("users")
-        .select("id, groupId, elder")
-        .in("id", [currentUserId, targetUserId]);
+        .select("elder")
+        .eq("id", currentUserId)
+        .single();
 
-      if (error || !users || users.length !== 2) {
-        return false;
-      }
-
-      const currentUser = users.find(u => u.id === currentUserId);
-      const targetUser = users.find(u => u.id === targetUserId);
-
-      if (!currentUser || !targetUser) {
-        return false;
-      }
-
-      if (!currentUser.groupId || currentUser.groupId !== targetUser.groupId) {
-        return false;
-      }
-
-      if (currentUser.elder === true) {
+      if (currentUser?.elder === true) {
         return false;
       }
 

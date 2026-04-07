@@ -37,6 +37,8 @@ import {
   usePostShopEquip,
   usePostShopUnequip,
 } from "@elepad/api-client";
+import { useGroup } from "@/context/GroupContext";
+import { Menu } from "react-native-paper";
 
 export default function ConfiguracionScreen() {
   const router = useRouter();
@@ -59,6 +61,9 @@ export default function ConfiguracionScreen() {
     userElepadLoading,
     updateUserTimezone,
   } = useAuth();
+  
+  const { selectedGroupId, setSelectedGroupId, availableGroups, isLoading: isLoadingGroups } = useGroup();
+  const [groupMenuVisible, setGroupMenuVisible] = useState(false);
   // shop hooks for frames
   const inventoryResponse = useGetShopInventory();
   const inventoryData = normalizeData(inventoryResponse.data) as
@@ -130,27 +135,9 @@ export default function ConfiguracionScreen() {
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
   const activeFrameUrl = userElepad?.activeFrameUrl;
-  const groupId = userElepad?.groupId;
 
-  // Fetch optional group info for the family name
-  const membersQuery = useGetGroupsGroupIdMembers(groupId ?? "", {
-    query: { enabled: !!groupId },
-  });
-
-  // Normaliza la respuesta del hook (envuelta en {data} o directa)
-  const groupInfo = (() => {
-    const resp = membersQuery.data as unknown; // Quick cast since type is internal
-    if (!resp) return undefined;
-
-    type GroupResponse = { data?: { name: string } } | { name: string };
-    const checkedResp = resp as GroupResponse;
-
-    if ('name' in checkedResp) {
-      return checkedResp;
-    }
-    return checkedResp.data;
-  })();
-  const familyName = groupInfo?.name || "Sin familia";
+  const groupInfo = availableGroups.find(g => g.id === selectedGroupId);
+  const familyName = groupInfo?.name || "Sin grupo";
 
   const [editNameModalVisible, setEditNameModalVisible] = useState(false);
   const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
@@ -351,28 +338,73 @@ export default function ConfiguracionScreen() {
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
-              title="DateGroup"
-              left={(props) => <List.Icon {...props} icon="account-group" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              title="Cerrar sesión"
+              left={(props) => <List.Icon {...props} icon="logout" color={COLORS.error} />}
               style={{ minHeight: 60, justifyContent: "center" }}
-              onPress={() => {
-                router.navigate("/group");
-              }}
+              onPress={signOut}
             />
           </List.Section>
         </Card>
 
-        <View style={STYLES.container}>
-          <Button
-            mode="contained"
-            icon="logout"
-            onPress={signOut}
-            contentStyle={STYLES.buttonContent}
-            style={STYLES.buttonPrimary}
-          >
-            Cerrar sesión
-          </Button>
-        </View>
+        <Text style={[STYLES.sectionTitle, { marginTop: 24, marginBottom: 12, paddingHorizontal: 4 }]}>
+          Mis Grupos
+        </Text>
+        
+        <Card style={STYLES.menuCard}>
+          <List.Section>
+            <View style={{ padding: 8 }}>
+              <Menu
+                visible={groupMenuVisible}
+                onDismiss={() => setGroupMenuVisible(false)}
+                anchor={
+                  <TouchableOpacity 
+                    onPress={() => setGroupMenuVisible(true)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: 12,
+                      backgroundColor: COLORS.backgroundSecondary,
+                      borderRadius: 12,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                      <List.Icon icon="account-group" color={COLORS.primary} />
+                      <View>
+                        <Text style={{ fontWeight: 'bold' }}>{familyName}</Text>
+                        <Text style={{ fontSize: 12, color: COLORS.textSecondary }}>Grupo Activo</Text>
+                      </View>
+                    </View>
+                    <List.Icon icon="chevron-down" />
+                  </TouchableOpacity>
+                }
+                contentStyle={{ backgroundColor: COLORS.white, borderRadius: 12 }}
+              >
+                {availableGroups.map((group) => (
+                  <Menu.Item 
+                    key={group.id}
+                    onPress={() => {
+                      setSelectedGroupId(group.id);
+                      setGroupMenuVisible(false);
+                    }} 
+                    title={group.name}
+                    leadingIcon={group.id === selectedGroupId ? "check" : "account-group-outline"}
+                  />
+                ))}
+                <Divider />
+                <Menu.Item 
+                  onPress={() => {
+                    setGroupMenuVisible(false);
+                    router.push("/group");
+                  }} 
+                  title="Gestionar Grupos" 
+                  leadingIcon="cog"
+                />
+              </Menu>
+            </View>
+          </List.Section>
+        </Card>
+
 
         <View
           style={{

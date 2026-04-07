@@ -26,6 +26,7 @@ import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
 import { useAuth } from "@/hooks/useAuth";
+import { useGroup } from "@/context/GroupContext";
 import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 
 // Register locale for paper-dates
@@ -192,6 +193,7 @@ export default function ActivityForm({
   preSelectedElderId,
 }: Props) {
   const { userElepad } = useAuth();
+  const { selectedGroupId } = useGroup();
   const isElder = userElepad?.elder ?? false;
 
   const [title, setTitle] = useState(initial?.title || "");
@@ -293,7 +295,7 @@ export default function ActivityForm({
           endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
           completed: initial?.completed ?? false,
           frequencyId: frequencyId || null,
-          groupId: (initial && 'groupId' in initial ? initial.groupId : null) || userElepad?.groupId || "",
+          groupId: (initial && 'groupId' in initial ? initial.groupId : null) || selectedGroupId || "",
         }),
         timeoutPromise,
       ]);
