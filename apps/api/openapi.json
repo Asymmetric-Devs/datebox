@@ -102,7 +102,7 @@
         },
         "additionalProperties": false
       },
-      "NewFamilyGroup": {
+      "NewGroup": {
         "type": "object",
         "properties": {
           "name": {
@@ -136,7 +136,7 @@
           "invitationCode"
         ]
       },
-      "UpdateFamilyGroup": {
+      "UpdateGroup": {
         "type": "object",
         "properties": {
           "name": {
@@ -162,7 +162,7 @@
         ],
         "additionalProperties": false
       },
-      "Activity": {
+      "DateEvent": {
         "type": "object",
         "properties": {
           "id": {
@@ -193,7 +193,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "assignedTo": {
+          "groupId": {
             "type": "string",
             "nullable": true,
             "format": "uuid"
@@ -218,12 +218,12 @@
           "startsAt",
           "completed",
           "createdBy",
-          "assignedTo",
+          "groupId",
           "createdAt",
           "updatedAt"
         ]
       },
-      "NewActivity": {
+      "NewDateEvent": {
         "type": "object",
         "properties": {
           "title": {
@@ -247,7 +247,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "assignedTo": {
+          "groupId": {
             "type": "string",
             "format": "uuid"
           },
@@ -261,10 +261,10 @@
           "title",
           "startsAt",
           "createdBy",
-          "assignedTo"
+          "groupId"
         ]
       },
-      "UpdateActivity": {
+      "UpdateDateEvent": {
         "type": "object",
         "properties": {
           "title": {
@@ -283,7 +283,7 @@
           "completed": {
             "type": "boolean"
           },
-          "assignedTo": {
+          "groupId": {
             "type": "string",
             "format": "uuid"
           },
@@ -1984,17 +1984,17 @@
         }
       }
     },
-    "/familyGroup/create": {
+    "/groups/create": {
       "post": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewFamilyGroup"
+                "$ref": "#/components/schemas/NewGroup"
               }
             }
           }
@@ -2026,10 +2026,10 @@
         }
       }
     },
-    "/familyGroup/link": {
+    "/groups/link": {
       "post": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
         "requestBody": {
           "required": true,
@@ -2078,10 +2078,10 @@
         }
       }
     },
-    "/familyGroup/{idGroup}/invite": {
+    "/groups/{groupId}/invite": {
       "get": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
         "parameters": [
           {
@@ -2090,7 +2090,7 @@
               "format": "uuid"
             },
             "required": true,
-            "name": "idGroup",
+            "name": "groupId",
             "in": "path"
           }
         ],
@@ -2131,10 +2131,10 @@
         }
       }
     },
-    "/familyGroup/{idGroup}/members": {
+    "/groups/{groupId}/members": {
       "get": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
         "parameters": [
           {
@@ -2143,7 +2143,7 @@
               "format": "uuid"
             },
             "required": true,
-            "name": "idGroup",
+            "name": "groupId",
             "in": "path"
           }
         ],
@@ -2264,12 +2264,12 @@
         }
       }
     },
-    "/familyGroup/{idGroup}/member/{idUser}": {
+    "/groups/{groupId}/member/{idUser}": {
       "delete": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
-        "operationId": "removeUserFromFamilyGroup",
+        "operationId": "removeUserFromGroup",
         "parameters": [
           {
             "schema": {
@@ -2277,7 +2277,7 @@
               "format": "uuid"
             },
             "required": true,
-            "name": "idGroup",
+            "name": "groupId",
             "in": "path"
           },
           {
@@ -2356,10 +2356,10 @@
         }
       }
     },
-    "/familyGroup/{idGroup}": {
+    "/groups/{groupId}": {
       "patch": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
         "parameters": [
           {
@@ -2368,7 +2368,7 @@
               "format": "uuid"
             },
             "required": true,
-            "name": "idGroup",
+            "name": "groupId",
             "in": "path"
           }
         ],
@@ -2377,7 +2377,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateFamilyGroup"
+                "$ref": "#/components/schemas/UpdateGroup"
               }
             }
           }
@@ -2444,12 +2444,12 @@
         }
       }
     },
-    "/familyGroup/{idGroup}/transfer-ownership": {
+    "/groups/{groupId}/transfer-ownership": {
       "put": {
         "tags": [
-          "familyGroups"
+          "groups"
         ],
-        "operationId": "transferFamilyGroupOwnership",
+        "operationId": "transferGroupOwnership",
         "parameters": [
           {
             "schema": {
@@ -2457,7 +2457,7 @@
               "format": "uuid"
             },
             "required": true,
-            "name": "idGroup",
+            "name": "groupId",
             "in": "path"
           }
         ],
@@ -2595,10 +2595,10 @@
         }
       }
     },
-    "/activities/{id}": {
+    "/dates/{id}": {
       "get": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "parameters": [
           {
@@ -2613,17 +2613,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Actividad",
+            "description": "Cita",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Activity"
+                  "$ref": "#/components/schemas/DateEvent"
                 }
               }
             }
           },
           "404": {
-            "description": "Actividad no encontrada",
+            "description": "Cita no encontrada",
             "content": {
               "application/json": {
                 "schema": {
@@ -2646,7 +2646,7 @@
       },
       "patch": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "parameters": [
           {
@@ -2664,18 +2664,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateActivity"
+                "$ref": "#/components/schemas/UpdateDateEvent"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Actividad actualizada",
+            "description": "Cita actualizada",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Activity"
+                  "$ref": "#/components/schemas/DateEvent"
                 }
               }
             }
@@ -2691,7 +2691,7 @@
             }
           },
           "404": {
-            "description": "Actividad no encontrada",
+            "description": "Cita no encontrada",
             "content": {
               "application/json": {
                 "schema": {
@@ -2714,7 +2714,7 @@
       },
       "delete": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "parameters": [
           {
@@ -2729,10 +2729,10 @@
         ],
         "responses": {
           "204": {
-            "description": "Actividad eliminada"
+            "description": "Cita eliminada"
           },
           "404": {
-            "description": "Actividad no encontrado",
+            "description": "Cita no encontrada",
             "content": {
               "application/json": {
                 "schema": {
@@ -2754,10 +2754,10 @@
         }
       }
     },
-    "/activities/familyCode/{idFamilyGroup}": {
+    "/dates/group/{groupId}": {
       "get": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "parameters": [
           {
@@ -2766,26 +2766,26 @@
               "format": "uuid"
             },
             "required": true,
-            "name": "idFamilyGroup",
+            "name": "groupId",
             "in": "path"
           }
         ],
         "responses": {
           "200": {
-            "description": "Actividad",
+            "description": "Citas",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Activity"
+                    "$ref": "#/components/schemas/DateEvent"
                   }
                 }
               }
             }
           },
           "404": {
-            "description": "Actividad no encontrada",
+            "description": "Citas no encontradas",
             "content": {
               "application/json": {
                 "schema": {
@@ -2807,28 +2807,28 @@
         }
       }
     },
-    "/activities": {
+    "/dates": {
       "post": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewActivity"
+                "$ref": "#/components/schemas/NewDateEvent"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Actividad creada",
+            "description": "Cita creada",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Activity"
+                  "$ref": "#/components/schemas/DateEvent"
                 }
               }
             }
@@ -2856,10 +2856,10 @@
         }
       }
     },
-    "/activities/google-calendar/enable": {
+    "/dates/google-calendar/enable": {
       "post": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "requestBody": {
           "content": {
@@ -2917,10 +2917,10 @@
         }
       }
     },
-    "/activities/google-calendar/disable": {
+    "/dates/google-calendar/disable": {
       "post": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "responses": {
           "200": {
@@ -2964,10 +2964,10 @@
         }
       }
     },
-    "/activities/google-calendar/status": {
+    "/dates/google-calendar/status": {
       "get": {
         "tags": [
-          "activities"
+          "dates"
         ],
         "responses": {
           "200": {
@@ -4506,10 +4506,10 @@
         }
       }
     },
-    "/activity-completions": {
+    "/date-completions": {
       "get": {
         "tags": [
-          "ActivityCompletions"
+          "DateCompletions"
         ],
         "summary": "Obtener completaciones del usuario",
         "parameters": [
@@ -4537,7 +4537,7 @@
               "format": "uuid"
             },
             "required": false,
-            "name": "activityId",
+            "name": "dateId",
             "in": "query"
           }
         ],
@@ -4558,7 +4558,7 @@
                             "type": "string",
                             "format": "uuid"
                           },
-                          "activityId": {
+                          "dateId": {
                             "type": "string",
                             "format": "uuid"
                           },
@@ -4580,7 +4580,7 @@
                         },
                         "required": [
                           "id",
-                          "activityId",
+                          "dateId",
                           "userId",
                           "completedDate",
                           "createdAt",
@@ -4617,10 +4617,10 @@
         }
       }
     },
-    "/activity-completions/toggle": {
+    "/date-completions/toggle": {
       "post": {
         "tags": [
-          "ActivityCompletions"
+          "DateCompletions"
         ],
         "summary": "Toggle completación de actividad para un día",
         "requestBody": {
@@ -4629,7 +4629,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "activityId": {
+                  "dateId": {
                     "type": "string",
                     "format": "uuid"
                   },
@@ -4639,7 +4639,7 @@
                   }
                 },
                 "required": [
-                  "activityId",
+                  "dateId",
                   "completedDate"
                 ]
               }
@@ -4668,7 +4668,7 @@
                               "type": "string",
                               "format": "uuid"
                             },
-                            "activityId": {
+                            "dateId": {
                               "type": "string",
                               "format": "uuid"
                             },
@@ -4690,7 +4690,7 @@
                           },
                           "required": [
                             "id",
-                            "activityId",
+                            "dateId",
                             "userId",
                             "completedDate",
                             "createdAt",

@@ -1,19 +1,18 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ApiException } from "@/utils/api-error";
-import { NewFamilyGroup, AddUserWithCode } from "./schema";
+import { NewGroup, AddUserWithCode } from "./schema";
 import { Database } from "@/supabase-types";
 
-export class FamilyGroupService {
+export class GroupService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
-   * Create a Family Group for the new User.
+   * Create a Group for the new User.
    */
-  // TODO: Could be better if this gets triggered when the user verifies the email
-  async create(newGroup: NewFamilyGroup) {
+  async create(newGroup: NewGroup) {
     const created = await this.createGroup(
       newGroup.ownerUserId,
-      `Grupo Familiar de ${newGroup.name}`,
+      `Grupo de ${newGroup.name}`,
     );
 
     const userUpdate = await this.supabase
@@ -24,56 +23,51 @@ export class FamilyGroupService {
       .eq("id", newGroup.ownerUserId);
 
     if (userUpdate.error) {
-      console.error("Error creating the family group: ", userUpdate.error);
-      throw new ApiException(500, "Error creating the family group");
+      console.error("Error creating the group: ", userUpdate.error);
+      throw new ApiException(500, "Error creating the group");
     }
 
     return true;
   }
 
-  async createInvitation(idGroup: string) {
-    // Generates a random code of 6 characters (letters and numbers)
-    // Not sure if this is the best approach
+  async createInvitation(groupId: string) {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    // The code will expire in 10 minutes
     const expiresAt = new Date(Date.now() + 600 * 1000).toISOString();
 
     const { error } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .update({
         code: code,
         expiresAt: expiresAt,
       })
-      .eq("id", idGroup)
-      //.eq("ownerUserId", idOwner) // Only the owner should create an invitation?
+      .eq("id", groupId)
       .single();
 
     if (error) {
-      console.error("Error finding the family group: ", error);
-      throw new ApiException(500, "Error finding the family group");
+      console.error("Error finding the group: ", error);
+      throw new ApiException(500, "Error finding the group");
     }
 
     return code;
   }
 
-  async addUserToFamilyGroupWithCode(group: AddUserWithCode) {
+  async addUserToGroupWithCode(groupData: AddUserWithCode) {
     const dateNow = new Date();
 
     const { data, error } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .select("id, expiresAt")
-      .eq("code", group.invitationCode)
+      .eq("code", groupData.invitationCode)
       .single();
 
     if (error) {
-      console.error("Error finding the family group: ", error);
-      throw new ApiException(500, "Error finding the family group");
+      console.error("Error finding the group: ", error);
+      throw new ApiException(500, "Error finding the group");
     }
 
     if (!data) {
-      console.error("Couldn't find the family group");
-      throw new ApiException(404, "Family Group not found");
+      console.error("Couldn't find the group");
+      throw new ApiException(404, "Group not found");
     }
 
     const dateExpiresAt = new Date(data.expiresAt ?? dateNow);
@@ -88,23 +82,20 @@ export class FamilyGroupService {
       .update({
         groupId: data.id,
       })
-      .eq("id", group.userId);
+      .eq("id", groupData.userId);
 
     if (userUpdate.error) {
-      console.error("Error linking the user with the family group: ", error);
+      console.error("Error linking the user with the group: ", userUpdate.error);
       throw new ApiException(
         500,
-        "Error linking the user with the family group",
+        "Error linking the user with the group",
       );
     }
 
     return true;
   }
 
-  /**
-   * Get group info: name, owner and members list (id, displayName, avatarUrl).
-   */
-  async getMembers(idGroup: string): Promise<{
+  async getMembers(groupId: string): Promise<{
     name: string;
     owner: { id: string; displayName: string; avatarUrl: string | null; elder: boolean; activeFrameUrl: string | null };
     members: Array<{
@@ -115,33 +106,30 @@ export class FamilyGroupService {
       activeFrameUrl: string | null;
     }>;
   }> {
-    // Traer grupo (para obtener name y ownerUserId)
     const { data: group, error: groupErr } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .select("name, ownerUserId")
-      .eq("id", idGroup)
+      .eq("id", groupId)
       .single();
 
     if (groupErr || !group) {
-      console.error("Error fetching family group: ", groupErr);
+      console.error("Error fetching group: ", groupErr);
       throw new ApiException(404, "Group not found");
     }
 
-    // Traer miembros del grupo
     const { data: members, error: membersErr } = await this.supabase
       .from("users")
       .select("id, displayName, avatarUrl, elder")
-      .eq("groupId", idGroup);
+      .eq("groupId", groupId);
 
     if (membersErr) {
-      console.error("Error fetching family group members: ", membersErr);
-      throw new ApiException(500, "Error fetching family group members");
+      console.error("Error fetching group members: ", membersErr);
+      throw new ApiException(500, "Error fetching group members");
     }
 
     const membersList = members ?? [];
     const memberIds = membersList.map((m) => m.id);
 
-    // Fetch equipped frames for these members
     let framesMap: Record<string, string> = {};
     if (memberIds.length > 0) {
       const { data: frames } = await this.supabase
@@ -149,16 +137,11 @@ export class FamilyGroupService {
         .select("user_id, item:shop_items(type, asset_url)")
         .in("user_id", memberIds)
         .eq("equipped", true)
-        .eq("item.type", "frame"); // Ensure we only get frames
+        .eq("item.type", "frame");
 
       if (frames) {
         frames.forEach((f) => {
-          // Cast item to expected shape since Supabase join types can be complex
-          const item = f.item as unknown as {
-            type: string;
-            asset_url: string | null;
-          } | null;
-
+          const item = f.item as unknown as { type: string; asset_url: string | null } | null;
           if (item?.asset_url) {
             framesMap[f.user_id] = item.asset_url;
           }
@@ -171,18 +154,14 @@ export class FamilyGroupService {
         activeFrameUrl: framesMap[m.id] || null
     });
     
-    // Enrich members with frame URL
     const enrichedMembers = membersList.map(enrichMember);
-
     const filteredMembers = enrichedMembers.filter(
       (u) => u.id !== group.ownerUserId,
     );
 
-    // Obtener el owner
     let ownerToReturn = membersList.find((u) => u.id === group.ownerUserId);
     
     if (!ownerToReturn) {
-      // Si el owner no estaba en la lista de members (inconsistencia), buscarlo
       const { data: ownerUser, error: ownerErr } = await this.supabase
         .from("users")
         .select("id, displayName, avatarUrl, elder")
@@ -196,15 +175,7 @@ export class FamilyGroupService {
       ownerToReturn = ownerUser;
     }
 
-    // Enrich owner with frame
     if (ownerToReturn) {
-      // Check if we need to fetch frame for owner separate if wasn't in members list
-      // But above we fetched frames for memberIds which includes everyone in group usually.
-      // If owner wasn't in 'members' query (rare), we might miss their frame.
-      // Let's assume owner is usually in groupId. If not (inconsistencies), we skip frame for now.
-      
-      // But wait! If we fetched extra owner, we should check frame for them too?
-      // For simplicity, let's just apply framesMap
       const ownerFrame = framesMap[ownerToReturn.id] || null;
       
       return {
@@ -220,21 +191,21 @@ export class FamilyGroupService {
     throw new ApiException(500, "Unexpected error resolving owner");
   }
 
-  async updateFamilyGroupName(groupId: string, newName: string) {
+  async updateGroupName(groupId: string, newName: string) {
     const { data, error } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .update({ name: newName })
       .eq("id", groupId)
       .select()
       .single();
 
     if (error) {
-      console.error("Error updating family group name:", error);
-      throw new ApiException(500, "Error updating family group name");
+      console.error("Error updating group name:", error);
+      throw new ApiException(500, "Error updating group name");
     }
 
     if (!data) {
-      throw new ApiException(404, "Family group not found");
+      throw new ApiException(404, "Group not found");
     }
 
     return data;
@@ -245,23 +216,21 @@ export class FamilyGroupService {
     currentOwnerId: string,
     newOwnerId: string,
   ) {
-    // 1) Validate that the group exists and get current owner info
     const { data: group, error: groupErr } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .select("id, name, ownerUserId")
       .eq("id", groupId)
       .single();
 
     if (groupErr) {
-      console.error("Error fetching family group:", groupErr);
-      throw new ApiException(500, "Error fetching the family group");
+      console.error("Error fetching group:", groupErr);
+      throw new ApiException(500, "Error fetching the group");
     }
 
     if (!group) {
-      throw new ApiException(404, "Family group not found");
+      throw new ApiException(404, "Group not found");
     }
 
-    // 2) Validate that the current user is the owner
     if (group.ownerUserId !== currentOwnerId) {
       throw new ApiException(
         403,
@@ -269,12 +238,10 @@ export class FamilyGroupService {
       );
     }
 
-    // 3) Validate that it's not the same owner
     if (currentOwnerId === newOwnerId) {
       throw new ApiException(400, "Cannot transfer ownership to the same user");
     }
 
-    // 4) Validate that the new owner exists and is a member of the group
     const { data: newOwner, error: newOwnerErr } = await this.supabase
       .from("users")
       .select("id, groupId, displayName")
@@ -294,9 +261,8 @@ export class FamilyGroupService {
       throw new ApiException(400, "New owner must be a member of the group");
     }
 
-    // 5) Transfer ownership
     const { data, error } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .update({ ownerUserId: newOwnerId })
       .eq("id", groupId)
       .select("id, name, ownerUserId, createdAt")
@@ -312,7 +278,7 @@ export class FamilyGroupService {
     }
 
     console.info(
-      `[FamilyGroups] Ownership of group ${groupId} transferred from ${currentOwnerId} to ${newOwnerId} at ${new Date().toISOString()}`,
+      `[Groups] Ownership of group ${groupId} transferred from ${currentOwnerId} to ${newOwnerId} at ${new Date().toISOString()}`,
     );
 
     return {
@@ -322,7 +288,7 @@ export class FamilyGroupService {
     };
   }
 
-  async removeUserFromFamilyGroup(
+  async removeUserFromGroup(
     groupId: string,
     userId: string,
     adminUserId: string,
@@ -332,22 +298,20 @@ export class FamilyGroupService {
     userId: string;
     createdNewGroup?: { id: string; name: string };
   } | null> {
-    // 1) Validate that the group exists and get owner info (avoid assigning an invalid groupId)
     const { data: group, error: groupErr } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .select("id, ownerUserId")
       .eq("id", groupId)
       .single();
 
     if (groupErr) {
       console.error("Error fetching group: ", groupErr);
-      throw new ApiException(500, "Error fetching the family group");
+      throw new ApiException(500, "Error fetching the group");
     }
     if (!group) {
-      throw new ApiException(404, "Family Group not found");
+      throw new ApiException(404, "Group not found");
     }
 
-    // 2) Authorization check: Owner can remove anyone, members can only remove themselves
     const isOwner = group.ownerUserId === adminUserId;
     const isSelfRemoval = userId === adminUserId;
 
@@ -358,7 +322,6 @@ export class FamilyGroupService {
       );
     }
 
-    // 3) Validate that the user exists
     const { data: user, error: userErr } = await this.supabase
       .from("users")
       .select("id, groupId, displayName")
@@ -373,14 +336,11 @@ export class FamilyGroupService {
       throw new ApiException(404, "User not found");
     }
 
-    // 4) If the user is not in that group, return a consistent 404
     if (user.groupId !== groupId) {
       throw new ApiException(404, "User is not a member of this group");
     }
 
-    // 5) Prevent the owner from removing themselves if there are other members in the group
     if (userId === group.ownerUserId && isSelfRemoval) {
-      // Check if there are other members in the group
       const { data: otherMembers, error: membersErr } = await this.supabase
         .from("users")
         .select("id")
@@ -392,7 +352,6 @@ export class FamilyGroupService {
         throw new ApiException(500, "Error checking group members");
       }
 
-      // If there are other members, the owner cannot leave
       if (otherMembers && otherMembers.length > 0) {
         throw new ApiException(
           400,
@@ -401,7 +360,6 @@ export class FamilyGroupService {
       }
     }
 
-    // 6) Unlink the user from the group (set groupId = null)
     const { error: unlinkErr } = await this.supabase
       .from("users")
       .update({ groupId: null })
@@ -412,13 +370,12 @@ export class FamilyGroupService {
     }
 
     console.info(
-      `[FamilyGroups] User ${userId} removed from group ${groupId} at ${new Date().toISOString()}`,
+      `[Groups] User ${userId} removed from group ${groupId} at ${new Date().toISOString()}`,
     );
 
-    // 7) Solo crear un nuevo grupo si se solicita
     if (!createNewGroup) {
       console.info(
-        `[FamilyGroups] User ${userId} left group without creating a new one at ${new Date().toISOString()}`,
+        `[Groups] User ${userId} left group without creating a new one at ${new Date().toISOString()}`,
       );
       return {
         removedFromGroupId: groupId,
@@ -426,8 +383,6 @@ export class FamilyGroupService {
       };
     }
 
-    // 8) Validate if the user has another group assigned
-    // Given the current schema (users.groupId), if it's null, they have no group.
     const created = await this.createPersonalGroupForUser(
       userId,
       user.displayName,
@@ -439,7 +394,6 @@ export class FamilyGroupService {
       );
     }
 
-    // Assign the new groupId to the user
     const { error: reassignErr } = await this.supabase
       .from("users")
       .update({ groupId: created.id })
@@ -453,7 +407,7 @@ export class FamilyGroupService {
     }
 
     console.info(
-      `[FamilyGroups] Created personal group ${created.id} ("${created.name}") for user ${userId} and reassigned at ${new Date().toISOString()}`,
+      `[Groups] Created personal group ${created.id} ("${created.name}") for user ${userId} and reassigned at ${new Date().toISOString()}`,
     );
 
     return {
@@ -463,59 +417,44 @@ export class FamilyGroupService {
     };
   }
 
-  /**
-   * Creates a personal group in familyGroups and returns { id, name }.
-   */
   private async createPersonalGroupForUser(
     userId: string,
     displayName?: string,
   ): Promise<{ id: string; name: string } | null> {
-    const name = `Grupo Familiar de ${displayName ?? "Usuario"}`;
+    const name = `Grupo de ${displayName ?? "Usuario"}`;
     try {
       const data = await this.createGroup(userId, name);
       return data;
     } catch (e) {
-      console.error("Error creating personal family group: ", e);
+      console.error("Error creating personal group: ", e);
       return null;
     }
   }
 
-  /**
-   * Creates a group in familyGroups and returns its id and name.
-   * Reusable internal method with no side effects on users.
-   */
   private async createGroup(
     ownerUserId: string,
     name: string,
   ): Promise<{ id: string; name: string }> {
     const { data, error } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .insert({ ownerUserId, name })
       .select("id, name")
       .single();
 
     if (error || !data) {
-      console.error("Error creating the family group: ", error);
-      throw new ApiException(500, "Error creating the family group");
+      console.error("Error creating the group: ", error);
+      throw new ApiException(500, "Error creating the group");
     }
 
     return data;
   }
 
-  /**
-   * Verifica si un usuario puede acceder a los datos de otro usuario
-   * Esto es true si:
-   * 1. Es el mismo usuario
-   * 2. Ambos están en el mismo grupo familiar Y el usuario actual NO es elder
-   */
   async canAccessUserData(currentUserId: string, targetUserId: string): Promise<boolean> {
-    // Si es el mismo usuario, siempre puede acceder
     if (currentUserId === targetUserId) {
       return true;
     }
 
     try {
-      // Obtener información de ambos usuarios
       const { data: users, error } = await this.supabase
         .from("users")
         .select("id, groupId, elder")
@@ -532,13 +471,10 @@ export class FamilyGroupService {
         return false;
       }
 
-      // Deben estar en el mismo grupo familiar
       if (!currentUser.groupId || currentUser.groupId !== targetUser.groupId) {
         return false;
       }
 
-      // El usuario actual NO debe ser elder (los elders no pueden ver datos de otros)
-      // Solo los helpers/supervisores pueden ver datos de los elders
       if (currentUser.elder === true) {
         return false;
       }

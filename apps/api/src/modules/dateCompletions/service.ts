@@ -1,12 +1,12 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase-types";
 import type {
-  ActivityCompletion,
-  NewActivityCompletion,
-  GetActivityCompletionsQuery,
+  DateCompletion,
+  NewDateCompletion,
+  GetDateCompletionsQuery,
 } from "./schema";
 
-export class ActivityCompletionService {
+export class DateCompletionService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
@@ -14,10 +14,10 @@ export class ActivityCompletionService {
    */
   async getCompletions(
     userId: string,
-    query: GetActivityCompletionsQuery,
-  ): Promise<ActivityCompletion[]> {
+    query: GetDateCompletionsQuery,
+  ): Promise<DateCompletion[]> {
     let queryBuilder = this.supabase
-      .from("activity_completions")
+      .from("date_completions")
       .select("*")
       .eq("userId", userId);
 
@@ -29,8 +29,8 @@ export class ActivityCompletionService {
       queryBuilder = queryBuilder.lte("completedDate", query.endDate);
     }
 
-    if (query.activityId) {
-      queryBuilder = queryBuilder.eq("activityId", query.activityId);
+    if (query.dateId) {
+      queryBuilder = queryBuilder.eq("dateId", query.dateId);
     }
 
     const { data, error } = await queryBuilder.order("completedDate", {
@@ -41,7 +41,7 @@ export class ActivityCompletionService {
 
     return (data || []).map((item) => ({
       id: item.id,
-      activityId: item.activityId,
+      dateId: item.dateId,
       userId: item.userId,
       completedDate: item.completedDate,
       createdAt: item.createdAt,
@@ -54,13 +54,13 @@ export class ActivityCompletionService {
    */
   async toggleCompletion(
     userId: string,
-    data: NewActivityCompletion,
-  ): Promise<{ completed: boolean; completion: ActivityCompletion | null }> {
+    data: NewDateCompletion,
+  ): Promise<{ completed: boolean; completion: DateCompletion | null }> {
     // Primero verificar si ya existe
     const { data: existing, error: findError } = await this.supabase
-      .from("activity_completions")
+      .from("date_completions")
       .select("*")
-      .eq("activityId", data.activityId)
+      .eq("dateId", data.dateId)
       .eq("userId", userId)
       .eq("completedDate", data.completedDate)
       .maybeSingle();
@@ -70,7 +70,7 @@ export class ActivityCompletionService {
     // Si existe, eliminar (toggle off)
     if (existing) {
       const { error: deleteError } = await this.supabase
-        .from("activity_completions")
+        .from("date_completions")
         .delete()
         .eq("id", existing.id);
 
@@ -81,9 +81,9 @@ export class ActivityCompletionService {
 
     // Si no existe, crear (toggle on)
     const { data: newCompletion, error: insertError } = await this.supabase
-      .from("activity_completions")
+      .from("date_completions")
       .insert({
-        activityId: data.activityId,
+        dateId: data.dateId,
         userId: userId,
         completedDate: data.completedDate,
       })
@@ -96,7 +96,7 @@ export class ActivityCompletionService {
       completed: true,
       completion: {
         id: newCompletion.id,
-        activityId: newCompletion.activityId,
+        dateId: newCompletion.dateId,
         userId: newCompletion.userId,
         completedDate: newCompletion.completedDate,
         createdAt: newCompletion.createdAt,
@@ -110,13 +110,13 @@ export class ActivityCompletionService {
    */
   async isCompleted(
     userId: string,
-    activityId: string,
+    dateId: string,
     completedDate: string,
   ): Promise<boolean> {
     const { data, error } = await this.supabase
-      .from("activity_completions")
+      .from("date_completions")
       .select("id")
-      .eq("activityId", activityId)
+      .eq("dateId", dateId)
       .eq("userId", userId)
       .eq("completedDate", completedDate)
       .maybeSingle();
@@ -129,11 +129,11 @@ export class ActivityCompletionService {
   /**
    * Eliminar todas las completaciones de una actividad
    */
-  async deleteByActivityId(activityId: string): Promise<void> {
+  async deleteByActivityId(dateId: string): Promise<void> {
     const { error } = await this.supabase
-      .from("activity_completions")
+      .from("date_completions")
       .delete()
-      .eq("activityId", activityId);
+      .eq("dateId", dateId);
 
     if (error) throw error;
   }

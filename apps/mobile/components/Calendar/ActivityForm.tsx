@@ -19,7 +19,7 @@ import {
   registerTranslation,
   es,
 } from "react-native-paper-dates";
-import type { Activity } from "@elepad/api-client";
+import type { DateEvent } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
@@ -49,8 +49,8 @@ type FamilyMember = {
 type Props = {
   visible: boolean;
   onClose: () => void;
-  onSave: (payload: Partial<Activity>) => Promise<void>;
-  initial?: Partial<Activity> | null;
+  onSave: (payload: Partial<DateEvent>) => Promise<void>;
+  initial?: Partial<DateEvent> | null;
   familyMembers?: FamilyMember[];
   currentUserId?: string;
   preSelectedElderId?: string | null;
@@ -197,9 +197,6 @@ export default function ActivityForm({
 
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
-  const [assignedTo, setAssignedTo] = useState<string | null>(
-    initial?.assignedTo || null,
-  );
   const [startsAtDate, setStartsAtDate] = useState<Date>(
     initial?.startsAt ? new Date(initial.startsAt) : new Date(),
   );
@@ -246,17 +243,6 @@ export default function ActivityForm({
       setEndsAtDate(initial?.endsAt ? new Date(initial.endsAt) : undefined);
       setFrequencyId(initial?.frequencyId || undefined);
 
-      // Si es un elder, assignedTo siempre es él mismo
-      // Si es familiar y está editando, mantener el assignedTo existente
-      // Si es familiar y está creando nueva actividad:
-      //   - Si hay un elder pre-seleccionado desde el filtro, usarlo
-      //   - Si no, requiere seleccionar destinatario manualmente
-      if (isElder) {
-        setAssignedTo(currentUserId || null);
-      } else {
-        setAssignedTo(initial?.assignedTo || preSelectedElderId || null);
-      }
-
       setError(null);
     }
   }, [visible, initial, isElder, currentUserId, preSelectedElderId]);
@@ -292,15 +278,7 @@ export default function ActivityForm({
       return;
     }
 
-    // Validar que se haya seleccionado un destinatario
-    if (!assignedTo) {
-      setError(
-        isElder
-          ? "Error: No se pudo determinar el destinatario."
-          : "Debes seleccionar un destinatario para la actividad.",
-      );
-      return;
-    }
+
 
     setSaving(true);
     try {
@@ -320,7 +298,7 @@ export default function ActivityForm({
           endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
           completed: initial?.completed ?? false,
           frequencyId: frequencyId || null,
-          assignedTo: assignedTo,
+          groupId: (initial as any)?.groupId || userElepad?.groupId || "",
         }),
         timeoutPromise,
       ]);
@@ -384,32 +362,7 @@ export default function ActivityForm({
                     autoFocus={!initial || !initial.id}
                   />
 
-                  {/* Selector de destinatario - solo visible para familiares (no elders) */}
-                  {!isElder && elders.length > 0 && (
-                    <View style={styles.destinatarioWrapper}>
-                      <Text style={styles.destinatarioLabel}>
-                        Para (destinatario)
-                      </Text>
-                      <DropdownSelect
-                        label="Para (destinatario)"
-                        value={assignedTo || ""}
-                        options={elders.map((elder) => ({
-                          key: elder.id,
-                          label: elder.displayName,
-                          avatarUrl: elder.avatarUrl || null,
-                          frameUrl: elder.activeFrameUrl || null,
-                        }))}
-                        onSelect={(value) => setAssignedTo(value)}
-                        placeholder="Seleccionar adulto mayor"
-                        showLabel={false}
-                        buttonStyle={{
-                          backgroundColor: "transparent",
-                          borderColor: "transparent",
-                          borderRadius: 0,
-                        }}
-                      />
-                    </View>
-                  )}
+
 
                   <View style={styles.inputWrapper}>
                     <MentionInput
@@ -544,8 +497,7 @@ export default function ActivityForm({
                       disabled={
                         saving ||
                         !title.trim() ||
-                        !startsAtDate ||
-                        (!isElder && !assignedTo)
+                        !startsAtDate
                       }
                       loading={saving}
                     />

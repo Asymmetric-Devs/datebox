@@ -24,7 +24,7 @@ import {
   usePostShopBuy,
   useGetShopInventory,
   usePostShopEquip,
-  useGetFamilyGroupIdGroupMembers,
+  useGetGroupsGroupIdMembers,
   useGetShopItemsItemIdOwnership,
 } from "@elepad/api-client";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
@@ -83,7 +83,7 @@ export default function ShopScreen() {
   const refetchInventory = inventoryResponse.refetch;
 
   // Obtener miembros del grupo familiar
-  const groupMembersResponse = useGetFamilyGroupIdGroupMembers(
+  const groupMembersResponse = useGetGroupsGroupIdMembers(
     user?.groupId ?? "",
     {
       query: { enabled: !!user?.groupId },

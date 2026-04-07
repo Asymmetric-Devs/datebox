@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
+import { postGroupsCreate, postGroupsLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
@@ -126,7 +126,7 @@ export default function NewAccount() {
         // Create new family group
         try {
           console.log("Intentando crear grupo familiar...");
-          const res = await postFamilyGroupCreate({
+          const res = await postGroupsCreate({
             name: displayName,
             ownerUserId: data.session!.user.id, // Force unwrap session
           });
@@ -157,7 +157,7 @@ export default function NewAccount() {
            const sessionUser = data.session?.user;
            if (!sessionUser) throw new Error("No user in session");
 
-          const res = await postFamilyGroupLink({
+          const res = await postGroupsLink({
             invitationCode: familyCode,
             userId: sessionUser.id,
           });

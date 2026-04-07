@@ -20,29 +20,29 @@ export class CalendarService {
   ): Promise<{ calendarId: string; feedUrl: string }> {
     const { userId, startDate, endDate } = body;
 
-    const { data: activities, error: activitiesError } = await this.supabase
-      .from("activities")
+    const { data: datesRecord, error: datesError } = await this.supabase
+      .from("dates")
       .select("*")
-      .or(`createdBy.eq.${userId},assignedTo.eq.${userId}`)
+      // .or(`createdBy.eq.${userId},groupId.eq.${userId}`) <-- not correct, groupId is not a user
       .gte("startsAt", `${startDate}T00:00:00.000Z`)
       .lte("startsAt", `${endDate}T23:59:59.999Z`);
 
-    if (activitiesError) {
+    if (datesError) {
       throw new ApiException(
         500,
-        "Error al consultar actividades",
-        activitiesError,
+        "Error al consultar citas",
+        datesError,
       );
     }
 
-    if (!activities || activities.length === 0) {
+    if (!datesRecord || datesRecord.length === 0) {
       throw new ApiException(
         404,
-        "No se encontraron actividades en el rango de fechas seleccionado",
+        "No se encontraron citas en el rango de fechas seleccionado",
       );
     }
 
-    const events: EventAttributes[] = activities.map((act) => {
+    const events: EventAttributes[] = datesRecord.map((act) => {
       const start = new Date(act.startsAt);
       const startTuple: [number, number, number, number, number] = [
         start.getUTCFullYear(),

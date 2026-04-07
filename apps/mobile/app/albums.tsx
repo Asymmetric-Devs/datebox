@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
-import { useGetMemories, Album, useGetFamilyGroupIdGroupMembers, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+import { useGetMemories, Album, useGetGroupsGroupIdMembers, GetGroupsGroupIdMembers200 } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
@@ -72,19 +72,19 @@ export default function AlbumsScreen() {
     : [];
 
   // Fetch family members for the preview
-  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId, {
+  const membersQuery = useGetGroupsGroupIdMembers(groupId, {
     query: { enabled: !!groupId },
   });
 
-  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+  const selectGroupInfo = (): GetGroupsGroupIdMembers200 | undefined => {
     const resp = membersQuery.data as
-      | { data?: GetFamilyGroupIdGroupMembers200 }
-      | GetFamilyGroupIdGroupMembers200
+      | { data?: GetGroupsGroupIdMembers200 }
+      | GetGroupsGroupIdMembers200
       | undefined;
     if (!resp) return undefined;
     return (
-      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
-      (resp as GetFamilyGroupIdGroupMembers200)
+      (resp as { data?: GetGroupsGroupIdMembers200 }).data ??
+      (resp as GetGroupsGroupIdMembers200)
     );
   };
 

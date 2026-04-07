@@ -8,20 +8,20 @@ import {
   Button,
   Divider,
 } from "react-native-paper";
-import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+import { DateEvent, GetGroupsGroupIdMembers200 } from "@elepad/api-client";
 import { COLORS, SHADOWS } from "@/styles/base";
 import HighlightedMentionText from "../Recuerdos/HighlightedMentionText";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ActivityItemProps {
-  item: Activity;
+  item: DateEvent;
   idUser: string;
-  onEdit: (ev: Activity) => void;
+  onEdit: (ev: DateEvent) => void;
   onDelete: (id: string) => void;
-  onToggleComplete: (ev: Activity) => void;
+  onToggleComplete: (ev: DateEvent) => void;
   isOwnerOfGroup: boolean;
-  groupInfo?: GetFamilyGroupIdGroupMembers200;
+  groupInfo?: GetGroupsGroupIdMembers200;
   completed?: boolean; // Nueva prop para completado por día
   familyMembers?: Array<{
     id: string;
@@ -107,12 +107,7 @@ export default function ActivityItem({
     return member?.displayName || "Usuario desconocido";
   })();
 
-  // Find the assigned user (recipient) of this activity
-  const activityAssignedTo = (() => {
-    if (!item.assignedTo) return null;
-    const member = allGroupMembers.find((m) => m.id === item.assignedTo);
-    return member?.displayName || "Usuario desconocido";
-  })();
+
 
   // Check if current user can edit this activity
   const canEdit = item.createdBy === idUser || isOwnerOfGroup;
@@ -198,12 +193,10 @@ export default function ActivityItem({
             />
           )}
 
-          {/* Footer con información de hora y asignación */}
+          {/* Footer con información de hora */}
           <View style={styles.assignedToContainer}>
             <Text style={styles.assignedToText}>
-              {showTargetUser && activityAssignedTo
-                ? `Para: ${activityAssignedTo}   ${getFormatTime()}`
-                : getFormatTime()}
+              {getFormatTime()}
             </Text>
           </View>
         </View>
@@ -268,7 +261,8 @@ export default function ActivityItem({
               </View>
 
               {/* Creador y Destinatario */}
-              {item.createdBy !== item.assignedTo && activityOwner && (
+              {/* Creador */}
+              {activityOwner && (
                 <View style={styles.modalRow}>
                   <IconButton
                     icon="account-edit"
@@ -282,19 +276,7 @@ export default function ActivityItem({
                 </View>
               )}
 
-              {activityAssignedTo && (
-                <View style={styles.modalRow}>
-                  <IconButton
-                    icon="account-arrow-right"
-                    size={20}
-                    iconColor={COLORS.primary}
-                    style={{ margin: 0 }}
-                  />
-                  <Text variant="bodyMedium" style={styles.modalText}>
-                    Para: {activityAssignedTo}
-                  </Text>
-                </View>
-              )}
+
 
               {/* Estado */}
               <View style={styles.modalRow}>

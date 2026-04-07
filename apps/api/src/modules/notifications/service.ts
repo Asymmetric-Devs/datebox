@@ -3,7 +3,7 @@ import { Database } from "@/supabase-types";
 import { PushTokensService } from "../pushTokens/service";
 
 export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned" | "reaction" | "gift_received";
-export type EntityType = "memory" | "activity" | "puzzle" | "achievement" | "shop_item";
+export type EntityType = "memory" | "date" | "puzzle" | "achievement" | "shop_item";
 
 // Expo Push Notification Response Types
 interface ExpoPushTicket {
@@ -275,8 +275,8 @@ export class NotificationsService {
     let titleMessage = "";
     if (entityType === "memory") {
       titleMessage = `${actorName} te mencionó en un recuerdo`;
-    } else if (entityType === "activity") {
-      titleMessage = `${actorName} te mencionó en una actividad`;
+    } else if (entityType === "date") {
+      titleMessage = `${actorName} te mencionó en una cita`;
     } else {
       titleMessage = `${actorName} te mencionó`;
     }

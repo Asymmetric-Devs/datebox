@@ -1,5 +1,5 @@
 // Validadores de tipo para evitar castings inseguros
-function isActivity(obj: unknown): obj is Activity {
+function isDateEvent(obj: unknown): obj is DateEvent {
   return (
     typeof obj === "object" &&
     obj !== null &&
@@ -55,15 +55,15 @@ import {
   usePatchNotificationsIdRead,
   usePatchNotificationsReadAll,
   useDeleteNotificationsId,
-  useGetFamilyGroupIdGroupMembers,
-  GetFamilyGroupIdGroupMembers200,
+  useGetGroupsGroupIdMembers,
+  GetGroupsGroupIdMembers200,
   useGetMemoriesId,
   Memory,
-  useGetActivitiesId,
-  Activity,
-  useGetActivityCompletions,
+  useGetDatesId,
+  DateEvent,
+  useGetDateCompletions,
   GetNotifications200Item,
-  GetActivityCompletions200DataItem,
+  GetDateCompletions200DataItem,
   useGetAlbumId,
   AlbumWithPages,
 } from "@elepad/api-client";
@@ -185,7 +185,7 @@ export default function NotificationsScreen() {
   }, [activityDetailDialogVisible]);
 
   // Fetch family members for displaying names in mentions
-  const membersQuery = useGetFamilyGroupIdGroupMembers(
+  const membersQuery = useGetGroupsGroupIdMembers(
     userElepad?.groupId || "",
     {
       query: {
@@ -194,15 +194,15 @@ export default function NotificationsScreen() {
     },
   );
 
-  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+  const selectGroupInfo = (): GetGroupsGroupIdMembers200 | undefined => {
     const resp = membersQuery.data as
-      | { data?: GetFamilyGroupIdGroupMembers200 }
-      | GetFamilyGroupIdGroupMembers200
+      | { data?: GetGroupsGroupIdMembers200 }
+      | GetGroupsGroupIdMembers200
       | undefined;
     if (!resp) return undefined;
     return (
-      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
-      (resp as GetFamilyGroupIdGroupMembers200)
+      (resp as { data?: GetGroupsGroupIdMembers200 }).data ??
+      (resp as GetGroupsGroupIdMembers200)
     );
   };
 
@@ -217,7 +217,7 @@ export default function NotificationsScreen() {
   });
 
   // Query para obtener la actividad seleccionada
-  const activityQuery = useGetActivitiesId(selectedActivityId || "", {
+  const activityQuery = useGetDatesId(selectedActivityId || "", {
     query: {
       enabled: !!selectedActivityId,
       retry: false,
@@ -234,12 +234,12 @@ export default function NotificationsScreen() {
   // Obtener el rango de fechas para la actividad (solo el día de la actividad)
   const activityDateRange = useMemo(() => {
     // Extraer el objeto Activity solo si la respuesta es exitosa
-    let activity: Activity | undefined;
+    let activity: DateEvent | undefined;
     if (activityQuery.data && typeof activityQuery.data === "object") {
-      if ("data" in activityQuery.data && isActivity(activityQuery.data.data)) {
+      if ("data" in activityQuery.data && isDateEvent(activityQuery.data.data)) {
         activity = activityQuery.data.data;
-      } else if (isActivity(activityQuery.data)) {
-        activity = activityQuery.data;
+      } else if (isDateEvent(activityQuery.data)) {
+        activity = activityQuery.data as DateEvent;
       }
     }
     if (!activity || !activity.startsAt) return { startDate: "", endDate: "" };
@@ -251,7 +251,7 @@ export default function NotificationsScreen() {
   }, [activityQuery.data]);
 
   // Cargar completaciones solo para el día de la actividad
-  const activityCompletionsQuery = useGetActivityCompletions(
+  const activityCompletionsQuery = useGetDateCompletions(
     {
       startDate: activityDateRange.startDate,
       endDate: activityDateRange.endDate,
@@ -266,12 +266,12 @@ export default function NotificationsScreen() {
   // Determinar si la actividad está completada para su día específico
   const isActivityCompleted = useMemo(() => {
     // Extraer el objeto Activity solo si la respuesta es exitosa
-    let activity: Activity | undefined;
+    let activity: DateEvent | undefined;
     if (activityQuery.data && typeof activityQuery.data === "object") {
-      if ("data" in activityQuery.data && isActivity(activityQuery.data.data)) {
+      if ("data" in activityQuery.data && isDateEvent(activityQuery.data.data)) {
         activity = activityQuery.data.data;
-      } else if (isActivity(activityQuery.data)) {
-        activity = activityQuery.data;
+      } else if (isDateEvent(activityQuery.data)) {
+        activity = activityQuery.data as DateEvent;
       }
     }
     if (!activity || !activity.startsAt || !activityCompletionsQuery.data)
@@ -280,7 +280,7 @@ export default function NotificationsScreen() {
 
     // Extraer las completaciones correctamente
     const completionsData = activityCompletionsQuery.data;
-    let completions: GetActivityCompletions200DataItem[] = [];
+    let completions: GetDateCompletions200DataItem[] = [];
 
     if (Array.isArray(completionsData)) {
       completions = completionsData;
@@ -293,8 +293,8 @@ export default function NotificationsScreen() {
 
     // Buscar si existe una completación para esta actividad en este día
     return completions.some(
-      (c: GetActivityCompletions200DataItem) =>
-        c.activityId === activity.id && c.completedDate === activityDate,
+      (c: GetDateCompletions200DataItem) =>
+        c.dateId === activity.id && c.completedDate === activityDate,
     );
   }, [activityQuery.data, activityCompletionsQuery.data]);
 
@@ -952,17 +952,17 @@ export default function NotificationsScreen() {
           >
             {activityQuery.data
               ? (() => {
-                  let activity: Activity | undefined;
+                  let activity: DateEvent | undefined;
                   if (
                     activityQuery.data &&
                     typeof activityQuery.data === "object"
                   ) {
                     if (
                       "data" in activityQuery.data &&
-                      isActivity(activityQuery.data.data)
+                      isDateEvent(activityQuery.data.data)
                     ) {
                       activity = activityQuery.data.data;
-                    } else if (isActivity(activityQuery.data)) {
+                    } else if (isDateEvent(activityQuery.data)) {
                       activity = activityQuery.data;
                     }
                   }

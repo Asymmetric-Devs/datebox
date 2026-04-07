@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 
-type EntityType = "memory" | "activity" | "puzzle";
+type EntityType = "memory" | "date" | "puzzle";
 
 export class MentionsService {
   constructor(private supabase: SupabaseClient<Database>) {}

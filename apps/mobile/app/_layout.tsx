@@ -105,7 +105,7 @@ export default function RootLayout() {
                           options={{ headerShown: false, animation: "fade" }}
                         />
                         <Stack.Screen
-                          name="familyGroup"
+                          name="group"
                           options={{
                             headerShown: false,
                             animation: "fade",

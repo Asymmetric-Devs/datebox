@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
-export const ActivitySchema = z
+export const DateEventSchema = z
   .object({
     id: z.uuid(),
     title: z.string().min(1, "El título es obligatorio"),
@@ -9,16 +9,16 @@ export const ActivitySchema = z
     endsAt: z.date().optional().nullable(),
     completed: z.boolean(),
     createdBy: z.uuid(),
-    assignedTo: z.uuid().nullable(),
+    groupId: z.uuid().nullable(),
     createdAt: z.date(),
     updatedAt: z.date(),
     frequencyId: z.uuid().optional().nullable(),
   })
-  .openapi("Activity");
+  .openapi("DateEvent");
 
-export type Activity = z.infer<typeof ActivitySchema>;
+export type DateEvent = z.infer<typeof DateEventSchema>;
 
-export const NewActivitySchema = z
+export const NewDateEventSchema = z
   .object({
     title: z.string().min(1, "El título es obligatorio"),
     description: z.string().optional(),
@@ -26,24 +26,24 @@ export const NewActivitySchema = z
     endsAt: z.string().optional(),
     completed: z.boolean().optional().default(false),
     createdBy: z.uuid(),
-    assignedTo: z.uuid(),
+    groupId: z.uuid(),
     frequencyId: z.uuid().optional().nullable(),
   })
-  .openapi("NewActivity");
+  .openapi("NewDateEvent");
 
-export type NewActivity = z.infer<typeof NewActivitySchema>;
+export type NewDateEvent = z.infer<typeof NewDateEventSchema>;
 
-export const UpdateActivitySchema = z
+export const UpdateDateEventSchema = z
   .object({
     title: z.string().min(1).optional(),
     description: z.string().optional(),
     startsAt: z.string(),
     endsAt: z.string().optional(),
     completed: z.boolean().optional(),
-    assignedTo: z.uuid().optional(),
+    groupId: z.uuid().optional(),
     frequencyId: z.uuid().optional().nullable(),
   })
   .strict()
-  .openapi("UpdateActivity");
+  .openapi("UpdateDateEvent");
 
-export type UpdateActivity = z.infer<typeof UpdateActivitySchema>;
+export type UpdateDateEvent = z.infer<typeof UpdateDateEventSchema>;

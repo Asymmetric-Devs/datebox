@@ -1,85 +1,84 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { ActivityService } from "./service";
+import { DateService } from "./service";
 import {
-  ActivitySchema,
-  NewActivitySchema,
-  UpdateActivitySchema,
+  DateEventSchema,
+  NewDateEventSchema,
+  UpdateDateEventSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { GoogleCalendarService } from "@/services/google-calendar";
 
-export const activitiesApp = new OpenAPIHono();
+export const datesApp = new OpenAPIHono();
 
 declare module "hono" {
   interface ContextVariableMap {
-    activityService: ActivityService;
+    dateService: DateService;
     googleCalendarService: GoogleCalendarService;
   }
 }
 
-activitiesApp.use("/activities/*", async (c, next) => {
-  const activityService = new ActivityService(c.var.supabase);
+datesApp.use("/dates/*", async (c, next) => {
+  const dateService = new DateService(c.var.supabase);
   const googleCalendarService = new GoogleCalendarService(c.var.supabase);
-  c.set("activityService", activityService);
+  c.set("dateService", dateService);
   c.set("googleCalendarService", googleCalendarService);
   await next();
 });
 
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "get",
-    path: "/activities/{id}",
-    tags: ["activities"],
+    path: "/dates/{id}",
+    tags: ["dates"],
     request: { params: z.object({ id: z.uuid() }) },
     responses: {
       200: {
-        description: "Actividad",
-        content: { "application/json": { schema: ActivitySchema } },
+        description: "Cita",
+        content: { "application/json": { schema: DateEventSchema } },
       },
-      404: openApiErrorResponse("Actividad no encontrada"),
+      404: openApiErrorResponse("Cita no encontrada"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
     const { id } = c.req.valid("param");
-    const event = await c.var.activityService.getActivityById(id);
+    const event = await c.var.dateService.getDateById(id);
     return c.json(event, 200);
   },
 );
 
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "get",
-    path: "/activities/familyCode/{idFamilyGroup}",
-    tags: ["activities"],
-    request: { params: z.object({ idFamilyGroup: z.uuid() }) },
+    path: "/dates/group/{groupId}",
+    tags: ["dates"],
+    request: { params: z.object({ groupId: z.uuid() }) },
     responses: {
       200: {
-        description: "Actividad",
-        content: { "application/json": { schema: z.array(ActivitySchema) } },
+        description: "Citas",
+        content: { "application/json": { schema: z.array(DateEventSchema) } },
       },
-      404: openApiErrorResponse("Actividad no encontrada"),
+      404: openApiErrorResponse("Citas no encontradas"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
-    const { idFamilyGroup } = c.req.valid("param");
-    const event =
-      await c.var.activityService.getActivitiesWithFamilyCode(idFamilyGroup);
-    return c.json(event, 200);
+    const { groupId } = c.req.valid("param");
+    const events = await c.var.dateService.getDatesWithGroupId(groupId);
+    return c.json(events, 200);
   },
 );
 
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "post",
-    path: "/activities",
-    tags: ["activities"],
+    path: "/dates",
+    tags: ["dates"],
     request: {
       body: {
         content: {
           "application/json": {
-            schema: NewActivitySchema,
+            schema: NewDateEventSchema,
           },
         },
         required: true,
@@ -87,8 +86,8 @@ activitiesApp.openapi(
     },
     responses: {
       201: {
-        description: "Actividad creada",
-        content: { "application/json": { schema: ActivitySchema } },
+        description: "Cita creada",
+        content: { "application/json": { schema: DateEventSchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
       500: openApiErrorResponse("Error interno del servidor"),
@@ -96,22 +95,22 @@ activitiesApp.openapi(
   },
   async (c) => {
     const body = c.req.valid("json");
-    const event = await c.var.activityService.create(body);
+    const event = await c.var.dateService.create(body);
     return c.json(event, 201);
   },
 );
 
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "patch",
-    path: "/activities/{id}",
-    tags: ["activities"],
+    path: "/dates/{id}",
+    tags: ["dates"],
     request: {
       params: z.object({ id: z.uuid() }),
       body: {
         content: {
           "application/json": {
-            schema: UpdateActivitySchema,
+            schema: UpdateDateEventSchema,
           },
         },
         required: true,
@@ -119,49 +118,49 @@ activitiesApp.openapi(
     },
     responses: {
       200: {
-        description: "Actividad actualizada",
-        content: { "application/json": { schema: ActivitySchema } },
+        description: "Cita actualizada",
+        content: { "application/json": { schema: DateEventSchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
-      404: openApiErrorResponse("Actividad no encontrada"),
+      404: openApiErrorResponse("Cita no encontrada"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
     const { id } = c.req.valid("param");
     const body = c.req.valid("json");
-    const event = await c.var.activityService.update(id, body);
+    const event = await c.var.dateService.update(id, body);
     return c.json(event, 200);
   },
 );
 
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "delete",
-    path: "/activities/{id}",
-    tags: ["activities"],
+    path: "/dates/{id}",
+    tags: ["dates"],
     request: { params: z.object({ id: z.uuid() }) },
     responses: {
       204: {
-        description: "Actividad eliminada",
+        description: "Cita eliminada",
       },
-      404: openApiErrorResponse("Actividad no encontrado"),
+      404: openApiErrorResponse("Cita no encontrada"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
     const { id } = c.req.valid("param");
-    const event = await c.var.activityService.remove(id);
+    const event = await c.var.dateService.remove(id);
     return c.json(event, 200);
   },
 );
 
 // Google Calendar endpoints
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "post",
-    path: "/activities/google-calendar/enable",
-    tags: ["activities"],
+    path: "/dates/google-calendar/enable",
+    tags: ["dates"],
     request: {
       body: {
         content: {
@@ -202,11 +201,11 @@ activitiesApp.openapi(
   },
 );
 
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "post",
-    path: "/activities/google-calendar/disable",
-    tags: ["activities"],
+    path: "/dates/google-calendar/disable",
+    tags: ["dates"],
     responses: {
       200: {
         description: "Google Calendar disabled",
@@ -234,76 +233,11 @@ activitiesApp.openapi(
   },
 );
 
-activitiesApp.openapi(
-  {
-    method: "post",
-    path: "/activities/google-calendar/disable",
-    tags: ["activities"],
-    responses: {
-      200: {
-        description: "Google Calendar disabled",
-        content: {
-          "application/json": { schema: z.object({ success: z.boolean() }) },
-        },
-      },
-      400: openApiErrorResponse("Error al deshabilitar Google Calendar"),
-      500: openApiErrorResponse("Error interno del servidor"),
-    },
-  },
-  async (c) => {
-    const userId = c.var.user.id;
-    try {
-      await c.var.googleCalendarService.disableGoogleCalendar(userId);
-      return c.json({ success: true }, 200);
-    } catch (error) {
-      console.error("Error disabling Google Calendar:", error);
-      return c.json(
-        { error: { message: "Failed to disable Google Calendar" } },
-        400,
-      );
-    }
-  },
-);
-
-activitiesApp.openapi(
+datesApp.openapi(
   {
     method: "get",
-    path: "/activities/google-calendar/status",
-    tags: ["activities"],
-    responses: {
-      200: {
-        description: "Google Calendar status",
-        content: {
-          "application/json": {
-            schema: z.object({
-              enabled: z.boolean(),
-              calendarId: z.string().optional(),
-            }),
-          },
-        },
-      },
-      500: openApiErrorResponse("Error interno del servidor"),
-    },
-  },
-  async (c) => {
-    const userId = c.var.user.id;
-
-    try {
-      const enabled =
-        await c.var.googleCalendarService.isGoogleCalendarEnabled(userId);
-      return c.json({ enabled, calendarId: undefined }, 200);
-    } catch (error) {
-      console.error("Error checking Google Calendar status:", error);
-      return c.json({ enabled: false, calendarId: undefined }, 200);
-    }
-  },
-);
-
-activitiesApp.openapi(
-  {
-    method: "get",
-    path: "/activities/google-calendar/status",
-    tags: ["activities"],
+    path: "/dates/google-calendar/status",
+    tags: ["dates"],
     responses: {
       200: {
         description: "Google Calendar status",

@@ -53,7 +53,7 @@ export interface UpdateUser {
   timezone?: string;
 }
 
-export interface NewFamilyGroup {
+export interface NewGroup {
   /** @minLength 1 */
   name: string;
   ownerUserId: string;
@@ -65,7 +65,7 @@ export interface AddUserWithCode {
   invitationCode: string;
 }
 
-export interface UpdateFamilyGroup {
+export interface UpdateGroup {
   /** @minLength 1 */
   name: string;
 }
@@ -74,7 +74,7 @@ export interface TransferOwnership {
   newOwnerId: string;
 }
 
-export interface Activity {
+export interface DateEvent {
   id: string;
   /** @minLength 1 */
   title: string;
@@ -83,13 +83,13 @@ export interface Activity {
   endsAt?: string | null;
   completed: boolean;
   createdBy: string;
-  assignedTo: string | null;
+  groupId: string | null;
   createdAt: string;
   updatedAt: string;
   frequencyId?: string | null;
 }
 
-export interface NewActivity {
+export interface NewDateEvent {
   /** @minLength 1 */
   title: string;
   description?: string;
@@ -97,18 +97,18 @@ export interface NewActivity {
   endsAt?: string;
   completed?: boolean;
   createdBy: string;
-  assignedTo: string;
+  groupId: string;
   frequencyId?: string | null;
 }
 
-export interface UpdateActivity {
+export interface UpdateDateEvent {
   /** @minLength 1 */
   title?: string;
   description?: string;
   startsAt: string;
   endsAt?: string;
   completed?: boolean;
-  assignedTo?: string;
+  groupId?: string;
   frequencyId?: string | null;
 }
 
@@ -646,7 +646,7 @@ export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
 
-export type GetFamilyGroupIdGroupMembers200Owner = {
+export type GetGroupsGroupIdMembers200Owner = {
   id: string;
   displayName: string;
   avatarUrl: string | null;
@@ -654,7 +654,7 @@ export type GetFamilyGroupIdGroupMembers200Owner = {
   activeFrameUrl: string | null;
 };
 
-export type GetFamilyGroupIdGroupMembers200MembersItem = {
+export type GetGroupsGroupIdMembers200MembersItem = {
   id: string;
   displayName: string;
   avatarUrl: string | null;
@@ -662,57 +662,57 @@ export type GetFamilyGroupIdGroupMembers200MembersItem = {
   activeFrameUrl: string | null;
 };
 
-export type GetFamilyGroupIdGroupMembers200 = {
+export type GetGroupsGroupIdMembers200 = {
   name: string;
-  owner: GetFamilyGroupIdGroupMembers200Owner;
-  members: GetFamilyGroupIdGroupMembers200MembersItem[];
+  owner: GetGroupsGroupIdMembers200Owner;
+  members: GetGroupsGroupIdMembers200MembersItem[];
 };
 
-export type RemoveUserFromFamilyGroupParams = {
+export type RemoveUserFromGroupParams = {
   createNewGroup?: string;
 };
 
-export type PatchFamilyGroupIdGroup200 = {
+export type PatchGroupsGroupId200 = {
   id: string;
   name: string;
   ownerUserId: string;
 };
 
-export type TransferFamilyGroupOwnership200Group = {
+export type TransferGroupOwnership200Group = {
   id: string;
   name: string;
   ownerUserId: string;
   createdAt: string;
 };
 
-export type TransferFamilyGroupOwnership200PreviousOwner = {
+export type TransferGroupOwnership200PreviousOwner = {
   id: string;
 };
 
-export type TransferFamilyGroupOwnership200NewOwner = {
+export type TransferGroupOwnership200NewOwner = {
   id: string;
   displayName: string;
 };
 
-export type TransferFamilyGroupOwnership200 = {
-  group: TransferFamilyGroupOwnership200Group;
-  previousOwner: TransferFamilyGroupOwnership200PreviousOwner;
-  newOwner: TransferFamilyGroupOwnership200NewOwner;
+export type TransferGroupOwnership200 = {
+  group: TransferGroupOwnership200Group;
+  previousOwner: TransferGroupOwnership200PreviousOwner;
+  newOwner: TransferGroupOwnership200NewOwner;
 };
 
-export type PostActivitiesGoogleCalendarEnableBody = {
+export type PostDatesGoogleCalendarEnableBody = {
   calendarId?: string;
 };
 
-export type PostActivitiesGoogleCalendarEnable200 = {
+export type PostDatesGoogleCalendarEnable200 = {
   success: boolean;
 };
 
-export type PostActivitiesGoogleCalendarDisable200 = {
+export type PostDatesGoogleCalendarDisable200 = {
   success: boolean;
 };
 
-export type GetActivitiesGoogleCalendarStatus200 = {
+export type GetDatesGoogleCalendarStatus200 = {
   enabled: boolean;
   calendarId?: string;
 };
@@ -788,7 +788,7 @@ export type PostAlbumIdExportPdf200 = {
   message: string;
 };
 
-export type GetActivityCompletionsParams = {
+export type GetDateCompletionsParams = {
   /**
    * @pattern ^\d{4}-\d{2}-\d{2}$
    */
@@ -797,51 +797,51 @@ export type GetActivityCompletionsParams = {
    * @pattern ^\d{4}-\d{2}-\d{2}$
    */
   endDate?: string;
-  activityId?: string;
+  dateId?: string;
 };
 
-export type GetActivityCompletions200DataItem = {
+export type GetDateCompletions200DataItem = {
   id: string;
-  activityId: string;
+  dateId: string;
   userId: string;
   completedDate: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type GetActivityCompletions200 = {
-  data: GetActivityCompletions200DataItem[];
+export type GetDateCompletions200 = {
+  data: GetDateCompletions200DataItem[];
 };
 
-export type GetActivityCompletions500 = {
+export type GetDateCompletions500 = {
   error: string;
 };
 
-export type PostActivityCompletionsToggleBody = {
-  activityId: string;
+export type PostDateCompletionsToggleBody = {
+  dateId: string;
   /** @pattern ^\d{4}-\d{2}-\d{2}$ */
   completedDate: string;
 };
 
-export type PostActivityCompletionsToggle200DataCompletion = {
+export type PostDateCompletionsToggle200DataCompletion = {
   id: string;
-  activityId: string;
+  dateId: string;
   userId: string;
   completedDate: string;
   createdAt: string;
   updatedAt: string;
 } | null;
 
-export type PostActivityCompletionsToggle200Data = {
+export type PostDateCompletionsToggle200Data = {
   completed: boolean;
-  completion: PostActivityCompletionsToggle200DataCompletion;
+  completion: PostDateCompletionsToggle200DataCompletion;
 };
 
-export type PostActivityCompletionsToggle200 = {
-  data: PostActivityCompletionsToggle200Data;
+export type PostDateCompletionsToggle200 = {
+  data: PostDateCompletionsToggle200Data;
 };
 
-export type PostActivityCompletionsToggle500 = {
+export type PostDateCompletionsToggle500 = {
   error: string;
 };
 
@@ -1578,70 +1578,69 @@ export const usePatchUsersIdAvatar = <TError = Error, TContext = unknown>(
   );
 };
 
-export type postFamilyGroupCreateResponse201 = {
+export type postGroupsCreateResponse201 = {
   data: void;
   status: 201;
 };
 
-export type postFamilyGroupCreateResponse400 = {
+export type postGroupsCreateResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postFamilyGroupCreateResponse500 = {
+export type postGroupsCreateResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postFamilyGroupCreateResponseSuccess =
-  postFamilyGroupCreateResponse201 & {
-    headers: Headers;
-  };
-export type postFamilyGroupCreateResponseError = (
-  | postFamilyGroupCreateResponse400
-  | postFamilyGroupCreateResponse500
+export type postGroupsCreateResponseSuccess = postGroupsCreateResponse201 & {
+  headers: Headers;
+};
+export type postGroupsCreateResponseError = (
+  | postGroupsCreateResponse400
+  | postGroupsCreateResponse500
 ) & {
   headers: Headers;
 };
 
-export type postFamilyGroupCreateResponse =
-  | postFamilyGroupCreateResponseSuccess
-  | postFamilyGroupCreateResponseError;
+export type postGroupsCreateResponse =
+  | postGroupsCreateResponseSuccess
+  | postGroupsCreateResponseError;
 
-export const getPostFamilyGroupCreateUrl = () => {
-  return `/familyGroup/create`;
+export const getPostGroupsCreateUrl = () => {
+  return `/groups/create`;
 };
 
-export const postFamilyGroupCreate = async (
-  newFamilyGroup: NewFamilyGroup,
+export const postGroupsCreate = async (
+  newGroup: NewGroup,
   options?: RequestInit
-): Promise<postFamilyGroupCreateResponse> => {
-  return rnFetch<postFamilyGroupCreateResponse>(getPostFamilyGroupCreateUrl(), {
+): Promise<postGroupsCreateResponse> => {
+  return rnFetch<postGroupsCreateResponse>(getPostGroupsCreateUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(newFamilyGroup),
+    body: JSON.stringify(newGroup),
   });
 };
 
-export const getPostFamilyGroupCreateMutationOptions = <
+export const getPostGroupsCreateMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postFamilyGroupCreate>>,
+    Awaited<ReturnType<typeof postGroupsCreate>>,
     TError,
-    { data: NewFamilyGroup },
+    { data: NewGroup },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postFamilyGroupCreate>>,
+  Awaited<ReturnType<typeof postGroupsCreate>>,
   TError,
-  { data: NewFamilyGroup },
+  { data: NewGroup },
   TContext
 > => {
-  const mutationKey = ["postFamilyGroupCreate"];
+  const mutationKey = ["postGroupsCreate"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1651,91 +1650,87 @@ export const getPostFamilyGroupCreateMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postFamilyGroupCreate>>,
-    { data: NewFamilyGroup }
+    Awaited<ReturnType<typeof postGroupsCreate>>,
+    { data: NewGroup }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postFamilyGroupCreate(data, requestOptions);
+    return postGroupsCreate(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostFamilyGroupCreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postFamilyGroupCreate>>
+export type PostGroupsCreateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postGroupsCreate>>
 >;
-export type PostFamilyGroupCreateMutationBody = NewFamilyGroup;
-export type PostFamilyGroupCreateMutationError = Error;
+export type PostGroupsCreateMutationBody = NewGroup;
+export type PostGroupsCreateMutationError = Error;
 
-export const usePostFamilyGroupCreate = <TError = Error, TContext = unknown>(
+export const usePostGroupsCreate = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postFamilyGroupCreate>>,
+      Awaited<ReturnType<typeof postGroupsCreate>>,
       TError,
-      { data: NewFamilyGroup },
+      { data: NewGroup },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postFamilyGroupCreate>>,
+  Awaited<ReturnType<typeof postGroupsCreate>>,
   TError,
-  { data: NewFamilyGroup },
+  { data: NewGroup },
   TContext
 > => {
-  return useMutation(
-    getPostFamilyGroupCreateMutationOptions(options),
-    queryClient
-  );
+  return useMutation(getPostGroupsCreateMutationOptions(options), queryClient);
 };
 
-export type postFamilyGroupLinkResponse200 = {
+export type postGroupsLinkResponse200 = {
   data: void;
   status: 200;
 };
 
-export type postFamilyGroupLinkResponse400 = {
+export type postGroupsLinkResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postFamilyGroupLinkResponse404 = {
+export type postGroupsLinkResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type postFamilyGroupLinkResponse500 = {
+export type postGroupsLinkResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postFamilyGroupLinkResponseSuccess =
-  postFamilyGroupLinkResponse200 & {
-    headers: Headers;
-  };
-export type postFamilyGroupLinkResponseError = (
-  | postFamilyGroupLinkResponse400
-  | postFamilyGroupLinkResponse404
-  | postFamilyGroupLinkResponse500
+export type postGroupsLinkResponseSuccess = postGroupsLinkResponse200 & {
+  headers: Headers;
+};
+export type postGroupsLinkResponseError = (
+  | postGroupsLinkResponse400
+  | postGroupsLinkResponse404
+  | postGroupsLinkResponse500
 ) & {
   headers: Headers;
 };
 
-export type postFamilyGroupLinkResponse =
-  | postFamilyGroupLinkResponseSuccess
-  | postFamilyGroupLinkResponseError;
+export type postGroupsLinkResponse =
+  | postGroupsLinkResponseSuccess
+  | postGroupsLinkResponseError;
 
-export const getPostFamilyGroupLinkUrl = () => {
-  return `/familyGroup/link`;
+export const getPostGroupsLinkUrl = () => {
+  return `/groups/link`;
 };
 
-export const postFamilyGroupLink = async (
+export const postGroupsLink = async (
   addUserWithCode: AddUserWithCode,
   options?: RequestInit
-): Promise<postFamilyGroupLinkResponse> => {
-  return rnFetch<postFamilyGroupLinkResponse>(getPostFamilyGroupLinkUrl(), {
+): Promise<postGroupsLinkResponse> => {
+  return rnFetch<postGroupsLinkResponse>(getPostGroupsLinkUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -1743,24 +1738,24 @@ export const postFamilyGroupLink = async (
   });
 };
 
-export const getPostFamilyGroupLinkMutationOptions = <
+export const getPostGroupsLinkMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postFamilyGroupLink>>,
+    Awaited<ReturnType<typeof postGroupsLink>>,
     TError,
     { data: AddUserWithCode },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postFamilyGroupLink>>,
+  Awaited<ReturnType<typeof postGroupsLink>>,
   TError,
   { data: AddUserWithCode },
   TContext
 > => {
-  const mutationKey = ["postFamilyGroupLink"];
+  const mutationKey = ["postGroupsLink"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1770,27 +1765,27 @@ export const getPostFamilyGroupLinkMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postFamilyGroupLink>>,
+    Awaited<ReturnType<typeof postGroupsLink>>,
     { data: AddUserWithCode }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postFamilyGroupLink(data, requestOptions);
+    return postGroupsLink(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostFamilyGroupLinkMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postFamilyGroupLink>>
+export type PostGroupsLinkMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postGroupsLink>>
 >;
-export type PostFamilyGroupLinkMutationBody = AddUserWithCode;
-export type PostFamilyGroupLinkMutationError = Error;
+export type PostGroupsLinkMutationBody = AddUserWithCode;
+export type PostGroupsLinkMutationError = Error;
 
-export const usePostFamilyGroupLink = <TError = Error, TContext = unknown>(
+export const usePostGroupsLink = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postFamilyGroupLink>>,
+      Awaited<ReturnType<typeof postGroupsLink>>,
       TError,
       { data: AddUserWithCode },
       TContext
@@ -1799,63 +1794,60 @@ export const usePostFamilyGroupLink = <TError = Error, TContext = unknown>(
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postFamilyGroupLink>>,
+  Awaited<ReturnType<typeof postGroupsLink>>,
   TError,
   { data: AddUserWithCode },
   TContext
 > => {
-  return useMutation(
-    getPostFamilyGroupLinkMutationOptions(options),
-    queryClient
-  );
+  return useMutation(getPostGroupsLinkMutationOptions(options), queryClient);
 };
 
-export type getFamilyGroupIdGroupInviteResponse200 = {
+export type getGroupsGroupIdInviteResponse200 = {
   data: void;
   status: 200;
 };
 
-export type getFamilyGroupIdGroupInviteResponse400 = {
+export type getGroupsGroupIdInviteResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type getFamilyGroupIdGroupInviteResponse404 = {
+export type getGroupsGroupIdInviteResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type getFamilyGroupIdGroupInviteResponse500 = {
+export type getGroupsGroupIdInviteResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type getFamilyGroupIdGroupInviteResponseSuccess =
-  getFamilyGroupIdGroupInviteResponse200 & {
+export type getGroupsGroupIdInviteResponseSuccess =
+  getGroupsGroupIdInviteResponse200 & {
     headers: Headers;
   };
-export type getFamilyGroupIdGroupInviteResponseError = (
-  | getFamilyGroupIdGroupInviteResponse400
-  | getFamilyGroupIdGroupInviteResponse404
-  | getFamilyGroupIdGroupInviteResponse500
+export type getGroupsGroupIdInviteResponseError = (
+  | getGroupsGroupIdInviteResponse400
+  | getGroupsGroupIdInviteResponse404
+  | getGroupsGroupIdInviteResponse500
 ) & {
   headers: Headers;
 };
 
-export type getFamilyGroupIdGroupInviteResponse =
-  | getFamilyGroupIdGroupInviteResponseSuccess
-  | getFamilyGroupIdGroupInviteResponseError;
+export type getGroupsGroupIdInviteResponse =
+  | getGroupsGroupIdInviteResponseSuccess
+  | getGroupsGroupIdInviteResponseError;
 
-export const getGetFamilyGroupIdGroupInviteUrl = (idGroup: string) => {
-  return `/familyGroup/${idGroup}/invite`;
+export const getGetGroupsGroupIdInviteUrl = (groupId: string) => {
+  return `/groups/${groupId}/invite`;
 };
 
-export const getFamilyGroupIdGroupInvite = async (
-  idGroup: string,
+export const getGroupsGroupIdInvite = async (
+  groupId: string,
   options?: RequestInit
-): Promise<getFamilyGroupIdGroupInviteResponse> => {
-  return rnFetch<getFamilyGroupIdGroupInviteResponse>(
-    getGetFamilyGroupIdGroupInviteUrl(idGroup),
+): Promise<getGroupsGroupIdInviteResponse> => {
+  return rnFetch<getGroupsGroupIdInviteResponse>(
+    getGetGroupsGroupIdInviteUrl(groupId),
     {
       ...options,
       method: "GET",
@@ -1863,19 +1855,19 @@ export const getFamilyGroupIdGroupInvite = async (
   );
 };
 
-export const getGetFamilyGroupIdGroupInviteQueryKey = (idGroup: string) => {
-  return [`/familyGroup/${idGroup}/invite`] as const;
+export const getGetGroupsGroupIdInviteQueryKey = (groupId: string) => {
+  return [`/groups/${groupId}/invite`] as const;
 };
 
-export const getGetFamilyGroupIdGroupInviteQueryOptions = <
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+export const getGetGroupsGroupIdInviteQueryOptions = <
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
         TError,
         TData
       >
@@ -1886,48 +1878,48 @@ export const getGetFamilyGroupIdGroupInviteQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetFamilyGroupIdGroupInviteQueryKey(idGroup);
+    queryOptions?.queryKey ?? getGetGroupsGroupIdInviteQueryKey(groupId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
+    Awaited<ReturnType<typeof getGroupsGroupIdInvite>>
   > = ({ signal }) =>
-    getFamilyGroupIdGroupInvite(idGroup, { signal, ...requestOptions });
+    getGroupsGroupIdInvite(groupId, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!idGroup,
+    enabled: !!groupId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+    Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetFamilyGroupIdGroupInviteQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
+export type GetGroupsGroupIdInviteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getGroupsGroupIdInvite>>
 >;
-export type GetFamilyGroupIdGroupInviteQueryError = Error;
+export type GetGroupsGroupIdInviteQueryError = Error;
 
-export function useGetFamilyGroupIdGroupInvite<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+export function useGetGroupsGroupIdInvite<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+          Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
           TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
+          Awaited<ReturnType<typeof getGroupsGroupIdInvite>>
         >,
         "initialData"
       >;
@@ -1937,24 +1929,24 @@ export function useGetFamilyGroupIdGroupInvite<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetFamilyGroupIdGroupInvite<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+export function useGetGroupsGroupIdInvite<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+          Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
           TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
+          Awaited<ReturnType<typeof getGroupsGroupIdInvite>>
         >,
         "initialData"
       >;
@@ -1964,15 +1956,15 @@ export function useGetFamilyGroupIdGroupInvite<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetFamilyGroupIdGroupInvite<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+export function useGetGroupsGroupIdInvite<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
         TError,
         TData
       >
@@ -1984,15 +1976,15 @@ export function useGetFamilyGroupIdGroupInvite<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetFamilyGroupIdGroupInvite<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+export function useGetGroupsGroupIdInvite<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdInvite>>,
         TError,
         TData
       >
@@ -2003,10 +1995,7 @@ export function useGetFamilyGroupIdGroupInvite<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetFamilyGroupIdGroupInviteQueryOptions(
-    idGroup,
-    options
-  );
+  const queryOptions = getGetGroupsGroupIdInviteQueryOptions(groupId, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -2016,52 +2005,52 @@ export function useGetFamilyGroupIdGroupInvite<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getFamilyGroupIdGroupMembersResponse200 = {
-  data: GetFamilyGroupIdGroupMembers200;
+export type getGroupsGroupIdMembersResponse200 = {
+  data: GetGroupsGroupIdMembers200;
   status: 200;
 };
 
-export type getFamilyGroupIdGroupMembersResponse400 = {
+export type getGroupsGroupIdMembersResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type getFamilyGroupIdGroupMembersResponse404 = {
+export type getGroupsGroupIdMembersResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type getFamilyGroupIdGroupMembersResponse500 = {
+export type getGroupsGroupIdMembersResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type getFamilyGroupIdGroupMembersResponseSuccess =
-  getFamilyGroupIdGroupMembersResponse200 & {
+export type getGroupsGroupIdMembersResponseSuccess =
+  getGroupsGroupIdMembersResponse200 & {
     headers: Headers;
   };
-export type getFamilyGroupIdGroupMembersResponseError = (
-  | getFamilyGroupIdGroupMembersResponse400
-  | getFamilyGroupIdGroupMembersResponse404
-  | getFamilyGroupIdGroupMembersResponse500
+export type getGroupsGroupIdMembersResponseError = (
+  | getGroupsGroupIdMembersResponse400
+  | getGroupsGroupIdMembersResponse404
+  | getGroupsGroupIdMembersResponse500
 ) & {
   headers: Headers;
 };
 
-export type getFamilyGroupIdGroupMembersResponse =
-  | getFamilyGroupIdGroupMembersResponseSuccess
-  | getFamilyGroupIdGroupMembersResponseError;
+export type getGroupsGroupIdMembersResponse =
+  | getGroupsGroupIdMembersResponseSuccess
+  | getGroupsGroupIdMembersResponseError;
 
-export const getGetFamilyGroupIdGroupMembersUrl = (idGroup: string) => {
-  return `/familyGroup/${idGroup}/members`;
+export const getGetGroupsGroupIdMembersUrl = (groupId: string) => {
+  return `/groups/${groupId}/members`;
 };
 
-export const getFamilyGroupIdGroupMembers = async (
-  idGroup: string,
+export const getGroupsGroupIdMembers = async (
+  groupId: string,
   options?: RequestInit
-): Promise<getFamilyGroupIdGroupMembersResponse> => {
-  return rnFetch<getFamilyGroupIdGroupMembersResponse>(
-    getGetFamilyGroupIdGroupMembersUrl(idGroup),
+): Promise<getGroupsGroupIdMembersResponse> => {
+  return rnFetch<getGroupsGroupIdMembersResponse>(
+    getGetGroupsGroupIdMembersUrl(groupId),
     {
       ...options,
       method: "GET",
@@ -2069,19 +2058,19 @@ export const getFamilyGroupIdGroupMembers = async (
   );
 };
 
-export const getGetFamilyGroupIdGroupMembersQueryKey = (idGroup: string) => {
-  return [`/familyGroup/${idGroup}/members`] as const;
+export const getGetGroupsGroupIdMembersQueryKey = (groupId: string) => {
+  return [`/groups/${groupId}/members`] as const;
 };
 
-export const getGetFamilyGroupIdGroupMembersQueryOptions = <
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+export const getGetGroupsGroupIdMembersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
         TError,
         TData
       >
@@ -2092,48 +2081,48 @@ export const getGetFamilyGroupIdGroupMembersQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetFamilyGroupIdGroupMembersQueryKey(idGroup);
+    queryOptions?.queryKey ?? getGetGroupsGroupIdMembersQueryKey(groupId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
+    Awaited<ReturnType<typeof getGroupsGroupIdMembers>>
   > = ({ signal }) =>
-    getFamilyGroupIdGroupMembers(idGroup, { signal, ...requestOptions });
+    getGroupsGroupIdMembers(groupId, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!idGroup,
+    enabled: !!groupId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+    Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetFamilyGroupIdGroupMembersQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
+export type GetGroupsGroupIdMembersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getGroupsGroupIdMembers>>
 >;
-export type GetFamilyGroupIdGroupMembersQueryError = Error;
+export type GetGroupsGroupIdMembersQueryError = Error;
 
-export function useGetFamilyGroupIdGroupMembers<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+export function useGetGroupsGroupIdMembers<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+          Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
           TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
+          Awaited<ReturnType<typeof getGroupsGroupIdMembers>>
         >,
         "initialData"
       >;
@@ -2143,24 +2132,24 @@ export function useGetFamilyGroupIdGroupMembers<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetFamilyGroupIdGroupMembers<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+export function useGetGroupsGroupIdMembers<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+          Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
           TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
+          Awaited<ReturnType<typeof getGroupsGroupIdMembers>>
         >,
         "initialData"
       >;
@@ -2170,15 +2159,15 @@ export function useGetFamilyGroupIdGroupMembers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetFamilyGroupIdGroupMembers<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+export function useGetGroupsGroupIdMembers<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
         TError,
         TData
       >
@@ -2190,15 +2179,15 @@ export function useGetFamilyGroupIdGroupMembers<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetFamilyGroupIdGroupMembers<
-  TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+export function useGetGroupsGroupIdMembers<
+  TData = Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
   TError = Error
 >(
-  idGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        Awaited<ReturnType<typeof getGroupsGroupIdMembers>>,
         TError,
         TData
       >
@@ -2209,10 +2198,7 @@ export function useGetFamilyGroupIdGroupMembers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetFamilyGroupIdGroupMembersQueryOptions(
-    idGroup,
-    options
-  );
+  const queryOptions = getGetGroupsGroupIdMembersQueryOptions(groupId, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -2222,58 +2208,58 @@ export function useGetFamilyGroupIdGroupMembers<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type removeUserFromFamilyGroupResponse200 = {
+export type removeUserFromGroupResponse200 = {
   data: void;
   status: 200;
 };
 
-export type removeUserFromFamilyGroupResponse400 = {
+export type removeUserFromGroupResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type removeUserFromFamilyGroupResponse401 = {
+export type removeUserFromGroupResponse401 = {
   data: Error;
   status: 401;
 };
 
-export type removeUserFromFamilyGroupResponse403 = {
+export type removeUserFromGroupResponse403 = {
   data: Error;
   status: 403;
 };
 
-export type removeUserFromFamilyGroupResponse404 = {
+export type removeUserFromGroupResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type removeUserFromFamilyGroupResponse500 = {
+export type removeUserFromGroupResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type removeUserFromFamilyGroupResponseSuccess =
-  removeUserFromFamilyGroupResponse200 & {
+export type removeUserFromGroupResponseSuccess =
+  removeUserFromGroupResponse200 & {
     headers: Headers;
   };
-export type removeUserFromFamilyGroupResponseError = (
-  | removeUserFromFamilyGroupResponse400
-  | removeUserFromFamilyGroupResponse401
-  | removeUserFromFamilyGroupResponse403
-  | removeUserFromFamilyGroupResponse404
-  | removeUserFromFamilyGroupResponse500
+export type removeUserFromGroupResponseError = (
+  | removeUserFromGroupResponse400
+  | removeUserFromGroupResponse401
+  | removeUserFromGroupResponse403
+  | removeUserFromGroupResponse404
+  | removeUserFromGroupResponse500
 ) & {
   headers: Headers;
 };
 
-export type removeUserFromFamilyGroupResponse =
-  | removeUserFromFamilyGroupResponseSuccess
-  | removeUserFromFamilyGroupResponseError;
+export type removeUserFromGroupResponse =
+  | removeUserFromGroupResponseSuccess
+  | removeUserFromGroupResponseError;
 
-export const getRemoveUserFromFamilyGroupUrl = (
-  idGroup: string,
+export const getRemoveUserFromGroupUrl = (
+  groupId: string,
   idUser: string,
-  params?: RemoveUserFromFamilyGroupParams
+  params?: RemoveUserFromGroupParams
 ) => {
   const normalizedParams = new URLSearchParams();
 
@@ -2286,18 +2272,18 @@ export const getRemoveUserFromFamilyGroupUrl = (
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/familyGroup/${idGroup}/member/${idUser}?${stringifiedParams}`
-    : `/familyGroup/${idGroup}/member/${idUser}`;
+    ? `/groups/${groupId}/member/${idUser}?${stringifiedParams}`
+    : `/groups/${groupId}/member/${idUser}`;
 };
 
-export const removeUserFromFamilyGroup = async (
-  idGroup: string,
+export const removeUserFromGroup = async (
+  groupId: string,
   idUser: string,
-  params?: RemoveUserFromFamilyGroupParams,
+  params?: RemoveUserFromGroupParams,
   options?: RequestInit
-): Promise<removeUserFromFamilyGroupResponse> => {
-  return rnFetch<removeUserFromFamilyGroupResponse>(
-    getRemoveUserFromFamilyGroupUrl(idGroup, idUser, params),
+): Promise<removeUserFromGroupResponse> => {
+  return rnFetch<removeUserFromGroupResponse>(
+    getRemoveUserFromGroupUrl(groupId, idUser, params),
     {
       ...options,
       method: "DELETE",
@@ -2305,28 +2291,24 @@ export const removeUserFromFamilyGroup = async (
   );
 };
 
-export const getRemoveUserFromFamilyGroupMutationOptions = <
+export const getRemoveUserFromGroupMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
+    Awaited<ReturnType<typeof removeUserFromGroup>>,
     TError,
-    {
-      idGroup: string;
-      idUser: string;
-      params?: RemoveUserFromFamilyGroupParams;
-    },
+    { groupId: string; idUser: string; params?: RemoveUserFromGroupParams },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
+  Awaited<ReturnType<typeof removeUserFromGroup>>,
   TError,
-  { idGroup: string; idUser: string; params?: RemoveUserFromFamilyGroupParams },
+  { groupId: string; idUser: string; params?: RemoveUserFromGroupParams },
   TContext
 > => {
-  const mutationKey = ["removeUserFromFamilyGroup"];
+  const mutationKey = ["removeUserFromGroup"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2336,131 +2318,120 @@ export const getRemoveUserFromFamilyGroupMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
-    {
-      idGroup: string;
-      idUser: string;
-      params?: RemoveUserFromFamilyGroupParams;
-    }
+    Awaited<ReturnType<typeof removeUserFromGroup>>,
+    { groupId: string; idUser: string; params?: RemoveUserFromGroupParams }
   > = (props) => {
-    const { idGroup, idUser, params } = props ?? {};
+    const { groupId, idUser, params } = props ?? {};
 
-    return removeUserFromFamilyGroup(idGroup, idUser, params, requestOptions);
+    return removeUserFromGroup(groupId, idUser, params, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type RemoveUserFromFamilyGroupMutationResult = NonNullable<
-  Awaited<ReturnType<typeof removeUserFromFamilyGroup>>
+export type RemoveUserFromGroupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof removeUserFromGroup>>
 >;
 
-export type RemoveUserFromFamilyGroupMutationError = Error;
+export type RemoveUserFromGroupMutationError = Error;
 
-export const useRemoveUserFromFamilyGroup = <
-  TError = Error,
-  TContext = unknown
->(
+export const useRemoveUserFromGroup = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
+      Awaited<ReturnType<typeof removeUserFromGroup>>,
       TError,
-      {
-        idGroup: string;
-        idUser: string;
-        params?: RemoveUserFromFamilyGroupParams;
-      },
+      { groupId: string; idUser: string; params?: RemoveUserFromGroupParams },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
+  Awaited<ReturnType<typeof removeUserFromGroup>>,
   TError,
-  { idGroup: string; idUser: string; params?: RemoveUserFromFamilyGroupParams },
+  { groupId: string; idUser: string; params?: RemoveUserFromGroupParams },
   TContext
 > => {
   return useMutation(
-    getRemoveUserFromFamilyGroupMutationOptions(options),
+    getRemoveUserFromGroupMutationOptions(options),
     queryClient
   );
 };
 
-export type patchFamilyGroupIdGroupResponse200 = {
-  data: PatchFamilyGroupIdGroup200;
+export type patchGroupsGroupIdResponse200 = {
+  data: PatchGroupsGroupId200;
   status: 200;
 };
 
-export type patchFamilyGroupIdGroupResponse400 = {
+export type patchGroupsGroupIdResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type patchFamilyGroupIdGroupResponse404 = {
+export type patchGroupsGroupIdResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type patchFamilyGroupIdGroupResponse500 = {
+export type patchGroupsGroupIdResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type patchFamilyGroupIdGroupResponseSuccess =
-  patchFamilyGroupIdGroupResponse200 & {
+export type patchGroupsGroupIdResponseSuccess =
+  patchGroupsGroupIdResponse200 & {
     headers: Headers;
   };
-export type patchFamilyGroupIdGroupResponseError = (
-  | patchFamilyGroupIdGroupResponse400
-  | patchFamilyGroupIdGroupResponse404
-  | patchFamilyGroupIdGroupResponse500
+export type patchGroupsGroupIdResponseError = (
+  | patchGroupsGroupIdResponse400
+  | patchGroupsGroupIdResponse404
+  | patchGroupsGroupIdResponse500
 ) & {
   headers: Headers;
 };
 
-export type patchFamilyGroupIdGroupResponse =
-  | patchFamilyGroupIdGroupResponseSuccess
-  | patchFamilyGroupIdGroupResponseError;
+export type patchGroupsGroupIdResponse =
+  | patchGroupsGroupIdResponseSuccess
+  | patchGroupsGroupIdResponseError;
 
-export const getPatchFamilyGroupIdGroupUrl = (idGroup: string) => {
-  return `/familyGroup/${idGroup}`;
+export const getPatchGroupsGroupIdUrl = (groupId: string) => {
+  return `/groups/${groupId}`;
 };
 
-export const patchFamilyGroupIdGroup = async (
-  idGroup: string,
-  updateFamilyGroup: UpdateFamilyGroup,
+export const patchGroupsGroupId = async (
+  groupId: string,
+  updateGroup: UpdateGroup,
   options?: RequestInit
-): Promise<patchFamilyGroupIdGroupResponse> => {
-  return rnFetch<patchFamilyGroupIdGroupResponse>(
-    getPatchFamilyGroupIdGroupUrl(idGroup),
+): Promise<patchGroupsGroupIdResponse> => {
+  return rnFetch<patchGroupsGroupIdResponse>(
+    getPatchGroupsGroupIdUrl(groupId),
     {
       ...options,
       method: "PATCH",
       headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(updateFamilyGroup),
+      body: JSON.stringify(updateGroup),
     }
   );
 };
 
-export const getPatchFamilyGroupIdGroupMutationOptions = <
+export const getPatchGroupsGroupIdMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
+    Awaited<ReturnType<typeof patchGroupsGroupId>>,
     TError,
-    { idGroup: string; data: UpdateFamilyGroup },
+    { groupId: string; data: UpdateGroup },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
+  Awaited<ReturnType<typeof patchGroupsGroupId>>,
   TError,
-  { idGroup: string; data: UpdateFamilyGroup },
+  { groupId: string; data: UpdateGroup },
   TContext
 > => {
-  const mutationKey = ["patchFamilyGroupIdGroup"];
+  const mutationKey = ["patchGroupsGroupId"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2470,105 +2441,105 @@ export const getPatchFamilyGroupIdGroupMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
-    { idGroup: string; data: UpdateFamilyGroup }
+    Awaited<ReturnType<typeof patchGroupsGroupId>>,
+    { groupId: string; data: UpdateGroup }
   > = (props) => {
-    const { idGroup, data } = props ?? {};
+    const { groupId, data } = props ?? {};
 
-    return patchFamilyGroupIdGroup(idGroup, data, requestOptions);
+    return patchGroupsGroupId(groupId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchFamilyGroupIdGroupMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>
+export type PatchGroupsGroupIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof patchGroupsGroupId>>
 >;
-export type PatchFamilyGroupIdGroupMutationBody = UpdateFamilyGroup;
-export type PatchFamilyGroupIdGroupMutationError = Error;
+export type PatchGroupsGroupIdMutationBody = UpdateGroup;
+export type PatchGroupsGroupIdMutationError = Error;
 
-export const usePatchFamilyGroupIdGroup = <TError = Error, TContext = unknown>(
+export const usePatchGroupsGroupId = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
+      Awaited<ReturnType<typeof patchGroupsGroupId>>,
       TError,
-      { idGroup: string; data: UpdateFamilyGroup },
+      { groupId: string; data: UpdateGroup },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
+  Awaited<ReturnType<typeof patchGroupsGroupId>>,
   TError,
-  { idGroup: string; data: UpdateFamilyGroup },
+  { groupId: string; data: UpdateGroup },
   TContext
 > => {
   return useMutation(
-    getPatchFamilyGroupIdGroupMutationOptions(options),
+    getPatchGroupsGroupIdMutationOptions(options),
     queryClient
   );
 };
 
-export type transferFamilyGroupOwnershipResponse200 = {
-  data: TransferFamilyGroupOwnership200;
+export type transferGroupOwnershipResponse200 = {
+  data: TransferGroupOwnership200;
   status: 200;
 };
 
-export type transferFamilyGroupOwnershipResponse400 = {
+export type transferGroupOwnershipResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type transferFamilyGroupOwnershipResponse401 = {
+export type transferGroupOwnershipResponse401 = {
   data: Error;
   status: 401;
 };
 
-export type transferFamilyGroupOwnershipResponse403 = {
+export type transferGroupOwnershipResponse403 = {
   data: Error;
   status: 403;
 };
 
-export type transferFamilyGroupOwnershipResponse404 = {
+export type transferGroupOwnershipResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type transferFamilyGroupOwnershipResponse500 = {
+export type transferGroupOwnershipResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type transferFamilyGroupOwnershipResponseSuccess =
-  transferFamilyGroupOwnershipResponse200 & {
+export type transferGroupOwnershipResponseSuccess =
+  transferGroupOwnershipResponse200 & {
     headers: Headers;
   };
-export type transferFamilyGroupOwnershipResponseError = (
-  | transferFamilyGroupOwnershipResponse400
-  | transferFamilyGroupOwnershipResponse401
-  | transferFamilyGroupOwnershipResponse403
-  | transferFamilyGroupOwnershipResponse404
-  | transferFamilyGroupOwnershipResponse500
+export type transferGroupOwnershipResponseError = (
+  | transferGroupOwnershipResponse400
+  | transferGroupOwnershipResponse401
+  | transferGroupOwnershipResponse403
+  | transferGroupOwnershipResponse404
+  | transferGroupOwnershipResponse500
 ) & {
   headers: Headers;
 };
 
-export type transferFamilyGroupOwnershipResponse =
-  | transferFamilyGroupOwnershipResponseSuccess
-  | transferFamilyGroupOwnershipResponseError;
+export type transferGroupOwnershipResponse =
+  | transferGroupOwnershipResponseSuccess
+  | transferGroupOwnershipResponseError;
 
-export const getTransferFamilyGroupOwnershipUrl = (idGroup: string) => {
-  return `/familyGroup/${idGroup}/transfer-ownership`;
+export const getTransferGroupOwnershipUrl = (groupId: string) => {
+  return `/groups/${groupId}/transfer-ownership`;
 };
 
-export const transferFamilyGroupOwnership = async (
-  idGroup: string,
+export const transferGroupOwnership = async (
+  groupId: string,
   transferOwnership: TransferOwnership,
   options?: RequestInit
-): Promise<transferFamilyGroupOwnershipResponse> => {
-  return rnFetch<transferFamilyGroupOwnershipResponse>(
-    getTransferFamilyGroupOwnershipUrl(idGroup),
+): Promise<transferGroupOwnershipResponse> => {
+  return rnFetch<transferGroupOwnershipResponse>(
+    getTransferGroupOwnershipUrl(groupId),
     {
       ...options,
       method: "PUT",
@@ -2578,24 +2549,24 @@ export const transferFamilyGroupOwnership = async (
   );
 };
 
-export const getTransferFamilyGroupOwnershipMutationOptions = <
+export const getTransferGroupOwnershipMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
+    Awaited<ReturnType<typeof transferGroupOwnership>>,
     TError,
-    { idGroup: string; data: TransferOwnership },
+    { groupId: string; data: TransferOwnership },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
+  Awaited<ReturnType<typeof transferGroupOwnership>>,
   TError,
-  { idGroup: string; data: TransferOwnership },
+  { groupId: string; data: TransferOwnership },
   TContext
 > => {
-  const mutationKey = ["transferFamilyGroupOwnership"];
+  const mutationKey = ["transferGroupOwnership"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2605,119 +2576,112 @@ export const getTransferFamilyGroupOwnershipMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
-    { idGroup: string; data: TransferOwnership }
+    Awaited<ReturnType<typeof transferGroupOwnership>>,
+    { groupId: string; data: TransferOwnership }
   > = (props) => {
-    const { idGroup, data } = props ?? {};
+    const { groupId, data } = props ?? {};
 
-    return transferFamilyGroupOwnership(idGroup, data, requestOptions);
+    return transferGroupOwnership(groupId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type TransferFamilyGroupOwnershipMutationResult = NonNullable<
-  Awaited<ReturnType<typeof transferFamilyGroupOwnership>>
+export type TransferGroupOwnershipMutationResult = NonNullable<
+  Awaited<ReturnType<typeof transferGroupOwnership>>
 >;
-export type TransferFamilyGroupOwnershipMutationBody = TransferOwnership;
-export type TransferFamilyGroupOwnershipMutationError = Error;
+export type TransferGroupOwnershipMutationBody = TransferOwnership;
+export type TransferGroupOwnershipMutationError = Error;
 
-export const useTransferFamilyGroupOwnership = <
-  TError = Error,
-  TContext = unknown
->(
+export const useTransferGroupOwnership = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
+      Awaited<ReturnType<typeof transferGroupOwnership>>,
       TError,
-      { idGroup: string; data: TransferOwnership },
+      { groupId: string; data: TransferOwnership },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
+  Awaited<ReturnType<typeof transferGroupOwnership>>,
   TError,
-  { idGroup: string; data: TransferOwnership },
+  { groupId: string; data: TransferOwnership },
   TContext
 > => {
   return useMutation(
-    getTransferFamilyGroupOwnershipMutationOptions(options),
+    getTransferGroupOwnershipMutationOptions(options),
     queryClient
   );
 };
 
-export type getActivitiesIdResponse200 = {
-  data: Activity;
+export type getDatesIdResponse200 = {
+  data: DateEvent;
   status: 200;
 };
 
-export type getActivitiesIdResponse404 = {
+export type getDatesIdResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type getActivitiesIdResponse500 = {
+export type getDatesIdResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type getActivitiesIdResponseSuccess = getActivitiesIdResponse200 & {
+export type getDatesIdResponseSuccess = getDatesIdResponse200 & {
   headers: Headers;
 };
-export type getActivitiesIdResponseError = (
-  | getActivitiesIdResponse404
-  | getActivitiesIdResponse500
+export type getDatesIdResponseError = (
+  | getDatesIdResponse404
+  | getDatesIdResponse500
 ) & {
   headers: Headers;
 };
 
-export type getActivitiesIdResponse =
-  | getActivitiesIdResponseSuccess
-  | getActivitiesIdResponseError;
+export type getDatesIdResponse =
+  | getDatesIdResponseSuccess
+  | getDatesIdResponseError;
 
-export const getGetActivitiesIdUrl = (id: string) => {
-  return `/activities/${id}`;
+export const getGetDatesIdUrl = (id: string) => {
+  return `/dates/${id}`;
 };
 
-export const getActivitiesId = async (
+export const getDatesId = async (
   id: string,
   options?: RequestInit
-): Promise<getActivitiesIdResponse> => {
-  return rnFetch<getActivitiesIdResponse>(getGetActivitiesIdUrl(id), {
+): Promise<getDatesIdResponse> => {
+  return rnFetch<getDatesIdResponse>(getGetDatesIdUrl(id), {
     ...options,
     method: "GET",
   });
 };
 
-export const getGetActivitiesIdQueryKey = (id: string) => {
-  return [`/activities/${id}`] as const;
+export const getGetDatesIdQueryKey = (id: string) => {
+  return [`/dates/${id}`] as const;
 };
 
-export const getGetActivitiesIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getActivitiesId>>,
+export const getGetDatesIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDatesId>>,
   TError = Error
 >(
   id: string,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesId>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getDatesId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
   }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetActivitiesIdQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetDatesIdQueryKey(id);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getActivitiesId>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getDatesId>>> = ({
     signal,
-  }) => getActivitiesId(id, { signal, ...requestOptions });
+  }) => getDatesId(id, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -2725,35 +2689,31 @@ export const getGetActivitiesIdQueryOptions = <
     enabled: !!id,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getActivitiesId>>,
+    Awaited<ReturnType<typeof getDatesId>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetActivitiesIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getActivitiesId>>
+export type GetDatesIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDatesId>>
 >;
-export type GetActivitiesIdQueryError = Error;
+export type GetDatesIdQueryError = Error;
 
-export function useGetActivitiesId<
-  TData = Awaited<ReturnType<typeof getActivitiesId>>,
+export function useGetDatesId<
+  TData = Awaited<ReturnType<typeof getDatesId>>,
   TError = Error
 >(
   id: string,
   options: {
     query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesId>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getDatesId>>, TError, TData>
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesId>>,
+          Awaited<ReturnType<typeof getDatesId>>,
           TError,
-          Awaited<ReturnType<typeof getActivitiesId>>
+          Awaited<ReturnType<typeof getDatesId>>
         >,
         "initialData"
       >;
@@ -2763,24 +2723,20 @@ export function useGetActivitiesId<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivitiesId<
-  TData = Awaited<ReturnType<typeof getActivitiesId>>,
+export function useGetDatesId<
+  TData = Awaited<ReturnType<typeof getDatesId>>,
   TError = Error
 >(
   id: string,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesId>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getDatesId>>, TError, TData>
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesId>>,
+          Awaited<ReturnType<typeof getDatesId>>,
           TError,
-          Awaited<ReturnType<typeof getActivitiesId>>
+          Awaited<ReturnType<typeof getDatesId>>
         >,
         "initialData"
       >;
@@ -2790,18 +2746,14 @@ export function useGetActivitiesId<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivitiesId<
-  TData = Awaited<ReturnType<typeof getActivitiesId>>,
+export function useGetDatesId<
+  TData = Awaited<ReturnType<typeof getDatesId>>,
   TError = Error
 >(
   id: string,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesId>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getDatesId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
@@ -2810,18 +2762,14 @@ export function useGetActivitiesId<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetActivitiesId<
-  TData = Awaited<ReturnType<typeof getActivitiesId>>,
+export function useGetDatesId<
+  TData = Awaited<ReturnType<typeof getDatesId>>,
   TError = Error
 >(
   id: string,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesId>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getDatesId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
@@ -2829,7 +2777,7 @@ export function useGetActivitiesId<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetActivitiesIdQueryOptions(id, options);
+  const queryOptions = getGetDatesIdQueryOptions(id, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -2839,76 +2787,76 @@ export function useGetActivitiesId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type patchActivitiesIdResponse200 = {
-  data: Activity;
+export type patchDatesIdResponse200 = {
+  data: DateEvent;
   status: 200;
 };
 
-export type patchActivitiesIdResponse400 = {
+export type patchDatesIdResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type patchActivitiesIdResponse404 = {
+export type patchDatesIdResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type patchActivitiesIdResponse500 = {
+export type patchDatesIdResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type patchActivitiesIdResponseSuccess = patchActivitiesIdResponse200 & {
+export type patchDatesIdResponseSuccess = patchDatesIdResponse200 & {
   headers: Headers;
 };
-export type patchActivitiesIdResponseError = (
-  | patchActivitiesIdResponse400
-  | patchActivitiesIdResponse404
-  | patchActivitiesIdResponse500
+export type patchDatesIdResponseError = (
+  | patchDatesIdResponse400
+  | patchDatesIdResponse404
+  | patchDatesIdResponse500
 ) & {
   headers: Headers;
 };
 
-export type patchActivitiesIdResponse =
-  | patchActivitiesIdResponseSuccess
-  | patchActivitiesIdResponseError;
+export type patchDatesIdResponse =
+  | patchDatesIdResponseSuccess
+  | patchDatesIdResponseError;
 
-export const getPatchActivitiesIdUrl = (id: string) => {
-  return `/activities/${id}`;
+export const getPatchDatesIdUrl = (id: string) => {
+  return `/dates/${id}`;
 };
 
-export const patchActivitiesId = async (
+export const patchDatesId = async (
   id: string,
-  updateActivity: UpdateActivity,
+  updateDateEvent: UpdateDateEvent,
   options?: RequestInit
-): Promise<patchActivitiesIdResponse> => {
-  return rnFetch<patchActivitiesIdResponse>(getPatchActivitiesIdUrl(id), {
+): Promise<patchDatesIdResponse> => {
+  return rnFetch<patchDatesIdResponse>(getPatchDatesIdUrl(id), {
     ...options,
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(updateActivity),
+    body: JSON.stringify(updateDateEvent),
   });
 };
 
-export const getPatchActivitiesIdMutationOptions = <
+export const getPatchDatesIdMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof patchActivitiesId>>,
+    Awaited<ReturnType<typeof patchDatesId>>,
     TError,
-    { id: string; data: UpdateActivity },
+    { id: string; data: UpdateDateEvent },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof patchActivitiesId>>,
+  Awaited<ReturnType<typeof patchDatesId>>,
   TError,
-  { id: string; data: UpdateActivity },
+  { id: string; data: UpdateDateEvent },
   TContext
 > => {
-  const mutationKey = ["patchActivitiesId"];
+  const mutationKey = ["patchDatesId"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2918,105 +2866,104 @@ export const getPatchActivitiesIdMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof patchActivitiesId>>,
-    { id: string; data: UpdateActivity }
+    Awaited<ReturnType<typeof patchDatesId>>,
+    { id: string; data: UpdateDateEvent }
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return patchActivitiesId(id, data, requestOptions);
+    return patchDatesId(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PatchActivitiesIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof patchActivitiesId>>
+export type PatchDatesIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof patchDatesId>>
 >;
-export type PatchActivitiesIdMutationBody = UpdateActivity;
-export type PatchActivitiesIdMutationError = Error;
+export type PatchDatesIdMutationBody = UpdateDateEvent;
+export type PatchDatesIdMutationError = Error;
 
-export const usePatchActivitiesId = <TError = Error, TContext = unknown>(
+export const usePatchDatesId = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof patchActivitiesId>>,
+      Awaited<ReturnType<typeof patchDatesId>>,
       TError,
-      { id: string; data: UpdateActivity },
+      { id: string; data: UpdateDateEvent },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof patchActivitiesId>>,
+  Awaited<ReturnType<typeof patchDatesId>>,
   TError,
-  { id: string; data: UpdateActivity },
+  { id: string; data: UpdateDateEvent },
   TContext
 > => {
-  return useMutation(getPatchActivitiesIdMutationOptions(options), queryClient);
+  return useMutation(getPatchDatesIdMutationOptions(options), queryClient);
 };
 
-export type deleteActivitiesIdResponse204 = {
+export type deleteDatesIdResponse204 = {
   data: void;
   status: 204;
 };
 
-export type deleteActivitiesIdResponse404 = {
+export type deleteDatesIdResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type deleteActivitiesIdResponse500 = {
+export type deleteDatesIdResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type deleteActivitiesIdResponseSuccess =
-  deleteActivitiesIdResponse204 & {
-    headers: Headers;
-  };
-export type deleteActivitiesIdResponseError = (
-  | deleteActivitiesIdResponse404
-  | deleteActivitiesIdResponse500
+export type deleteDatesIdResponseSuccess = deleteDatesIdResponse204 & {
+  headers: Headers;
+};
+export type deleteDatesIdResponseError = (
+  | deleteDatesIdResponse404
+  | deleteDatesIdResponse500
 ) & {
   headers: Headers;
 };
 
-export type deleteActivitiesIdResponse =
-  | deleteActivitiesIdResponseSuccess
-  | deleteActivitiesIdResponseError;
+export type deleteDatesIdResponse =
+  | deleteDatesIdResponseSuccess
+  | deleteDatesIdResponseError;
 
-export const getDeleteActivitiesIdUrl = (id: string) => {
-  return `/activities/${id}`;
+export const getDeleteDatesIdUrl = (id: string) => {
+  return `/dates/${id}`;
 };
 
-export const deleteActivitiesId = async (
+export const deleteDatesId = async (
   id: string,
   options?: RequestInit
-): Promise<deleteActivitiesIdResponse> => {
-  return rnFetch<deleteActivitiesIdResponse>(getDeleteActivitiesIdUrl(id), {
+): Promise<deleteDatesIdResponse> => {
+  return rnFetch<deleteDatesIdResponse>(getDeleteDatesIdUrl(id), {
     ...options,
     method: "DELETE",
   });
 };
 
-export const getDeleteActivitiesIdMutationOptions = <
+export const getDeleteDatesIdMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteActivitiesId>>,
+    Awaited<ReturnType<typeof deleteDatesId>>,
     TError,
     { id: string },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteActivitiesId>>,
+  Awaited<ReturnType<typeof deleteDatesId>>,
   TError,
   { id: string },
   TContext
 > => {
-  const mutationKey = ["deleteActivitiesId"];
+  const mutationKey = ["deleteDatesId"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3026,27 +2973,27 @@ export const getDeleteActivitiesIdMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteActivitiesId>>,
+    Awaited<ReturnType<typeof deleteDatesId>>,
     { id: string }
   > = (props) => {
     const { id } = props ?? {};
 
-    return deleteActivitiesId(id, requestOptions);
+    return deleteDatesId(id, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type DeleteActivitiesIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteActivitiesId>>
+export type DeleteDatesIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteDatesId>>
 >;
 
-export type DeleteActivitiesIdMutationError = Error;
+export type DeleteDatesIdMutationError = Error;
 
-export const useDeleteActivitiesId = <TError = Error, TContext = unknown>(
+export const useDeleteDatesId = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteActivitiesId>>,
+      Awaited<ReturnType<typeof deleteDatesId>>,
       TError,
       { id: string },
       TContext
@@ -3055,59 +3002,54 @@ export const useDeleteActivitiesId = <TError = Error, TContext = unknown>(
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof deleteActivitiesId>>,
+  Awaited<ReturnType<typeof deleteDatesId>>,
   TError,
   { id: string },
   TContext
 > => {
-  return useMutation(
-    getDeleteActivitiesIdMutationOptions(options),
-    queryClient
-  );
+  return useMutation(getDeleteDatesIdMutationOptions(options), queryClient);
 };
 
-export type getActivitiesFamilyCodeIdFamilyGroupResponse200 = {
-  data: Activity[];
+export type getDatesGroupGroupIdResponse200 = {
+  data: DateEvent[];
   status: 200;
 };
 
-export type getActivitiesFamilyCodeIdFamilyGroupResponse404 = {
+export type getDatesGroupGroupIdResponse404 = {
   data: Error;
   status: 404;
 };
 
-export type getActivitiesFamilyCodeIdFamilyGroupResponse500 = {
+export type getDatesGroupGroupIdResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type getActivitiesFamilyCodeIdFamilyGroupResponseSuccess =
-  getActivitiesFamilyCodeIdFamilyGroupResponse200 & {
+export type getDatesGroupGroupIdResponseSuccess =
+  getDatesGroupGroupIdResponse200 & {
     headers: Headers;
   };
-export type getActivitiesFamilyCodeIdFamilyGroupResponseError = (
-  | getActivitiesFamilyCodeIdFamilyGroupResponse404
-  | getActivitiesFamilyCodeIdFamilyGroupResponse500
+export type getDatesGroupGroupIdResponseError = (
+  | getDatesGroupGroupIdResponse404
+  | getDatesGroupGroupIdResponse500
 ) & {
   headers: Headers;
 };
 
-export type getActivitiesFamilyCodeIdFamilyGroupResponse =
-  | getActivitiesFamilyCodeIdFamilyGroupResponseSuccess
-  | getActivitiesFamilyCodeIdFamilyGroupResponseError;
+export type getDatesGroupGroupIdResponse =
+  | getDatesGroupGroupIdResponseSuccess
+  | getDatesGroupGroupIdResponseError;
 
-export const getGetActivitiesFamilyCodeIdFamilyGroupUrl = (
-  idFamilyGroup: string
-) => {
-  return `/activities/familyCode/${idFamilyGroup}`;
+export const getGetDatesGroupGroupIdUrl = (groupId: string) => {
+  return `/dates/group/${groupId}`;
 };
 
-export const getActivitiesFamilyCodeIdFamilyGroup = async (
-  idFamilyGroup: string,
+export const getDatesGroupGroupId = async (
+  groupId: string,
   options?: RequestInit
-): Promise<getActivitiesFamilyCodeIdFamilyGroupResponse> => {
-  return rnFetch<getActivitiesFamilyCodeIdFamilyGroupResponse>(
-    getGetActivitiesFamilyCodeIdFamilyGroupUrl(idFamilyGroup),
+): Promise<getDatesGroupGroupIdResponse> => {
+  return rnFetch<getDatesGroupGroupIdResponse>(
+    getGetDatesGroupGroupIdUrl(groupId),
     {
       ...options,
       method: "GET",
@@ -3115,21 +3057,19 @@ export const getActivitiesFamilyCodeIdFamilyGroup = async (
   );
 };
 
-export const getGetActivitiesFamilyCodeIdFamilyGroupQueryKey = (
-  idFamilyGroup: string
-) => {
-  return [`/activities/familyCode/${idFamilyGroup}`] as const;
+export const getGetDatesGroupGroupIdQueryKey = (groupId: string) => {
+  return [`/dates/group/${groupId}`] as const;
 };
 
-export const getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions = <
-  TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+export const getGetDatesGroupGroupIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDatesGroupGroupId>>,
   TError = Error
 >(
-  idFamilyGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        Awaited<ReturnType<typeof getDatesGroupGroupId>>,
         TError,
         TData
       >
@@ -3140,52 +3080,48 @@ export const getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getGetActivitiesFamilyCodeIdFamilyGroupQueryKey(idFamilyGroup);
+    queryOptions?.queryKey ?? getGetDatesGroupGroupIdQueryKey(groupId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
+    Awaited<ReturnType<typeof getDatesGroupGroupId>>
   > = ({ signal }) =>
-    getActivitiesFamilyCodeIdFamilyGroup(idFamilyGroup, {
-      signal,
-      ...requestOptions,
-    });
+    getDatesGroupGroupId(groupId, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!idFamilyGroup,
+    enabled: !!groupId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+    Awaited<ReturnType<typeof getDatesGroupGroupId>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetActivitiesFamilyCodeIdFamilyGroupQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
+export type GetDatesGroupGroupIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDatesGroupGroupId>>
 >;
-export type GetActivitiesFamilyCodeIdFamilyGroupQueryError = Error;
+export type GetDatesGroupGroupIdQueryError = Error;
 
-export function useGetActivitiesFamilyCodeIdFamilyGroup<
-  TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+export function useGetDatesGroupGroupId<
+  TData = Awaited<ReturnType<typeof getDatesGroupGroupId>>,
   TError = Error
 >(
-  idFamilyGroup: string,
+  groupId: string,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        Awaited<ReturnType<typeof getDatesGroupGroupId>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+          Awaited<ReturnType<typeof getDatesGroupGroupId>>,
           TError,
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
+          Awaited<ReturnType<typeof getDatesGroupGroupId>>
         >,
         "initialData"
       >;
@@ -3195,24 +3131,24 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivitiesFamilyCodeIdFamilyGroup<
-  TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+export function useGetDatesGroupGroupId<
+  TData = Awaited<ReturnType<typeof getDatesGroupGroupId>>,
   TError = Error
 >(
-  idFamilyGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        Awaited<ReturnType<typeof getDatesGroupGroupId>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+          Awaited<ReturnType<typeof getDatesGroupGroupId>>,
           TError,
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
+          Awaited<ReturnType<typeof getDatesGroupGroupId>>
         >,
         "initialData"
       >;
@@ -3222,15 +3158,15 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivitiesFamilyCodeIdFamilyGroup<
-  TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+export function useGetDatesGroupGroupId<
+  TData = Awaited<ReturnType<typeof getDatesGroupGroupId>>,
   TError = Error
 >(
-  idFamilyGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        Awaited<ReturnType<typeof getDatesGroupGroupId>>,
         TError,
         TData
       >
@@ -3242,15 +3178,15 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetActivitiesFamilyCodeIdFamilyGroup<
-  TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+export function useGetDatesGroupGroupId<
+  TData = Awaited<ReturnType<typeof getDatesGroupGroupId>>,
   TError = Error
 >(
-  idFamilyGroup: string,
+  groupId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        Awaited<ReturnType<typeof getDatesGroupGroupId>>,
         TError,
         TData
       >
@@ -3261,10 +3197,7 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions(
-    idFamilyGroup,
-    options
-  );
+  const queryOptions = getGetDatesGroupGroupIdQueryOptions(groupId, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -3274,69 +3207,69 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postActivitiesResponse201 = {
-  data: Activity;
+export type postDatesResponse201 = {
+  data: DateEvent;
   status: 201;
 };
 
-export type postActivitiesResponse400 = {
+export type postDatesResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postActivitiesResponse500 = {
+export type postDatesResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postActivitiesResponseSuccess = postActivitiesResponse201 & {
+export type postDatesResponseSuccess = postDatesResponse201 & {
   headers: Headers;
 };
-export type postActivitiesResponseError = (
-  | postActivitiesResponse400
-  | postActivitiesResponse500
+export type postDatesResponseError = (
+  | postDatesResponse400
+  | postDatesResponse500
 ) & {
   headers: Headers;
 };
 
-export type postActivitiesResponse =
-  | postActivitiesResponseSuccess
-  | postActivitiesResponseError;
+export type postDatesResponse =
+  | postDatesResponseSuccess
+  | postDatesResponseError;
 
-export const getPostActivitiesUrl = () => {
-  return `/activities`;
+export const getPostDatesUrl = () => {
+  return `/dates`;
 };
 
-export const postActivities = async (
-  newActivity: NewActivity,
+export const postDates = async (
+  newDateEvent: NewDateEvent,
   options?: RequestInit
-): Promise<postActivitiesResponse> => {
-  return rnFetch<postActivitiesResponse>(getPostActivitiesUrl(), {
+): Promise<postDatesResponse> => {
+  return rnFetch<postDatesResponse>(getPostDatesUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(newActivity),
+    body: JSON.stringify(newDateEvent),
   });
 };
 
-export const getPostActivitiesMutationOptions = <
+export const getPostDatesMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postActivities>>,
+    Awaited<ReturnType<typeof postDates>>,
     TError,
-    { data: NewActivity },
+    { data: NewDateEvent },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postActivities>>,
+  Awaited<ReturnType<typeof postDates>>,
   TError,
-  { data: NewActivity },
+  { data: NewDateEvent },
   TContext
 > => {
-  const mutationKey = ["postActivities"];
+  const mutationKey = ["postDates"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3346,110 +3279,110 @@ export const getPostActivitiesMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postActivities>>,
-    { data: NewActivity }
+    Awaited<ReturnType<typeof postDates>>,
+    { data: NewDateEvent }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postActivities(data, requestOptions);
+    return postDates(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostActivitiesMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postActivities>>
+export type PostDatesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postDates>>
 >;
-export type PostActivitiesMutationBody = NewActivity;
-export type PostActivitiesMutationError = Error;
+export type PostDatesMutationBody = NewDateEvent;
+export type PostDatesMutationError = Error;
 
-export const usePostActivities = <TError = Error, TContext = unknown>(
+export const usePostDates = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postActivities>>,
+      Awaited<ReturnType<typeof postDates>>,
       TError,
-      { data: NewActivity },
+      { data: NewDateEvent },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postActivities>>,
+  Awaited<ReturnType<typeof postDates>>,
   TError,
-  { data: NewActivity },
+  { data: NewDateEvent },
   TContext
 > => {
-  return useMutation(getPostActivitiesMutationOptions(options), queryClient);
+  return useMutation(getPostDatesMutationOptions(options), queryClient);
 };
 
-export type postActivitiesGoogleCalendarEnableResponse200 = {
-  data: PostActivitiesGoogleCalendarEnable200;
+export type postDatesGoogleCalendarEnableResponse200 = {
+  data: PostDatesGoogleCalendarEnable200;
   status: 200;
 };
 
-export type postActivitiesGoogleCalendarEnableResponse400 = {
+export type postDatesGoogleCalendarEnableResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postActivitiesGoogleCalendarEnableResponse500 = {
+export type postDatesGoogleCalendarEnableResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postActivitiesGoogleCalendarEnableResponseSuccess =
-  postActivitiesGoogleCalendarEnableResponse200 & {
+export type postDatesGoogleCalendarEnableResponseSuccess =
+  postDatesGoogleCalendarEnableResponse200 & {
     headers: Headers;
   };
-export type postActivitiesGoogleCalendarEnableResponseError = (
-  | postActivitiesGoogleCalendarEnableResponse400
-  | postActivitiesGoogleCalendarEnableResponse500
+export type postDatesGoogleCalendarEnableResponseError = (
+  | postDatesGoogleCalendarEnableResponse400
+  | postDatesGoogleCalendarEnableResponse500
 ) & {
   headers: Headers;
 };
 
-export type postActivitiesGoogleCalendarEnableResponse =
-  | postActivitiesGoogleCalendarEnableResponseSuccess
-  | postActivitiesGoogleCalendarEnableResponseError;
+export type postDatesGoogleCalendarEnableResponse =
+  | postDatesGoogleCalendarEnableResponseSuccess
+  | postDatesGoogleCalendarEnableResponseError;
 
-export const getPostActivitiesGoogleCalendarEnableUrl = () => {
-  return `/activities/google-calendar/enable`;
+export const getPostDatesGoogleCalendarEnableUrl = () => {
+  return `/dates/google-calendar/enable`;
 };
 
-export const postActivitiesGoogleCalendarEnable = async (
-  postActivitiesGoogleCalendarEnableBody: PostActivitiesGoogleCalendarEnableBody,
+export const postDatesGoogleCalendarEnable = async (
+  postDatesGoogleCalendarEnableBody: PostDatesGoogleCalendarEnableBody,
   options?: RequestInit
-): Promise<postActivitiesGoogleCalendarEnableResponse> => {
-  return rnFetch<postActivitiesGoogleCalendarEnableResponse>(
-    getPostActivitiesGoogleCalendarEnableUrl(),
+): Promise<postDatesGoogleCalendarEnableResponse> => {
+  return rnFetch<postDatesGoogleCalendarEnableResponse>(
+    getPostDatesGoogleCalendarEnableUrl(),
     {
       ...options,
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(postActivitiesGoogleCalendarEnableBody),
+      body: JSON.stringify(postDatesGoogleCalendarEnableBody),
     }
   );
 };
 
-export const getPostActivitiesGoogleCalendarEnableMutationOptions = <
+export const getPostDatesGoogleCalendarEnableMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+    Awaited<ReturnType<typeof postDatesGoogleCalendarEnable>>,
     TError,
-    { data: PostActivitiesGoogleCalendarEnableBody },
+    { data: PostDatesGoogleCalendarEnableBody },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+  Awaited<ReturnType<typeof postDatesGoogleCalendarEnable>>,
   TError,
-  { data: PostActivitiesGoogleCalendarEnableBody },
+  { data: PostDatesGoogleCalendarEnableBody },
   TContext
 > => {
-  const mutationKey = ["postActivitiesGoogleCalendarEnable"];
+  const mutationKey = ["postDatesGoogleCalendarEnable"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3459,89 +3392,89 @@ export const getPostActivitiesGoogleCalendarEnableMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
-    { data: PostActivitiesGoogleCalendarEnableBody }
+    Awaited<ReturnType<typeof postDatesGoogleCalendarEnable>>,
+    { data: PostDatesGoogleCalendarEnableBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postActivitiesGoogleCalendarEnable(data, requestOptions);
+    return postDatesGoogleCalendarEnable(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostActivitiesGoogleCalendarEnableMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>
+export type PostDatesGoogleCalendarEnableMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postDatesGoogleCalendarEnable>>
 >;
-export type PostActivitiesGoogleCalendarEnableMutationBody =
-  PostActivitiesGoogleCalendarEnableBody;
-export type PostActivitiesGoogleCalendarEnableMutationError = Error;
+export type PostDatesGoogleCalendarEnableMutationBody =
+  PostDatesGoogleCalendarEnableBody;
+export type PostDatesGoogleCalendarEnableMutationError = Error;
 
-export const usePostActivitiesGoogleCalendarEnable = <
+export const usePostDatesGoogleCalendarEnable = <
   TError = Error,
   TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+      Awaited<ReturnType<typeof postDatesGoogleCalendarEnable>>,
       TError,
-      { data: PostActivitiesGoogleCalendarEnableBody },
+      { data: PostDatesGoogleCalendarEnableBody },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+  Awaited<ReturnType<typeof postDatesGoogleCalendarEnable>>,
   TError,
-  { data: PostActivitiesGoogleCalendarEnableBody },
+  { data: PostDatesGoogleCalendarEnableBody },
   TContext
 > => {
   return useMutation(
-    getPostActivitiesGoogleCalendarEnableMutationOptions(options),
+    getPostDatesGoogleCalendarEnableMutationOptions(options),
     queryClient
   );
 };
 
-export type postActivitiesGoogleCalendarDisableResponse200 = {
-  data: PostActivitiesGoogleCalendarDisable200;
+export type postDatesGoogleCalendarDisableResponse200 = {
+  data: PostDatesGoogleCalendarDisable200;
   status: 200;
 };
 
-export type postActivitiesGoogleCalendarDisableResponse400 = {
+export type postDatesGoogleCalendarDisableResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postActivitiesGoogleCalendarDisableResponse500 = {
+export type postDatesGoogleCalendarDisableResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postActivitiesGoogleCalendarDisableResponseSuccess =
-  postActivitiesGoogleCalendarDisableResponse200 & {
+export type postDatesGoogleCalendarDisableResponseSuccess =
+  postDatesGoogleCalendarDisableResponse200 & {
     headers: Headers;
   };
-export type postActivitiesGoogleCalendarDisableResponseError = (
-  | postActivitiesGoogleCalendarDisableResponse400
-  | postActivitiesGoogleCalendarDisableResponse500
+export type postDatesGoogleCalendarDisableResponseError = (
+  | postDatesGoogleCalendarDisableResponse400
+  | postDatesGoogleCalendarDisableResponse500
 ) & {
   headers: Headers;
 };
 
-export type postActivitiesGoogleCalendarDisableResponse =
-  | postActivitiesGoogleCalendarDisableResponseSuccess
-  | postActivitiesGoogleCalendarDisableResponseError;
+export type postDatesGoogleCalendarDisableResponse =
+  | postDatesGoogleCalendarDisableResponseSuccess
+  | postDatesGoogleCalendarDisableResponseError;
 
-export const getPostActivitiesGoogleCalendarDisableUrl = () => {
-  return `/activities/google-calendar/disable`;
+export const getPostDatesGoogleCalendarDisableUrl = () => {
+  return `/dates/google-calendar/disable`;
 };
 
-export const postActivitiesGoogleCalendarDisable = async (
+export const postDatesGoogleCalendarDisable = async (
   options?: RequestInit
-): Promise<postActivitiesGoogleCalendarDisableResponse> => {
-  return rnFetch<postActivitiesGoogleCalendarDisableResponse>(
-    getPostActivitiesGoogleCalendarDisableUrl(),
+): Promise<postDatesGoogleCalendarDisableResponse> => {
+  return rnFetch<postDatesGoogleCalendarDisableResponse>(
+    getPostDatesGoogleCalendarDisableUrl(),
     {
       ...options,
       method: "POST",
@@ -3549,24 +3482,24 @@ export const postActivitiesGoogleCalendarDisable = async (
   );
 };
 
-export const getPostActivitiesGoogleCalendarDisableMutationOptions = <
+export const getPostDatesGoogleCalendarDisableMutationOptions = <
   TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+    Awaited<ReturnType<typeof postDatesGoogleCalendarDisable>>,
     TError,
     void,
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+  Awaited<ReturnType<typeof postDatesGoogleCalendarDisable>>,
   TError,
   void,
   TContext
 > => {
-  const mutationKey = ["postActivitiesGoogleCalendarDisable"];
+  const mutationKey = ["postDatesGoogleCalendarDisable"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3576,28 +3509,28 @@ export const getPostActivitiesGoogleCalendarDisableMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+    Awaited<ReturnType<typeof postDatesGoogleCalendarDisable>>,
     void
   > = () => {
-    return postActivitiesGoogleCalendarDisable(requestOptions);
+    return postDatesGoogleCalendarDisable(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostActivitiesGoogleCalendarDisableMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>
+export type PostDatesGoogleCalendarDisableMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postDatesGoogleCalendarDisable>>
 >;
 
-export type PostActivitiesGoogleCalendarDisableMutationError = Error;
+export type PostDatesGoogleCalendarDisableMutationError = Error;
 
-export const usePostActivitiesGoogleCalendarDisable = <
+export const usePostDatesGoogleCalendarDisable = <
   TError = Error,
   TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+      Awaited<ReturnType<typeof postDatesGoogleCalendarDisable>>,
       TError,
       void,
       TContext
@@ -3606,49 +3539,49 @@ export const usePostActivitiesGoogleCalendarDisable = <
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+  Awaited<ReturnType<typeof postDatesGoogleCalendarDisable>>,
   TError,
   void,
   TContext
 > => {
   return useMutation(
-    getPostActivitiesGoogleCalendarDisableMutationOptions(options),
+    getPostDatesGoogleCalendarDisableMutationOptions(options),
     queryClient
   );
 };
 
-export type getActivitiesGoogleCalendarStatusResponse200 = {
-  data: GetActivitiesGoogleCalendarStatus200;
+export type getDatesGoogleCalendarStatusResponse200 = {
+  data: GetDatesGoogleCalendarStatus200;
   status: 200;
 };
 
-export type getActivitiesGoogleCalendarStatusResponse500 = {
+export type getDatesGoogleCalendarStatusResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type getActivitiesGoogleCalendarStatusResponseSuccess =
-  getActivitiesGoogleCalendarStatusResponse200 & {
+export type getDatesGoogleCalendarStatusResponseSuccess =
+  getDatesGoogleCalendarStatusResponse200 & {
     headers: Headers;
   };
-export type getActivitiesGoogleCalendarStatusResponseError =
-  getActivitiesGoogleCalendarStatusResponse500 & {
+export type getDatesGoogleCalendarStatusResponseError =
+  getDatesGoogleCalendarStatusResponse500 & {
     headers: Headers;
   };
 
-export type getActivitiesGoogleCalendarStatusResponse =
-  | getActivitiesGoogleCalendarStatusResponseSuccess
-  | getActivitiesGoogleCalendarStatusResponseError;
+export type getDatesGoogleCalendarStatusResponse =
+  | getDatesGoogleCalendarStatusResponseSuccess
+  | getDatesGoogleCalendarStatusResponseError;
 
-export const getGetActivitiesGoogleCalendarStatusUrl = () => {
-  return `/activities/google-calendar/status`;
+export const getGetDatesGoogleCalendarStatusUrl = () => {
+  return `/dates/google-calendar/status`;
 };
 
-export const getActivitiesGoogleCalendarStatus = async (
+export const getDatesGoogleCalendarStatus = async (
   options?: RequestInit
-): Promise<getActivitiesGoogleCalendarStatusResponse> => {
-  return rnFetch<getActivitiesGoogleCalendarStatusResponse>(
-    getGetActivitiesGoogleCalendarStatusUrl(),
+): Promise<getDatesGoogleCalendarStatusResponse> => {
+  return rnFetch<getDatesGoogleCalendarStatusResponse>(
+    getGetDatesGoogleCalendarStatusUrl(),
     {
       ...options,
       method: "GET",
@@ -3656,17 +3589,17 @@ export const getActivitiesGoogleCalendarStatus = async (
   );
 };
 
-export const getGetActivitiesGoogleCalendarStatusQueryKey = () => {
-  return [`/activities/google-calendar/status`] as const;
+export const getGetDatesGoogleCalendarStatusQueryKey = () => {
+  return [`/dates/google-calendar/status`] as const;
 };
 
-export const getGetActivitiesGoogleCalendarStatusQueryOptions = <
-  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+export const getGetDatesGoogleCalendarStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
   TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+      Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
       TError,
       TData
     >
@@ -3676,42 +3609,42 @@ export const getGetActivitiesGoogleCalendarStatusQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetActivitiesGoogleCalendarStatusQueryKey();
+    queryOptions?.queryKey ?? getGetDatesGoogleCalendarStatusQueryKey();
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+    Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>
   > = ({ signal }) =>
-    getActivitiesGoogleCalendarStatus({ signal, ...requestOptions });
+    getDatesGoogleCalendarStatus({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+    Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetActivitiesGoogleCalendarStatusQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+export type GetDatesGoogleCalendarStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>
 >;
-export type GetActivitiesGoogleCalendarStatusQueryError = Error;
+export type GetDatesGoogleCalendarStatusQueryError = Error;
 
-export function useGetActivitiesGoogleCalendarStatus<
-  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+export function useGetDatesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
   TError = Error
 >(
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+          Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
           TError,
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+          Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>
         >,
         "initialData"
       >;
@@ -3721,23 +3654,23 @@ export function useGetActivitiesGoogleCalendarStatus<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivitiesGoogleCalendarStatus<
-  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+export function useGetDatesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
   TError = Error
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+          Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
           TError,
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+          Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>
         >,
         "initialData"
       >;
@@ -3747,14 +3680,14 @@ export function useGetActivitiesGoogleCalendarStatus<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivitiesGoogleCalendarStatus<
-  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+export function useGetDatesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
   TError = Error
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
         TError,
         TData
       >
@@ -3766,14 +3699,14 @@ export function useGetActivitiesGoogleCalendarStatus<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetActivitiesGoogleCalendarStatus<
-  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+export function useGetDatesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
   TError = Error
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        Awaited<ReturnType<typeof getDatesGoogleCalendarStatus>>,
         TError,
         TData
       >
@@ -3784,8 +3717,7 @@ export function useGetActivitiesGoogleCalendarStatus<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions =
-    getGetActivitiesGoogleCalendarStatusQueryOptions(options);
+  const queryOptions = getGetDatesGoogleCalendarStatusQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -6789,32 +6721,29 @@ export function useGetFrequenciesId<
 /**
  * @summary Obtener completaciones del usuario
  */
-export type getActivityCompletionsResponse200 = {
-  data: GetActivityCompletions200;
+export type getDateCompletionsResponse200 = {
+  data: GetDateCompletions200;
   status: 200;
 };
 
-export type getActivityCompletionsResponse500 = {
-  data: GetActivityCompletions500;
+export type getDateCompletionsResponse500 = {
+  data: GetDateCompletions500;
   status: 500;
 };
 
-export type getActivityCompletionsResponseSuccess =
-  getActivityCompletionsResponse200 & {
+export type getDateCompletionsResponseSuccess =
+  getDateCompletionsResponse200 & {
     headers: Headers;
   };
-export type getActivityCompletionsResponseError =
-  getActivityCompletionsResponse500 & {
-    headers: Headers;
-  };
+export type getDateCompletionsResponseError = getDateCompletionsResponse500 & {
+  headers: Headers;
+};
 
-export type getActivityCompletionsResponse =
-  | getActivityCompletionsResponseSuccess
-  | getActivityCompletionsResponseError;
+export type getDateCompletionsResponse =
+  | getDateCompletionsResponseSuccess
+  | getDateCompletionsResponseError;
 
-export const getGetActivityCompletionsUrl = (
-  params?: GetActivityCompletionsParams
-) => {
+export const getGetDateCompletionsUrl = (params?: GetDateCompletionsParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -6826,38 +6755,35 @@ export const getGetActivityCompletionsUrl = (
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/activity-completions?${stringifiedParams}`
-    : `/activity-completions`;
+    ? `/date-completions?${stringifiedParams}`
+    : `/date-completions`;
 };
 
-export const getActivityCompletions = async (
-  params?: GetActivityCompletionsParams,
+export const getDateCompletions = async (
+  params?: GetDateCompletionsParams,
   options?: RequestInit
-): Promise<getActivityCompletionsResponse> => {
-  return rnFetch<getActivityCompletionsResponse>(
-    getGetActivityCompletionsUrl(params),
-    {
-      ...options,
-      method: "GET",
-    }
-  );
+): Promise<getDateCompletionsResponse> => {
+  return rnFetch<getDateCompletionsResponse>(getGetDateCompletionsUrl(params), {
+    ...options,
+    method: "GET",
+  });
 };
 
-export const getGetActivityCompletionsQueryKey = (
-  params?: GetActivityCompletionsParams
+export const getGetDateCompletionsQueryKey = (
+  params?: GetDateCompletionsParams
 ) => {
-  return [`/activity-completions`, ...(params ? [params] : [])] as const;
+  return [`/date-completions`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetActivityCompletionsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500
+export const getGetDateCompletionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDateCompletions>>,
+  TError = GetDateCompletions500
 >(
-  params?: GetActivityCompletionsParams,
+  params?: GetDateCompletionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivityCompletions>>,
+        Awaited<ReturnType<typeof getDateCompletions>>,
         TError,
         TData
       >
@@ -6868,43 +6794,42 @@ export const getGetActivityCompletionsQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetActivityCompletionsQueryKey(params);
+    queryOptions?.queryKey ?? getGetDateCompletionsQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getActivityCompletions>>
-  > = ({ signal }) =>
-    getActivityCompletions(params, { signal, ...requestOptions });
+    Awaited<ReturnType<typeof getDateCompletions>>
+  > = ({ signal }) => getDateCompletions(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getActivityCompletions>>,
+    Awaited<ReturnType<typeof getDateCompletions>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetActivityCompletionsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getActivityCompletions>>
+export type GetDateCompletionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDateCompletions>>
 >;
-export type GetActivityCompletionsQueryError = GetActivityCompletions500;
+export type GetDateCompletionsQueryError = GetDateCompletions500;
 
-export function useGetActivityCompletions<
-  TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500
+export function useGetDateCompletions<
+  TData = Awaited<ReturnType<typeof getDateCompletions>>,
+  TError = GetDateCompletions500
 >(
-  params: undefined | GetActivityCompletionsParams,
+  params: undefined | GetDateCompletionsParams,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivityCompletions>>,
+        Awaited<ReturnType<typeof getDateCompletions>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivityCompletions>>,
+          Awaited<ReturnType<typeof getDateCompletions>>,
           TError,
-          Awaited<ReturnType<typeof getActivityCompletions>>
+          Awaited<ReturnType<typeof getDateCompletions>>
         >,
         "initialData"
       >;
@@ -6914,24 +6839,24 @@ export function useGetActivityCompletions<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivityCompletions<
-  TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500
+export function useGetDateCompletions<
+  TData = Awaited<ReturnType<typeof getDateCompletions>>,
+  TError = GetDateCompletions500
 >(
-  params?: GetActivityCompletionsParams,
+  params?: GetDateCompletionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivityCompletions>>,
+        Awaited<ReturnType<typeof getDateCompletions>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivityCompletions>>,
+          Awaited<ReturnType<typeof getDateCompletions>>,
           TError,
-          Awaited<ReturnType<typeof getActivityCompletions>>
+          Awaited<ReturnType<typeof getDateCompletions>>
         >,
         "initialData"
       >;
@@ -6941,15 +6866,15 @@ export function useGetActivityCompletions<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetActivityCompletions<
-  TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500
+export function useGetDateCompletions<
+  TData = Awaited<ReturnType<typeof getDateCompletions>>,
+  TError = GetDateCompletions500
 >(
-  params?: GetActivityCompletionsParams,
+  params?: GetDateCompletionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivityCompletions>>,
+        Awaited<ReturnType<typeof getDateCompletions>>,
         TError,
         TData
       >
@@ -6964,15 +6889,15 @@ export function useGetActivityCompletions<
  * @summary Obtener completaciones del usuario
  */
 
-export function useGetActivityCompletions<
-  TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500
+export function useGetDateCompletions<
+  TData = Awaited<ReturnType<typeof getDateCompletions>>,
+  TError = GetDateCompletions500
 >(
-  params?: GetActivityCompletionsParams,
+  params?: GetDateCompletionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getActivityCompletions>>,
+        Awaited<ReturnType<typeof getDateCompletions>>,
         TError,
         TData
       >
@@ -6983,7 +6908,7 @@ export function useGetActivityCompletions<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetActivityCompletionsQueryOptions(params, options);
+  const queryOptions = getGetDateCompletionsQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -6996,66 +6921,66 @@ export function useGetActivityCompletions<
 /**
  * @summary Toggle completación de actividad para un día
  */
-export type postActivityCompletionsToggleResponse200 = {
-  data: PostActivityCompletionsToggle200;
+export type postDateCompletionsToggleResponse200 = {
+  data: PostDateCompletionsToggle200;
   status: 200;
 };
 
-export type postActivityCompletionsToggleResponse500 = {
-  data: PostActivityCompletionsToggle500;
+export type postDateCompletionsToggleResponse500 = {
+  data: PostDateCompletionsToggle500;
   status: 500;
 };
 
-export type postActivityCompletionsToggleResponseSuccess =
-  postActivityCompletionsToggleResponse200 & {
+export type postDateCompletionsToggleResponseSuccess =
+  postDateCompletionsToggleResponse200 & {
     headers: Headers;
   };
-export type postActivityCompletionsToggleResponseError =
-  postActivityCompletionsToggleResponse500 & {
+export type postDateCompletionsToggleResponseError =
+  postDateCompletionsToggleResponse500 & {
     headers: Headers;
   };
 
-export type postActivityCompletionsToggleResponse =
-  | postActivityCompletionsToggleResponseSuccess
-  | postActivityCompletionsToggleResponseError;
+export type postDateCompletionsToggleResponse =
+  | postDateCompletionsToggleResponseSuccess
+  | postDateCompletionsToggleResponseError;
 
-export const getPostActivityCompletionsToggleUrl = () => {
-  return `/activity-completions/toggle`;
+export const getPostDateCompletionsToggleUrl = () => {
+  return `/date-completions/toggle`;
 };
 
-export const postActivityCompletionsToggle = async (
-  postActivityCompletionsToggleBody: PostActivityCompletionsToggleBody,
+export const postDateCompletionsToggle = async (
+  postDateCompletionsToggleBody: PostDateCompletionsToggleBody,
   options?: RequestInit
-): Promise<postActivityCompletionsToggleResponse> => {
-  return rnFetch<postActivityCompletionsToggleResponse>(
-    getPostActivityCompletionsToggleUrl(),
+): Promise<postDateCompletionsToggleResponse> => {
+  return rnFetch<postDateCompletionsToggleResponse>(
+    getPostDateCompletionsToggleUrl(),
     {
       ...options,
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(postActivityCompletionsToggleBody),
+      body: JSON.stringify(postDateCompletionsToggleBody),
     }
   );
 };
 
-export const getPostActivityCompletionsToggleMutationOptions = <
-  TError = PostActivityCompletionsToggle500,
+export const getPostDateCompletionsToggleMutationOptions = <
+  TError = PostDateCompletionsToggle500,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
+    Awaited<ReturnType<typeof postDateCompletionsToggle>>,
     TError,
-    { data: PostActivityCompletionsToggleBody },
+    { data: PostDateCompletionsToggleBody },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
+  Awaited<ReturnType<typeof postDateCompletionsToggle>>,
   TError,
-  { data: PostActivityCompletionsToggleBody },
+  { data: PostDateCompletionsToggleBody },
   TContext
 > => {
-  const mutationKey = ["postActivityCompletionsToggle"];
+  const mutationKey = ["postDateCompletionsToggle"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -7065,50 +6990,50 @@ export const getPostActivityCompletionsToggleMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
-    { data: PostActivityCompletionsToggleBody }
+    Awaited<ReturnType<typeof postDateCompletionsToggle>>,
+    { data: PostDateCompletionsToggleBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postActivityCompletionsToggle(data, requestOptions);
+    return postDateCompletionsToggle(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostActivityCompletionsToggleMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postActivityCompletionsToggle>>
+export type PostDateCompletionsToggleMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postDateCompletionsToggle>>
 >;
-export type PostActivityCompletionsToggleMutationBody =
-  PostActivityCompletionsToggleBody;
-export type PostActivityCompletionsToggleMutationError =
-  PostActivityCompletionsToggle500;
+export type PostDateCompletionsToggleMutationBody =
+  PostDateCompletionsToggleBody;
+export type PostDateCompletionsToggleMutationError =
+  PostDateCompletionsToggle500;
 
 /**
  * @summary Toggle completación de actividad para un día
  */
-export const usePostActivityCompletionsToggle = <
-  TError = PostActivityCompletionsToggle500,
+export const usePostDateCompletionsToggle = <
+  TError = PostDateCompletionsToggle500,
   TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
+      Awaited<ReturnType<typeof postDateCompletionsToggle>>,
       TError,
-      { data: PostActivityCompletionsToggleBody },
+      { data: PostDateCompletionsToggleBody },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
+  Awaited<ReturnType<typeof postDateCompletionsToggle>>,
   TError,
-  { data: PostActivityCompletionsToggleBody },
+  { data: PostDateCompletionsToggleBody },
   TContext
 > => {
   return useMutation(
-    getPostActivityCompletionsToggleMutationOptions(options),
+    getPostDateCompletionsToggleMutationOptions(options),
     queryClient
   );
 };

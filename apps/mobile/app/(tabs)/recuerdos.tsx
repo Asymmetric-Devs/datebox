@@ -30,14 +30,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   useGetMemoriesBooks,
-  useGetFamilyGroupIdGroupMembers,
+  useGetGroupsGroupIdMembers,
   createMemoriesBook,
   createMemoryWithMedia,
   createNote,
   createSpotifyMemory,
   deleteMemory,
   deleteMemoriesBook,
-  GetFamilyGroupIdGroupMembers200,
+  GetGroupsGroupIdMembers200,
   MemoryWithReactions,
   MemoriesBook,
   UpdateMemoriesBook,
@@ -181,20 +181,20 @@ export default function RecuerdosScreen() {
 
   const groupId = userElepad?.groupId || "";
 
-  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId, {
+  const membersQuery = useGetGroupsGroupIdMembers(groupId, {
     query: { enabled: !!groupId },
   });
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
-  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+  const selectGroupInfo = (): GetGroupsGroupIdMembers200 | undefined => {
     const resp = membersQuery.data as
-      | { data?: GetFamilyGroupIdGroupMembers200 }
-      | GetFamilyGroupIdGroupMembers200
+      | { data?: GetGroupsGroupIdMembers200 }
+      | GetGroupsGroupIdMembers200
       | undefined;
     if (!resp) return undefined;
     return (
-      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
-      (resp as GetFamilyGroupIdGroupMembers200)
+      (resp as { data?: GetGroupsGroupIdMembers200 }).data ??
+      (resp as GetGroupsGroupIdMembers200)
     );
   };
 

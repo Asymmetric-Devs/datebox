@@ -1,39 +1,39 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   AddUserWithCodeSchema,
-  NewFamilyGroupSchema,
-  UpdateFamilyGroupSchema,
+  NewGroupSchema,
+  UpdateGroupSchema,
   TransferOwnershipSchema,
 } from "./schema";
-import { FamilyGroupService } from "./service";
+import { GroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 import { withAuth } from "@/middleware/auth";
 
-export const familyGroupApp = new OpenAPIHono();
+export const groupApp = new OpenAPIHono();
 
 declare module "hono" {
   interface ContextVariableMap {
-    familyGroupService: FamilyGroupService;
+    groupService: GroupService;
     user: { id: string };
   }
 }
 
-familyGroupApp.use("/familyGroup/*", async (c, next) => {
-  const familyGroupService = new FamilyGroupService(c.var.supabase);
-  c.set("familyGroupService", familyGroupService);
+groupApp.use("/groups/*", async (c, next) => {
+  const groupService = new GroupService(c.var.supabase);
+  c.set("groupService", groupService);
   await next();
 });
 
-familyGroupApp.openapi(
+groupApp.openapi(
   {
     method: "post",
-    path: "/familyGroup/create",
-    tags: ["familyGroups"],
+    path: "/groups/create",
+    tags: ["groups"],
     request: {
       body: {
         content: {
           "application/json": {
-            schema: NewFamilyGroupSchema,
+            schema: NewGroupSchema,
           },
         },
         required: true,
@@ -50,7 +50,7 @@ familyGroupApp.openapi(
   async (c) => {
     const body = c.req.valid("json");
 
-    const created = await c.var.familyGroupService.create(body);
+    const created = await c.var.groupService.create(body);
     if (!created) {
       throw new ApiException(500, "Internal Server Error");
     }
@@ -59,11 +59,11 @@ familyGroupApp.openapi(
   },
 );
 
-familyGroupApp.openapi(
+groupApp.openapi(
   {
     method: "post",
-    path: "/familyGroup/link",
-    tags: ["familyGroups"],
+    path: "/groups/link",
+    tags: ["groups"],
     request: {
       body: {
         content: {
@@ -85,8 +85,7 @@ familyGroupApp.openapi(
   },
   async (c) => {
     const body = c.req.valid("json");
-    const linked =
-      await c.var.familyGroupService.addUserToFamilyGroupWithCode(body);
+    const linked = await c.var.groupService.addUserToGroupWithCode(body);
     if (!linked) {
       throw new ApiException(500, "Internal Server Error");
     }
@@ -95,13 +94,13 @@ familyGroupApp.openapi(
   },
 );
 
-familyGroupApp.openapi(
+groupApp.openapi(
   {
     method: "get",
-    path: "/familyGroup/{idGroup}/invite",
-    tags: ["familyGroups"],
+    path: "/groups/{groupId}/invite",
+    tags: ["groups"],
     request: {
-      params: z.object({ idGroup: z.uuid() }),
+      params: z.object({ groupId: z.uuid() }),
     },
     responses: {
       200: {
@@ -113,9 +112,8 @@ familyGroupApp.openapi(
     },
   },
   async (c) => {
-    const { idGroup } = c.req.valid("param");
-    const invitationCode =
-      await c.var.familyGroupService.createInvitation(idGroup);
+    const { groupId } = c.req.valid("param");
+    const invitationCode = await c.var.groupService.createInvitation(groupId);
     if (!invitationCode) {
       throw new ApiException(500, "Internal Server Error");
     }
@@ -124,13 +122,13 @@ familyGroupApp.openapi(
   },
 );
 
-familyGroupApp.openapi(
+groupApp.openapi(
   {
     method: "get",
-    path: "/familyGroup/{idGroup}/members",
-    tags: ["familyGroups"],
+    path: "/groups/{groupId}/members",
+    tags: ["groups"],
     request: {
-      params: z.object({ idGroup: z.uuid() }),
+      params: z.object({ groupId: z.uuid() }),
     },
     responses: {
       200: {
@@ -165,24 +163,24 @@ familyGroupApp.openapi(
     },
   },
   async (c) => {
-    const { idGroup } = c.req.valid("param");
-    const members = await c.var.familyGroupService.getMembers(idGroup);
+    const { groupId } = c.req.valid("param");
+    const members = await c.var.groupService.getMembers(groupId);
     return c.json(members, 200);
   },
 );
 
 // Apply auth middleware to the remove user endpoint
-familyGroupApp.use("/familyGroup/:idGroup/member/:idUser", withAuth);
+groupApp.use("/groups/:groupId/member/:idUser", withAuth);
 
-familyGroupApp.openapi(
+groupApp.openapi(
   {
     method: "delete",
-    path: "/familyGroup/{idGroup}/member/{idUser}",
-    tags: ["familyGroups"],
-    operationId: "removeUserFromFamilyGroup",
+    path: "/groups/{groupId}/member/{idUser}",
+    tags: ["groups"],
+    operationId: "removeUserFromGroup",
     request: {
       params: z.object({
-        idGroup: z.uuid(),
+        groupId: z.uuid(),
         idUser: z.uuid(),
       }),
       query: z.object({
@@ -204,12 +202,12 @@ familyGroupApp.openapi(
     },
   },
   async (c) => {
-    const { idGroup, idUser } = c.req.valid("param");
+    const { groupId, idUser } = c.req.valid("param");
     const { createNewGroup } = c.req.valid("query");
     const adminUser = c.var.user;
 
-    const result = await c.var.familyGroupService.removeUserFromFamilyGroup(
-      idGroup,
+    const result = await c.var.groupService.removeUserFromGroup(
+      groupId,
       idUser,
       adminUser.id,
       createNewGroup === "true",
@@ -223,18 +221,18 @@ familyGroupApp.openapi(
   },
 );
 
-// Endpoint para actualizar el nombre del grupo familiar
-familyGroupApp.openapi(
+// Endpoint para actualizar el nombre del grupo
+groupApp.openapi(
   {
     method: "patch",
-    path: "/familyGroup/{idGroup}",
-    tags: ["familyGroups"],
+    path: "/groups/{groupId}",
+    tags: ["groups"],
     request: {
-      params: z.object({ idGroup: z.uuid() }),
+      params: z.object({ groupId: z.uuid() }),
       body: {
         content: {
           "application/json": {
-            schema: UpdateFamilyGroupSchema,
+            schema: UpdateGroupSchema,
           },
         },
         required: true,
@@ -259,11 +257,11 @@ familyGroupApp.openapi(
     },
   },
   async (c) => {
-    const { idGroup } = c.req.valid("param");
+    const { groupId } = c.req.valid("param");
     const { name } = c.req.valid("json");
 
-    const updatedGroup = await c.var.familyGroupService.updateFamilyGroupName(
-      idGroup,
+    const updatedGroup = await c.var.groupService.updateGroupName(
+      groupId,
       name,
     );
 
@@ -272,17 +270,17 @@ familyGroupApp.openapi(
 );
 
 // Apply auth middleware to the transfer ownership endpoint
-familyGroupApp.use("/familyGroup/:idGroup/transfer-ownership", withAuth);
+groupApp.use("/groups/:groupId/transfer-ownership", withAuth);
 
-// Endpoint para transferir ownership del grupo familiar
-familyGroupApp.openapi(
+// Endpoint para transferir ownership del grupo
+groupApp.openapi(
   {
     method: "put",
-    path: "/familyGroup/{idGroup}/transfer-ownership",
-    tags: ["familyGroups"],
-    operationId: "transferFamilyGroupOwnership",
+    path: "/groups/{groupId}/transfer-ownership",
+    tags: ["groups"],
+    operationId: "transferGroupOwnership",
     request: {
-      params: z.object({ idGroup: z.uuid() }),
+      params: z.object({ groupId: z.uuid() }),
       body: {
         content: {
           "application/json": {
@@ -327,12 +325,12 @@ familyGroupApp.openapi(
     },
   },
   async (c) => {
-    const { idGroup } = c.req.valid("param");
+    const { groupId } = c.req.valid("param");
     const { newOwnerId } = c.req.valid("json");
     const currentUser = c.var.user;
 
-    const result = await c.var.familyGroupService.transferOwnership(
-      idGroup,
+    const result = await c.var.groupService.transferOwnership(
+      groupId,
       currentUser.id,
       newOwnerId,
     );

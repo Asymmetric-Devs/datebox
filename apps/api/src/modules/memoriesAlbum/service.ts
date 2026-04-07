@@ -298,7 +298,7 @@ export class MemoriesAlbumService {
 
       // Get family group info
       const { data: familyGroup } = await this.supabase
-        .from("familyGroups")
+        .from("groups")
         .select("name")
         .eq("id", groupId)
         .single();
@@ -724,7 +724,7 @@ Este recuerdo nos muestra...`;
 
     // Get family group info
     const { data: familyGroup } = await this.supabase
-      .from("familyGroups")
+      .from("groups")
       .select("name")
       .eq("id", userGroup.groupId)
       .single();

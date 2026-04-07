@@ -1,12 +1,12 @@
 import { ApiException } from "@/utils/api-error";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
-import type { NewActivity, UpdateActivity } from "./schema";
+import type { NewDateEvent, UpdateDateEvent } from "./schema";
 import { GoogleCalendarService } from "@/services/google-calendar";
 import { MentionsService } from "@/services/mentions";
 import { NotificationsService } from "@/modules/notifications/service";
 
-export class ActivityService {
+export class DateService {
   private googleCalendarService: GoogleCalendarService;
   private mentionsService: MentionsService;
   private notificationsService: NotificationsService;
@@ -17,79 +17,53 @@ export class ActivityService {
     this.notificationsService = new NotificationsService(supabase);
   }
 
-  async getActivityById(id: string) {
+  async getDateById(id: string) {
     const { data, error } = await this.supabase
-      .from("activities")
+      .from("dates")
       .select("*")
       .eq("id", id)
       .single();
     if (error) {
-      throw new ApiException(500, "Error al obtener la Actividad", error);
+      throw new ApiException(500, "Error al obtener la cita", error);
     }
     if (!data) {
-      throw new ApiException(404, "Actividad no encontrada");
+      throw new ApiException(404, "Cita no encontrada");
     }
     return data;
   }
 
-  // TODO: Check if the user id exist
-  async getActivitiesWithFamilyCode(idFamilyGroup: string) {
-    // Obtener los IDs de los usuarios del grupo familiar
-    const { data: usersIds, error: usersError } = await this.supabase
-      .from("users")
-      .select("id")
-      .eq("groupId", idFamilyGroup);
-
-    if (usersError) {
-      throw new ApiException(
-        500,
-        "Error al obtener los IDs de los usuarios",
-        usersError,
-      );
-    }
-
-    if (!usersIds || usersIds.length === 0) {
-      throw new ApiException(
-        404,
-        "No se encontraron usuarios en este grupo familiar",
-      );
-    }
-
-    // Pasar ids del obj a un array
-    const userIdsArray = usersIds.map((u) => u.id);
-
-    // Obtener todas las actividades donde los usuarios son creadores O destinatarios
-    const { data: activities, error: activitiesError } = await this.supabase
-      .from("activities")
+  async getDatesWithGroupId(groupId: string) {
+    const { data: dates, error: datesError } = await this.supabase
+      .from("dates")
       .select("*")
-      .or(`createdBy.in.(${userIdsArray.join(",")}),assignedTo.in.(${userIdsArray.join(",")})`);
+      .eq("groupId", groupId);
 
-    if (activitiesError) {
+    if (datesError) {
       throw new ApiException(
         500,
-        "Error al obtener las actividades",
-        activitiesError,
+        "Error al obtener las citas",
+        datesError,
       );
     }
 
-    // Devolver array vacío si no hay actividades en lugar de lanzar error
-    return activities || [];
+    return dates || [];
   }
 
-  async create(payload: NewActivity) {
+  async create(payload: NewDateEvent) {
     const { data, error } = await this.supabase
-      .from("activities")
+      .from("dates")
       .insert(payload)
       .select("*")
       .single();
     if (error) {
-      throw new ApiException(500, "Error al crear la actividad", error);
+      console.error(error);
+      throw new ApiException(500, "Error al crear la cita", error);
     }
 
     // Sync mentions from title and description
     try {
       await this.mentionsService.syncMentions(
-        "activity",
+        "date",
         data.id,
         payload.title,
         payload.description
@@ -114,36 +88,46 @@ export class ActivityService {
             mentionedIds,
             payload.createdBy,
             actor.displayName || "Un usuario",
-            "activity",
+            "date",
             data.id,
             payload.title || "Sin título"
           );
         }
       }
 
-      // Send notification to assignedTo user if different from creator
-      if (payload.assignedTo && payload.assignedTo !== payload.createdBy) {
-        const { data: creator, error: creatorError } = await this.supabase
+      // Send notification to group members if different from creator
+      if (payload.groupId) {
+        const { data: members } = await this.supabase
           .from("users")
-          .select("displayName")
-          .eq("id", payload.createdBy)
-          .single();
+          .select("id")
+          .eq("groupId", payload.groupId)
+          .neq("id", payload.createdBy);
 
-        if (!creatorError && creator) {
-          await this.notificationsService.createNotification({
-            userId: payload.assignedTo,
-            actorId: payload.createdBy,
-            eventType: "activity_assigned",
-            entityType: "activity",
-            entityId: data.id,
-            title: "Nueva actividad asignada",
-            body: `${creator.displayName} te agendó una nueva actividad: ${payload.title}`,
-          });
+        if (members && members.length > 0) {
+          const { data: creator } = await this.supabase
+            .from("users")
+            .select("displayName")
+            .eq("id", payload.createdBy)
+            .single();
+
+          if (creator) {
+            const memberPromises = members.map((member) => 
+              this.notificationsService.createNotification({
+                userId: member.id,
+                actorId: payload.createdBy,
+                eventType: "activity_assigned", // keeping event type string for compatibility
+                entityType: "date",
+                entityId: data.id,
+                title: "Nueva cita agregada al grupo",
+                body: `${creator.displayName} agregó una nueva cita: ${payload.title}`,
+              })
+            );
+            await Promise.allSettled(memberPromises);
+          }
         }
       }
     } catch (mentionError) {
       console.error("Error syncing mentions or creating notifications:", mentionError);
-      // Don't throw - mentions and notifications are not critical
     }
 
     // Sync with Google Calendar if enabled
@@ -161,35 +145,33 @@ export class ActivityService {
           endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
         });
 
-        // TODO: After migration, update activity with Google event ID and sync status
-        console.log("Google Calendar event created for activity:", data.id);
+        console.log("Google Calendar event created for date:", data.id);
       }
     } catch (googleError) {
       console.error("Google Calendar sync failed:", googleError);
-      // TODO: After migration, update activity with error status
     }
 
     return data;
   }
 
-  async update(id: string, payload: UpdateActivity) {
+  async update(id: string, payload: UpdateDateEvent) {
     const { data, error } = await this.supabase
-      .from("activities")
+      .from("dates")
       .update({ ...payload })
       .eq("id", id)
       .select("*")
       .maybeSingle();
     if (error) {
-      throw new ApiException(500, "Error al actualizar la actividad", error);
+      throw new ApiException(500, "Error al actualizar la cita", error);
     }
     if (!data) {
-      throw new ApiException(404, "Actividad no encontrada");
+      throw new ApiException(404, "Cita no encontrada");
     }
 
     // Sync mentions from title and description
     try {
       await this.mentionsService.syncMentions(
-        "activity",
+        "date",
         data.id,
         data.title,
         data.description
@@ -202,7 +184,6 @@ export class ActivityService {
       ];
 
       if (mentionedIds.length > 0) {
-        // Get the actor's name
         const { data: actor, error: actorError } = await this.supabase
           .from("users")
           .select("displayName")
@@ -214,7 +195,7 @@ export class ActivityService {
             mentionedIds,
             data.createdBy,
             actor.displayName || "Un usuario",
-            "activity",
+            "date",
             data.id,
             data.title || "Sin título"
           );
@@ -222,19 +203,15 @@ export class ActivityService {
       }
     } catch (mentionError) {
       console.error("Error syncing mentions or creating notifications:", mentionError);
-      // Don't throw - mentions and notifications are not critical
     }
 
-    // Sync with Google Calendar if enabled
     try {
       const isEnabled =
         await this.googleCalendarService.isGoogleCalendarEnabled(
           data.createdBy,
         );
       if (isEnabled) {
-        // TODO: After migration, get google_event_id from activity
-        // For now, we'll skip Google Calendar sync on updates
-        console.log("Would sync Google Calendar update for activity:", id);
+        console.log("Would sync Google Calendar update for date:", id);
       }
     } catch (googleError) {
       console.error("Google Calendar sync failed:", googleError);
@@ -244,40 +221,34 @@ export class ActivityService {
   }
 
   async remove(id: string) {
-    // Get activity details before deletion for Google Calendar sync
-    const { data: activity } = await this.supabase
-      .from("activities")
+    const { data: element } = await this.supabase
+      .from("dates")
       .select("createdBy")
       .eq("id", id)
       .single();
 
-    // Delete mentions for this activity
     try {
-      await this.mentionsService.deleteMentionsForEntity("activity", id);
+      await this.mentionsService.deleteMentionsForEntity("date", id);
     } catch (mentionError) {
       console.error("Error deleting mentions:", mentionError);
-      // Don't throw - continue with activity deletion
     }
 
     const { error } = await this.supabase
-      .from("activities")
+      .from("dates")
       .delete()
       .eq("id", id);
     if (error) {
-      throw new ApiException(500, "Error al eliminar la actividad", error);
+      throw new ApiException(500, "Error al eliminar la cita", error);
     }
 
-    // Delete from Google Calendar if enabled
-    if (activity) {
+    if (element) {
       try {
         const isEnabled =
           await this.googleCalendarService.isGoogleCalendarEnabled(
-            activity.createdBy,
+            element.createdBy,
           );
         if (isEnabled) {
-          // TODO: After migration, get google_event_id from activity
-          // For now, we'll skip Google Calendar sync on deletion
-          console.log("Would delete from Google Calendar for activity:", id);
+          console.log("Would delete from Google Calendar for date:", id);
         }
       } catch (googleError) {
         console.error("Google Calendar sync failed:", googleError);

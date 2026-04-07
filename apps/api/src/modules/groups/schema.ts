@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
-export const FamilyGroupSchema = z
+export const GroupSchema = z
   .object({
     id: z.uuid(),
     name: z.string().min(1),
@@ -9,27 +9,27 @@ export const FamilyGroupSchema = z
     code: z.string().optional(),
     expiresAt: z.date().optional(),
   })
-  .openapi("FamilyGroup");
+  .openapi("Group");
 
-export type FamilyGroup = z.infer<typeof FamilyGroupSchema>;
+export type Group = z.infer<typeof GroupSchema>;
 
-export const NewFamilyGroupSchema = z
+export const NewGroupSchema = z
   .object({
     name: z.string().min(1),
     ownerUserId: z.uuid(),
   })
-  .openapi("NewFamilyGroup");
+  .openapi("NewGroup");
 
-export type NewFamilyGroup = z.infer<typeof NewFamilyGroupSchema>;
+export type NewGroup = z.infer<typeof NewGroupSchema>;
 
-export const UpdateFamilyGroupSchema = z
+export const UpdateGroupSchema = z
   .object({
     name: z.string().min(1),
   })
   .strict()
-  .openapi("UpdateFamilyGroup");
+  .openapi("UpdateGroup");
 
-export type UpdateUser = z.infer<typeof UpdateFamilyGroupSchema>;
+export type UpdateGroup = z.infer<typeof UpdateGroupSchema>;
 
 export const AddUserWithCodeSchema = z
   .object({

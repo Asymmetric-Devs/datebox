@@ -18,7 +18,7 @@
     "format": "prettier --write .",
     "gen": "npm run gen:openapi && npm run gen:types",
     "gen:openapi": "tsx src/emit-openapi.ts",
-    "gen:types": "supabase gen types typescript --project-id sdnmoweppzszpxyggdyg > src/supabase-types.ts"
+    "gen:types": "supabase gen types typescript --project-id cfhhwmruhqtyxyzcxcxc > src/supabase-types.ts"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260207.0",

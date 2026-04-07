@@ -25,16 +25,16 @@ import {
 import { router } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import {
-  useGetFamilyGroupIdGroupInvite,
-  getFamilyGroupIdGroupInviteResponse,
-  useGetFamilyGroupIdGroupMembers,
-  useRemoveUserFromFamilyGroup,
-  usePatchFamilyGroupIdGroup,
-  useTransferFamilyGroupOwnership,
-  usePostFamilyGroupCreate,
-  usePostFamilyGroupLink,
+  useGetGroupsGroupIdInvite,
+  getGroupsGroupIdInviteResponse,
+  useGetGroupsGroupIdMembers,
+  useRemoveUserFromGroup,
+  usePatchGroupsGroupId,
+  useTransferGroupOwnership,
+  usePostGroupsCreate,
+  usePostGroupsLink,
 } from "@elepad/api-client";
-import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+import type { GetGroupsGroupIdMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { COLORS, STYLES } from "@/styles/base";
 import { BackButton } from "@/components/shared/BackButton";
@@ -43,22 +43,22 @@ import SaveButton from "@/components/shared/SaveButton";
 import { useToast } from "@/components/shared/Toast";
 import { StyledTextInput } from "@/components/shared";
 
-export default function FamilyGroup() {
+export default function Group() {
   const { userElepad, refreshUserElepad } = useAuth();
   const { showToast } = useToast();
   const [invitationCode, setInvitationCode] =
-    useState<getFamilyGroupIdGroupInviteResponse>();
+    useState<getGroupsGroupIdInviteResponse>();
 
   const groupId = userElepad?.groupId;
 
   // Debug: Log user data when component mounts or userElepad changes
   useEffect(() => {
-    console.log("FamilyGroup - userElepad:", userElepad);
-    console.log("FamilyGroup - groupId:", groupId);
+    console.log("Group - userElepad:", userElepad);
+    console.log("Group - groupId:", groupId);
 
     // If we don't have a groupId but we have a user, try refreshing
     if (userElepad && !groupId) {
-      console.log("FamilyGroup - No groupId found, refreshing user data...");
+      console.log("Group - No groupId found, refreshing user data...");
       refreshUserElepad();
     }
   }, [userElepad, groupId, refreshUserElepad]);
@@ -73,10 +73,10 @@ export default function FamilyGroup() {
   const [selectedFrameUrl, setSelectedFrameUrl] = useState<string | null>(null);
   const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
-  const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
+  const patchGroup = usePatchGroupsGroupId(); // Este hook ya maneja la mutación
 
   // Hook para crear código de invitación
-  const inviteQuery = useGetFamilyGroupIdGroupInvite(groupId ?? "", {
+  const inviteQuery = useGetGroupsGroupIdInvite(groupId ?? "", {
     query: { enabled: false }, // No ejecutar automáticamente
   });
 
@@ -103,22 +103,22 @@ export default function FamilyGroup() {
   const [confirmTransferVisible, setConfirmTransferVisible] = useState(false);
 
   // Fetch group members via the generated React Query hook
-  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
-  const removeMember = useRemoveUserFromFamilyGroup();
-  const transferOwnership = useTransferFamilyGroupOwnership();
-  const createGroup = usePostFamilyGroupCreate();
-  const joinGroup = usePostFamilyGroupLink();
+  const membersQuery = useGetGroupsGroupIdMembers(groupId ?? "");
+  const removeMember = useRemoveUserFromGroup();
+  const transferOwnership = useTransferGroupOwnership();
+  const createGroup = usePostGroupsCreate();
+  const joinGroup = usePostGroupsLink();
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
-  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+  const selectGroupInfo = (): GetGroupsGroupIdMembers200 | undefined => {
     const resp = membersQuery.data as
-      | { data?: GetFamilyGroupIdGroupMembers200 }
-      | GetFamilyGroupIdGroupMembers200
+      | { data?: GetGroupsGroupIdMembers200 }
+      | GetGroupsGroupIdMembers200
       | undefined;
     if (!resp) return undefined;
     return (
-      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
-      (resp as GetFamilyGroupIdGroupMembers200)
+      (resp as { data?: GetGroupsGroupIdMembers200 }).data ??
+      (resp as GetGroupsGroupIdMembers200)
     );
   };
 
@@ -206,7 +206,7 @@ export default function FamilyGroup() {
       // Solo eliminar otros miembros (no self-removal)
       // El self-removal ahora se maneja directamente con el modal de opciones
       await removeMember.mutateAsync({
-        idGroup: groupId,
+        groupId: groupId,
         idUser: memberToRemove.id,
       });
 
@@ -271,7 +271,7 @@ export default function FamilyGroup() {
       }
 
       await transferOwnership.mutateAsync({
-        idGroup: groupId,
+        groupId: groupId,
         data: { newOwnerId: selectedNewOwner.id },
       });
 
@@ -316,7 +316,7 @@ export default function FamilyGroup() {
       // Hacer todo en secuencia rápida
       // 1. Salir del grupo actual SIN crear uno nuevo
       await removeMember.mutateAsync({
-        idGroup: oldGroupId,
+        groupId: oldGroupId,
         idUser: userElepad.id,
         params: { createNewGroup: "false" },
       });
@@ -387,7 +387,7 @@ export default function FamilyGroup() {
       // Hacer todo en secuencia rápida
       // 1. Salir del grupo actual SIN crear uno nuevo
       await removeMember.mutateAsync({
-        idGroup: oldGroupId,
+        groupId: oldGroupId,
         idUser: userElepad.id,
         params: { createNewGroup: "false" },
       });
@@ -444,8 +444,8 @@ export default function FamilyGroup() {
       return;
     }
     try {
-      await patchFamilyGroup.mutateAsync({
-        idGroup: groupId,
+      await patchGroup.mutateAsync({
+        groupId: groupId,
         data: { name: newGroupName },
       });
       setIsEditing(false);
@@ -595,15 +595,15 @@ export default function FamilyGroup() {
                         setIsEditing(false);
                         setNewGroupName(groupInfo?.name || "");
                       }}
-                      disabled={patchFamilyGroup.isPending}
+                      disabled={patchGroup.isPending}
                     />
                   </View>
                   <View style={{ width: 120 }}>
                     <SaveButton
                       onPress={handleSaveGroupName}
-                      loading={patchFamilyGroup.isPending}
+                      loading={patchGroup.isPending}
                       disabled={
-                        !newGroupName.trim() || patchFamilyGroup.isPending
+                        !newGroupName.trim() || patchGroup.isPending
                       }
                     />
                   </View>

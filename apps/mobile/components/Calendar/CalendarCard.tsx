@@ -13,12 +13,12 @@ import { useStreakHistory } from "@/hooks/useStreak";
 import { getTodayLocal, toLocalDateString } from "@/lib/dateHelpers";
 
 import {
-  Activity,
+  DateEvent,
   useGetFrequencies,
-  useGetActivityCompletions,
-  usePostActivityCompletionsToggle,
-  getActivitiesFamilyCodeIdFamilyGroupResponse,
-  GetFamilyGroupIdGroupMembers200,
+  useGetDateCompletions,
+  usePostDateCompletionsToggle,
+  getDatesGroupGroupIdResponse,
+  GetGroupsGroupIdMembers200,
 } from "@elepad/api-client";
 import ExportCalendarModal from "./ExportCalendarModal";
 
@@ -31,18 +31,18 @@ type Frequency = {
 };
 
 interface CalendarCardProps {
-  idFamilyGroup: string;
+  idGroup: string;
   idUser: string;
   activitiesQuery: {
-    data?: getActivitiesFamilyCodeIdFamilyGroupResponse;
+    data?: getDatesGroupGroupIdResponse;
     isLoading: boolean;
     error: unknown;
     refetch: () => Promise<unknown>;
   };
-  onEdit: (ev: Activity) => void;
+  onEdit: (ev: DateEvent) => void;
   onDelete: (id: string) => void;
   isOwnerOfGroup: boolean;
-  groupInfo?: GetFamilyGroupIdGroupMembers200;
+  groupInfo?: GetGroupsGroupIdMembers200;
   activityToView?: string | null;
   activityDateToView?: string | null;
   onActivityViewed?: () => void;
@@ -105,7 +105,7 @@ LocaleConfig.defaultLocale = "es";
  * Soporta FREQ=DAILY, WEEKLY, MONTHLY, YEARLY y BYDAY.
  */
 function expandRecurringActivity(
-  activity: Activity,
+  activity: DateEvent,
   startDate: Date,
   endDate: Date,
   frequencies: Record<string, { label: string; rrule: string | null }>,
@@ -404,7 +404,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   }, []);
 
   // Queries
-  const completionsQuery = useGetActivityCompletions({
+  const completionsQuery = useGetDateCompletions({
     startDate: dateRange.startDate,
     endDate: dateRange.endDate,
   });
@@ -414,11 +414,11 @@ export default function CalendarCard(props: CalendarCardProps) {
     userElepad?.elder ? dateRange.endDate : undefined,
   );
 
-  const toggleCompletionMutation = usePostActivityCompletionsToggle();
+  const toggleCompletionMutation = usePostDateCompletionsToggle();
   const frequenciesQuery = useGetFrequencies();
 
   // Procesar eventos
-  const events: Activity[] = useMemo(() => {
+  const events: DateEvent[] = useMemo(() => {
     if (!activitiesQuery.data) return [];
     if (
       "data" in activitiesQuery.data &&
@@ -427,7 +427,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       return activitiesQuery.data.data;
     }
     if (Array.isArray(activitiesQuery.data)) {
-      return activitiesQuery.data as Activity[];
+      return activitiesQuery.data as DateEvent[];
     }
     return [];
   }, [activitiesQuery.data]);
@@ -454,7 +454,7 @@ export default function CalendarCard(props: CalendarCardProps) {
 
   // Expandir eventos recurrentes
   const eventsByDate = useMemo(() => {
-    const map: Record<string, Activity[]> = {};
+    const map: Record<string, DateEvent[]> = {};
     const now = new Date();
     const startRange = new Date(now);
     startRange.setMonth(now.getMonth() - 3);
@@ -508,9 +508,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     // Marcar días con eventos
     for (const d of Object.keys(eventsByDate)) {
       const eventsOnDay = eventsByDate[d];
-      const hasRelevantActivities = selectedElderId
-        ? eventsOnDay.some((ev) => ev.assignedTo === selectedElderId)
-        : eventsOnDay.length > 0;
+      const hasRelevantActivities = eventsOnDay.length > 0;
 
       if (hasRelevantActivities) {
         obj[d] = { marked: true, dotColor: COLORS.primary };
@@ -598,9 +596,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   // Filtrar y ordenar eventos del día seleccionado
   const dayEvents = useMemo(() => {
     const eventsToday = eventsByDate[selectedDay] ?? [];
-    const filtered = selectedElderId
-      ? eventsToday.filter((ev) => ev.assignedTo === selectedElderId)
-      : eventsToday;
+    const filtered = eventsToday;
 
     const incomplete = filtered.filter(
       (ev) => !completionsByDateMap[`${ev.id}_${selectedDay}`],
@@ -616,7 +612,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   }, [eventsByDate, selectedDay, selectedElderId, completionsByDateMap]);
 
   // Manejar toggle de completado
-  const handleToggleCompletion = async (activity: Activity) => {
+  const handleToggleCompletion = async (activity: DateEvent) => {
     const key = `${activity.id}_${selectedDay}`;
     const newState = !completionsByDateMap[key];
 
@@ -627,7 +623,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     const attemptToggle = async (attempt: number): Promise<boolean> => {
       try {
         await toggleCompletionMutation.mutateAsync({
-          data: { activityId: activity.id, completedDate: selectedDay },
+          data: { dateId: activity.id, completedDate: selectedDay },
         });
         return true;
       } catch {

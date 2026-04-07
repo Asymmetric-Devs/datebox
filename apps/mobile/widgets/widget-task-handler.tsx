@@ -39,7 +39,7 @@ interface User {
   displayName: string;
 }
 
-interface FamilyGroupMembersResponse {
+interface GroupMembersResponse {
   members: User[];
 }
 
@@ -237,14 +237,14 @@ async function handleDailyActivitiesWidget(
         });
 
         const res = await fetch(
-          `${apiUrl}/familyGroup/${userRow.groupId}/members`,
+          `${apiUrl}/group/${userRow.groupId}/members`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           },
         );
-        const data: FamilyGroupMembersResponse = await res.json();
+        const data: GroupMembersResponse = await res.json();
 
         console.log(data);
 

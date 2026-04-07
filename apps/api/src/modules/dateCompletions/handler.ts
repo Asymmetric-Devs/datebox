@@ -1,19 +1,19 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
-import { ActivityCompletionService } from "./service";
+import { DateCompletionService } from "./service";
 import { withAuth } from "../../middleware/auth";
 import {
-  NewActivityCompletionSchema,
-  GetActivityCompletionsQuerySchema,
-  ActivityCompletionSchema,
+  NewDateCompletionSchema,
+  GetDateCompletionsQuerySchema,
+  DateCompletionSchema,
 } from "./schema";
 import { ApiError } from "../../utils/api-error";
 import type { User } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../../supabase-types";
 
-export const activityCompletionsHandler = new OpenAPIHono<{
+export const dateCompletionsHandler = new OpenAPIHono<{
   Variables: {
     user: User;
     supabase: SupabaseClient<Database>;
@@ -21,7 +21,7 @@ export const activityCompletionsHandler = new OpenAPIHono<{
 }>();
 
 // Aplicar autenticación a todas las rutas
-activityCompletionsHandler.use("/*", withAuth);
+dateCompletionsHandler.use("/*", withAuth);
 
 // Esquema de respuestas comunes
 const ErrorSchema = z.object({
@@ -32,10 +32,10 @@ const ErrorSchema = z.object({
 const getCompletionsRoute = createRoute({
   method: "get",
   path: "/",
-  tags: ["ActivityCompletions"],
+  tags: ["DateCompletions"],
   summary: "Obtener completaciones del usuario",
   request: {
-    query: GetActivityCompletionsQuerySchema,
+    query: GetDateCompletionsQuerySchema,
   },
   responses: {
     200: {
@@ -43,7 +43,7 @@ const getCompletionsRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            data: z.array(ActivityCompletionSchema),
+            data: z.array(DateCompletionSchema),
           }),
         },
       },
@@ -59,13 +59,13 @@ const getCompletionsRoute = createRoute({
   },
 });
 
-activityCompletionsHandler.openapi(getCompletionsRoute, async (c) => {
+dateCompletionsHandler.openapi(getCompletionsRoute, async (c) => {
   try {
     const user = c.get("user");
     const supabase = c.get("supabase");
     const query = c.req.valid("query");
 
-    const service = new ActivityCompletionService(supabase);
+    const service = new DateCompletionService(supabase);
     const completions = await service.getCompletions(user.id, query);
 
     return c.json({ data: completions }, 200);
@@ -79,13 +79,13 @@ activityCompletionsHandler.openapi(getCompletionsRoute, async (c) => {
 const toggleCompletionRoute = createRoute({
   method: "post",
   path: "/toggle",
-  tags: ["ActivityCompletions"],
+  tags: ["DateCompletions"],
   summary: "Toggle completación de actividad para un día",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: NewActivityCompletionSchema,
+          schema: NewDateCompletionSchema,
         },
       },
     },
@@ -98,7 +98,7 @@ const toggleCompletionRoute = createRoute({
           schema: z.object({
             data: z.object({
               completed: z.boolean(),
-              completion: ActivityCompletionSchema.nullable(),
+              completion: DateCompletionSchema.nullable(),
             }),
           }),
         },
@@ -115,13 +115,13 @@ const toggleCompletionRoute = createRoute({
   },
 });
 
-activityCompletionsHandler.openapi(toggleCompletionRoute, async (c) => {
+dateCompletionsHandler.openapi(toggleCompletionRoute, async (c) => {
   try {
     const user = c.get("user");
     const supabase = c.get("supabase");
     const data = c.req.valid("json");
 
-    const service = new ActivityCompletionService(supabase);
+    const service = new DateCompletionService(supabase);
     const result = await service.toggleCompletion(user.id, data);
 
     return c.json({ data: result }, 200);

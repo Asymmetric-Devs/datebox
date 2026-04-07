@@ -8,15 +8,15 @@ import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
 import { useActivitiesRealtime } from "@/hooks/useActivitiesRealtime";
 import {
-  usePostActivities,
-  usePatchActivitiesId,
-  useDeleteActivitiesId,
-  Activity,
-  NewActivity,
-  UpdateActivity,
-  useGetActivitiesFamilyCodeIdFamilyGroup,
-  useGetFamilyGroupIdGroupMembers,
-  GetFamilyGroupIdGroupMembers200,
+  usePostDates,
+  usePatchDatesId,
+  useDeleteDatesId,
+  DateEvent,
+  NewDateEvent,
+  UpdateDateEvent,
+  useGetDatesGroupGroupId,
+  useGetGroupsGroupIdMembers,
+  GetGroupsGroupIdMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text, Dialog, Button, Portal } from "react-native-paper";
@@ -39,10 +39,10 @@ function CalendarScreenContent() {
 
   const [formVisible, setFormVisible] = useState(false);
 
-  const [editing, setEditing] = useState<Partial<Activity> | null>(null);
+  const [editing, setEditing] = useState<Partial<DateEvent> | null>(null);
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
-  const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
-  const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
+  const activitiesQuery = useGetDatesGroupGroupId(familyCode);
+  const membersQuery = useGetGroupsGroupIdMembers(familyCode);
 
   const [selectedDay, setSelectedDay] = useState<string>(getTodayLocal());
 
@@ -66,15 +66,15 @@ function CalendarScreenContent() {
   // ------------------
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
-  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+  const selectGroupInfo = (): GetGroupsGroupIdMembers200 | undefined => {
     const resp = membersQuery.data as
-      | { data?: GetFamilyGroupIdGroupMembers200 }
-      | GetFamilyGroupIdGroupMembers200
+      | { data?: GetGroupsGroupIdMembers200 }
+      | GetGroupsGroupIdMembers200
       | undefined;
     if (!resp) return undefined;
     return (
-      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
-      (resp as GetFamilyGroupIdGroupMembers200)
+      (resp as { data?: GetGroupsGroupIdMembers200 }).data ??
+      (resp as GetGroupsGroupIdMembers200)
     );
   };
 
@@ -117,7 +117,7 @@ function CalendarScreenContent() {
     return Array.from(byId.values());
   }, [groupInfo]);
 
-  const postActivity = usePostActivities({
+  const postActivity = usePostDates({
     mutation: {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
@@ -157,7 +157,7 @@ function CalendarScreenContent() {
     },
   });
 
-  const patchActivity = usePatchActivitiesId({
+  const patchActivity = usePatchDatesId({
     mutation: {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
@@ -196,7 +196,7 @@ function CalendarScreenContent() {
     },
   });
 
-  const deleteActivity = useDeleteActivitiesId({
+  const deleteActivity = useDeleteDatesId({
     mutation: {
       onSuccess: async () => {
         showToast({
@@ -247,10 +247,10 @@ function CalendarScreenContent() {
     ) {
       const activities = Array.isArray(activitiesQuery.data)
         ? activitiesQuery.data
-        : (activitiesQuery.data as { data?: Activity[] }).data || [];
+        : (activitiesQuery.data as { data?: DateEvent[] }).data || [];
 
       const activity = activities.find(
-        (a: Activity) => a.id === params.activityId,
+        (a: DateEvent) => a.id === params.activityId,
       );
       if (activity) {
         console.log("📅 Opening activity from params:", {
@@ -289,27 +289,27 @@ function CalendarScreenContent() {
     setActivityDateToView(null);
   };
 
-  const handleSave = async (payload: Partial<Activity>) => {
+  const handleSave = async (payload: Partial<DateEvent>) => {
     // No usamos try-catch aquí, dejamos que el error se propague al formulario
     if (editing && editing.id) {
       await patchActivity.mutateAsync({
         id: editing.id,
-        data: payload as UpdateActivity,
+        data: payload as UpdateDateEvent,
       });
     } else {
       await postActivity.mutateAsync({
         data: {
           ...payload,
           createdBy: idUser,
-          assignedTo: payload.assignedTo || idUser, // Fallback por seguridad
+          groupId: payload.groupId || familyCode, // Assign to user's group
           startsAt: payload.startsAt!,
-        } as NewActivity,
+        } as NewDateEvent,
       });
     }
     // Los callbacks onSuccess de las mutaciones ya manejan el cierre del form y el diálogo
   };
 
-  const handleEdit = (ev: Activity) => {
+  const handleEdit = (ev: DateEvent) => {
     setEditing(ev);
     setFormVisible(true);
   };
@@ -384,7 +384,7 @@ function CalendarScreenContent() {
 
       <View style={{ flex: 1 }}>
         <CalendarCard
-          idFamilyGroup={familyCode}
+          idGroup={familyCode}
           idUser={idUser}
           activitiesQuery={activitiesQuery}
           onEdit={handleEdit}

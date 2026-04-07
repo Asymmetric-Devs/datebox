@@ -8,13 +8,13 @@ import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
-import { familyGroupApp } from "./modules/familyGroups/handler.js";
-import { activitiesApp } from "./modules/activities/handler.js";
+import { groupApp } from "./modules/groups/handler.js";
+import { datesApp } from "./modules/dates/handler.js";
 import { Database } from "./supabase-types.js";
 import { memoriesApp } from "./modules/memories/handler.js";
 import { shopApp } from "./modules/shop/handler.js";
 import { frequenciesApp } from "./modules/frequencies/handler.js";
-import { activityCompletionsHandler } from "./modules/activityCompletions/handler.js";
+import { dateCompletionsHandler } from "./modules/dateCompletions/handler.js";
 import { puzzlesApp } from "./modules/puzzles/handler.js";
 import { attemptsApp } from "./modules/attempts/handler.js";
 import { achievementsApp } from "./modules/achievements/handler.js";
@@ -115,12 +115,12 @@ app.use("*", async (c, next) => {
 // Mount routes.
 app.route("/", healthApp);
 app.route("/", usersApp);
-app.route("/", familyGroupApp);
-app.route("/", activitiesApp);
+app.route("/", groupApp);
+app.route("/", datesApp);
 app.route("/", memoriesApp);
 app.route("/", albumApp);
 app.route("/", frequenciesApp);
-app.route("/activity-completions", activityCompletionsHandler);
+app.route("/date-completions", dateCompletionsHandler);
 
 // Mount games/puzzles routes (public)
 app.route("/", puzzlesApp);
@@ -159,9 +159,9 @@ app.doc("/openapi.json", {
     { name: "users" },
     { name: "memories" },
     { name: "album" },
-    { name: "familyGroups" },
+    { name: "groups" },
     { name: "frequencies" },
-    { name: "ActivityCompletions" },
+    { name: "DateCompletions" },
     { name: "games" },
     { name: "puzzles" },
     { name: "attempts" },
@@ -225,8 +225,8 @@ export default {
       const effectiveEndTime = new Date(windowEndMs).toISOString();
 
       const { data: singleDayActivities, error: error1 } = await supabase
-        .from("activities")
-        .select("id, title, description, assignedTo, startsAt")
+        .from("dates")
+        .select("id, title, description, groupId, startsAt")
         .eq("completed", false)
         .is("frequencyId", null)
         .gte("startsAt", windowStartTime)
@@ -234,13 +234,13 @@ export default {
 
       // Obtener actividades recurrentes con su frecuencia
       const { data: recurringActivities, error: error2 } = await supabase
-        .from("activities")
+        .from("dates")
         .select(
           `
           id, 
           title, 
           description, 
-          assignedTo, 
+          groupId, 
           startsAt, 
           frequencyId,
           endsAt,
@@ -260,9 +260,9 @@ export default {
       }
 
       const { data: completedToday, error: completedError } = await supabase
-        .from("activity_completions")
-        .select("activityId")
-        .eq("completedDate", todayStr);
+        .from("date_completions")
+        .select("dateId")
+        .eq("completed_date", todayStr);
 
       if (completedError) {
         console.log(completedError);
@@ -276,7 +276,7 @@ export default {
       }
 
       const completedActivityIdsToday = new Set(
-        (completedToday || []).map((c) => c.activityId),
+        (completedToday || []).map((c) => c.dateId),
       );
 
       // Filtrar actividades recurrentes que corresponden para hoy y la ventana horaria
@@ -332,13 +332,13 @@ export default {
 
             // Si no fue completada hoy, agregar a la lista
             if (!completedActivityIdsToday.has(activity.id)) {
-              recurringToNotify.push(
-                activity.id,
-                activity.title,
-                activity.description,
-                activity.assignedTo,
-                activity.startsAt,
-              );
+              recurringToNotify.push({
+                id: activity.id,
+                title: activity.title,
+                description: activity.description,
+                groupId: activity.groupId,
+                startsAt: activity.startsAt,
+              });
             }
           }
         }
@@ -507,17 +507,28 @@ export default {
       // Array de Promises
       const notificationPromises = allActivitiesToNotify.map(
         async (activity) => {
-          const targetUserId = activity.assignedTo;
-          if (!targetUserId) return;
+          const groupId = activity.groupId;
+          if (!groupId) return;
 
-          return notificationsService.createNotification({
-            userId: targetUserId,
-            eventType: "activity_reminder",
-            entityType: "activity",
-            entityId: activity.id,
-            title: "Actividad pendiente",
-            body: `${activity.title}`,
-          });
+          // Resolve group members
+          const { data: members } = await supabase
+            .from("users")
+            .select("id")
+            .eq("groupId", groupId);
+
+          if (!members || members.length === 0) return;
+
+          const notifyUsers = members.map(m => 
+            notificationsService.createNotification({
+              userId: m.id,
+              eventType: "activity_reminder",
+              entityType: "date",
+              entityId: activity.id,
+              title: "Cita pendiente",
+              body: `${activity.title}`,
+            })
+          );
+          await Promise.allSettled(notifyUsers);
         },
       );
 

@@ -10,7 +10,7 @@ import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { AchievementService } from "../achievements/service";
 import { StreakService } from "../streaks/service";
-import { FamilyGroupService } from "../familyGroups/service";
+import { GroupService } from "../groups/service";
 
 export const attemptsApp = new OpenAPIHono();
 
@@ -223,8 +223,8 @@ const listAttemptsHandler = async (c: any) => {
 
   // Si especifica userId, verificar permisos
   if (requestedUserId && requestedUserId !== currentUserId) {
-    const familyGroupService = new FamilyGroupService(c.var.supabase);
-    const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
+    const groupService = new GroupService(c.var.supabase);
+    const canAccess = await groupService.canAccessUserData(currentUserId, requestedUserId);
 
     if (!canAccess) {
       return c.json({ error: { message: "No tienes permisos para ver los datos de este usuario" } }, 403);
@@ -305,8 +305,8 @@ attemptsApp.openapi(
     
     // Si especifica userId, verificar permisos
     if (requestedUserId && requestedUserId !== currentUserId) {
-      const familyGroupService = new FamilyGroupService(c.var.supabase);
-      const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
+      const groupService = new GroupService(c.var.supabase);
+      const canAccess = await groupService.canAccessUserData(currentUserId, requestedUserId);
       
       if (!canAccess) {
         return c.json({ error: { message: "No tienes permisos para ver los datos de este usuario" } }, 403);

@@ -15,12 +15,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { SkeletonBox } from "@/components/shared";
 import {
-  useGetActivitiesFamilyCodeIdFamilyGroup,
+  useGetDatesGroupGroupId,
   useGetAttempts,
   useGetMemories,
-  useGetFamilyGroupIdGroupMembers,
-  GetFamilyGroupIdGroupMembers200,
+  useGetGroupsGroupIdMembers,
+  GetGroupsGroupIdMembers200,
   AttemptWithUser,
+  DateEvent,
 } from "@elepad/api-client";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -69,7 +70,7 @@ const HomeScreen = () => {
   const queryClient = useQueryClient();
 
   // Fetch today's activities
-  const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
+  const activitiesQuery = useGetDatesGroupGroupId(
     userElepad?.groupId || "",
     {
       query: {
@@ -100,7 +101,7 @@ const HomeScreen = () => {
   );
 
   // Fetch family members
-  const membersQuery = useGetFamilyGroupIdGroupMembers(
+  const membersQuery = useGetGroupsGroupIdMembers(
     userElepad?.groupId || "",
     {
       query: {
@@ -126,15 +127,15 @@ const HomeScreen = () => {
     memoriesLoading: memoriesQuery.isLoading,
   });
 
-  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+  const selectGroupInfo = (): GetGroupsGroupIdMembers200 | undefined => {
     const resp = membersQuery.data as
-      | { data?: GetFamilyGroupIdGroupMembers200 }
-      | GetFamilyGroupIdGroupMembers200
+      | { data?: GetGroupsGroupIdMembers200 }
+      | GetGroupsGroupIdMembers200
       | undefined;
     if (!resp) return undefined;
     return (
-      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
-      (resp as GetFamilyGroupIdGroupMembers200)
+      (resp as { data?: GetGroupsGroupIdMembers200 }).data ??
+      (resp as GetGroupsGroupIdMembers200)
     );
   };
 
@@ -174,15 +175,15 @@ const HomeScreen = () => {
 
     if (!Array.isArray(activities)) return [];
 
-    interface Activity {
+    interface DateItem {
       id: string;
       startsAt: string;
     }
 
     return activities
-      .filter((activity: Activity) => new Date(activity.startsAt) >= now)
+      .filter((activity: DateEvent) => new Date(activity.startsAt) >= now)
       .sort(
-        (a: Activity, b: Activity) =>
+        (a: DateEvent, b: DateEvent) =>
           new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
       .slice(0, 3);
@@ -258,10 +259,10 @@ const HomeScreen = () => {
       // La key generada por orval es ['/memories', params]
       queryClient.invalidateQueries({ queryKey: ["/memories"] });
       queryClient.invalidateQueries({
-        queryKey: ["getActivitiesFamilyCodeIdFamilyGroup"],
+        queryKey: ["getActivitiesFamilyCodeIdGroup"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["getFamilyGroupIdGroupMembers"],
+        queryKey: ["getGroupIdGroupMembers"],
       });
     }
   }, [userElepad?.groupId, queryClient]);

@@ -14,7 +14,7 @@ import {
   useGetAttemptsStatsGameType,
   GameType,
   getAttempts,
-  useGetFamilyGroupIdGroupMembers,
+  useGetGroupsGroupIdMembers,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
 import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
@@ -71,7 +71,7 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
   };
 
   // Fetch family members to get elders list
-  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId || "", {
+  const membersQuery = useGetGroupsGroupIdMembers(groupId || "", {
     query: { enabled: !!groupId && isHelper },
   });
 

@@ -22,7 +22,7 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
-import { useGetFamilyGroupIdGroupMembers } from "@elepad/api-client";
+import { useGetGroupsGroupIdMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import asymmetricLogo from "@/assets/images/logo/asymmetric-logo.png";
 import ProfileHeader from "@/components/ProfileHeader";
@@ -133,7 +133,7 @@ export default function ConfiguracionScreen() {
   const groupId = userElepad?.groupId;
 
   // Fetch optional group info for the family name
-  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "", {
+  const membersQuery = useGetGroupsGroupIdMembers(groupId ?? "", {
     query: { enabled: !!groupId },
   });
 
@@ -356,7 +356,7 @@ export default function ConfiguracionScreen() {
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: "center" }}
               onPress={() => {
-                router.navigate("/familyGroup");
+                router.navigate("/group" as any);
               }}
             />
           </List.Section>

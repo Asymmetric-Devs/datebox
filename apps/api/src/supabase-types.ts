@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -49,118 +49,6 @@ export type Database = {
           title?: string
         }
         Relationships: []
-      }
-      activities: {
-        Row: {
-          assignedTo: string | null
-          completed: boolean
-          createdAt: string
-          createdBy: string
-          description: string | null
-          endsAt: string | null
-          frequencyId: string | null
-          google_event_id: string | null
-          google_sync_status: string | null
-          id: string
-          startsAt: string
-          title: string
-          updatedAt: string
-        }
-        Insert: {
-          assignedTo?: string | null
-          completed?: boolean
-          createdAt?: string
-          createdBy: string
-          description?: string | null
-          endsAt?: string | null
-          frequencyId?: string | null
-          google_event_id?: string | null
-          google_sync_status?: string | null
-          id?: string
-          startsAt: string
-          title: string
-          updatedAt?: string
-        }
-        Update: {
-          assignedTo?: string | null
-          completed?: boolean
-          createdAt?: string
-          createdBy?: string
-          description?: string | null
-          endsAt?: string | null
-          frequencyId?: string | null
-          google_event_id?: string | null
-          google_sync_status?: string | null
-          id?: string
-          startsAt?: string
-          title?: string
-          updatedAt?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activities_assignedTo_fkey"
-            columns: ["assignedTo"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activities_createdBy_fkey"
-            columns: ["createdBy"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activities_frequencyId_fkey"
-            columns: ["frequencyId"]
-            isOneToOne: false
-            referencedRelation: "frequencies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      activity_completions: {
-        Row: {
-          activityId: string
-          completedDate: string
-          createdAt: string
-          id: string
-          updatedAt: string
-          userId: string
-        }
-        Insert: {
-          activityId: string
-          completedDate: string
-          createdAt?: string
-          id?: string
-          updatedAt?: string
-          userId: string
-        }
-        Update: {
-          activityId?: string
-          completedDate?: string
-          createdAt?: string
-          id?: string
-          updatedAt?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_completions_activityid_fkey"
-            columns: ["activityId"]
-            isOneToOne: false
-            referencedRelation: "activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_completions_userid_fkey"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       attempts: {
         Row: {
@@ -239,6 +127,118 @@ export type Database = {
           },
         ]
       }
+      date_completions: {
+        Row: {
+          completedDate: string
+          createdAt: string
+          dateId: string
+          id: string
+          updatedAt: string
+          userId: string
+        }
+        Insert: {
+          completedDate: string
+          createdAt?: string
+          dateId: string
+          id?: string
+          updatedAt?: string
+          userId: string
+        }
+        Update: {
+          completedDate?: string
+          createdAt?: string
+          dateId?: string
+          id?: string
+          updatedAt?: string
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "date_completions_dateId_fkey"
+            columns: ["dateId"]
+            isOneToOne: false
+            referencedRelation: "dates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "date_completions_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dates: {
+        Row: {
+          completed: boolean
+          createdAt: string
+          createdBy: string
+          description: string | null
+          endsAt: string | null
+          frequencyId: string | null
+          google_event_id: string | null
+          google_sync_status: string | null
+          groupId: string | null
+          id: string
+          startsAt: string
+          title: string
+          updatedAt: string
+        }
+        Insert: {
+          completed?: boolean
+          createdAt?: string
+          createdBy: string
+          description?: string | null
+          endsAt?: string | null
+          frequencyId?: string | null
+          google_event_id?: string | null
+          google_sync_status?: string | null
+          groupId?: string | null
+          id?: string
+          startsAt: string
+          title: string
+          updatedAt?: string
+        }
+        Update: {
+          completed?: boolean
+          createdAt?: string
+          createdBy?: string
+          description?: string | null
+          endsAt?: string | null
+          frequencyId?: string | null
+          google_event_id?: string | null
+          google_sync_status?: string | null
+          groupId?: string | null
+          id?: string
+          startsAt?: string
+          title?: string
+          updatedAt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dates_createdBy_fkey"
+            columns: ["createdBy"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dates_frequencyId_fkey"
+            columns: ["frequencyId"]
+            isOneToOne: false
+            referencedRelation: "frequencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dates_groupId_fkey"
+            columns: ["groupId"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_tokens: {
         Row: {
           created_at: string | null
@@ -280,7 +280,25 @@ export type Database = {
           },
         ]
       }
-      familyGroups: {
+      frequencies: {
+        Row: {
+          id: string
+          label: string
+          rrule: string | null
+        }
+        Insert: {
+          id?: string
+          label: string
+          rrule?: string | null
+        }
+        Update: {
+          id?: string
+          label?: string
+          rrule?: string | null
+        }
+        Relationships: []
+      }
+      groups: {
         Row: {
           code: string | null
           createdAt: string
@@ -307,31 +325,13 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "familyGroups_ownerUserId_fkey"
+            foreignKeyName: "groups_ownerUserId_fkey"
             columns: ["ownerUserId"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
-      }
-      frequencies: {
-        Row: {
-          id: string
-          label: string
-          rrule: string | null
-        }
-        Insert: {
-          id?: string
-          label: string
-          rrule?: string | null
-        }
-        Update: {
-          id?: string
-          label?: string
-          rrule?: string | null
-        }
-        Relationships: []
       }
       logicGames: {
         Row: {
@@ -375,6 +375,9 @@ export type Database = {
           id: string
           mediaUrl: string | null
           mimeType: string | null
+          spotifyData: Json | null
+          spotifyTrackId: string | null
+          spotifyUri: string | null
           title: string | null
         }
         Insert: {
@@ -386,6 +389,9 @@ export type Database = {
           id?: string
           mediaUrl?: string | null
           mimeType?: string | null
+          spotifyData?: Json | null
+          spotifyTrackId?: string | null
+          spotifyUri?: string | null
           title?: string | null
         }
         Update: {
@@ -397,6 +403,9 @@ export type Database = {
           id?: string
           mediaUrl?: string | null
           mimeType?: string | null
+          spotifyData?: Json | null
+          spotifyTrackId?: string | null
+          spotifyUri?: string | null
           title?: string | null
         }
         Relationships: [
@@ -418,7 +427,7 @@ export type Database = {
             foreignKeyName: "memories_groupId_fkey"
             columns: ["groupId"]
             isOneToOne: false
-            referencedRelation: "familyGroups"
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
         ]
@@ -459,14 +468,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "memoriesAlbumPage_albumId_fkey"
+            foreignKeyName: "memoriesAlbumPages_albumId_fkey"
             columns: ["albumId"]
             isOneToOne: false
             referencedRelation: "memoriesAlbums"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "memoriesAlbumPage_memoryId_fkey"
+            foreignKeyName: "memoriesAlbumPages_memoryId_fkey"
             columns: ["memoryId"]
             isOneToOne: false
             referencedRelation: "memories"
@@ -516,17 +525,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "memoriesAlbum_createdBy_fkey"
+            foreignKeyName: "memoriesAlbums_createdBy_fkey"
             columns: ["createdBy"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "memoriesAlbum_groupId_fkey"
+            foreignKeyName: "memoriesAlbums_groupId_fkey"
             columns: ["groupId"]
             isOneToOne: false
-            referencedRelation: "familyGroups"
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
         ]
@@ -564,7 +573,7 @@ export type Database = {
             foreignKeyName: "memoriesBooks_groupId_fkey"
             columns: ["groupId"]
             isOneToOne: false
-            referencedRelation: "familyGroups"
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
         ]
@@ -671,7 +680,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "mentions_mentioned_user_fkey"
+            foreignKeyName: "mentions_mentioned_user_id_fkey"
             columns: ["mentioned_user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -718,14 +727,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "notifications_actor_fkey"
+            foreignKeyName: "notifications_actor_id_fkey"
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "notifications_user_fkey"
+            foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -849,7 +858,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "streak_history_userid_fkey"
+            foreignKeyName: "streak_history_userId_fkey"
             columns: ["userId"]
             isOneToOne: false
             referencedRelation: "users"
@@ -910,14 +919,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_achievements_achievementid_fkey"
+            foreignKeyName: "user_achievements_achievementId_fkey"
             columns: ["achievementId"]
             isOneToOne: false
             referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_achievements_userid_fkey"
+            foreignKeyName: "user_achievements_userId_fkey"
             columns: ["userId"]
             isOneToOne: false
             referencedRelation: "users"
@@ -1062,7 +1071,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_streaks_userid_fkey"
+            foreignKeyName: "user_streaks_userId_fkey"
             columns: ["userId"]
             isOneToOne: true
             referencedRelation: "users"
@@ -1118,7 +1127,7 @@ export type Database = {
             foreignKeyName: "users_group_fk"
             columns: ["groupId"]
             isOneToOne: false
-            referencedRelation: "familyGroups"
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
         ]
@@ -1128,29 +1137,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_google_tokens: {
-        Args: { p_user_id: string }
-        Returns: {
-          access_token: string
-          expires_at: string
-          refresh_token: string
-          scope: string
-        }[]
-      }
-      is_same_family_group: {
-        Args: { target_user_id: string }
-        Returns: boolean
-      }
-      store_google_tokens: {
-        Args: {
-          p_access_token: string
-          p_expires_at: string
-          p_refresh_token: string
-          p_scope: string
-          p_user_id: string
-        }
-        Returns: undefined
-      }
+      is_same_group: { Args: { target_user_id: string }; Returns: boolean }
     }
     Enums: {
       album_status: "processing" | "ready" | "error"
