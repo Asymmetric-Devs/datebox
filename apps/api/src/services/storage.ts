@@ -6,9 +6,6 @@ const MEMORIES_BUCKET = "memories";
 const ALBUM_PDF_BUCKET = "album-exports";
 
 /** Turn the file name into an URL-compatible name. */
-function urlify(name: string) {
-  return name.replace(/[^a-zA-Z0-9_.-]/g, "_");
-}
 
 /**
  * Gets the correct file extension based on MIME type
@@ -123,13 +120,13 @@ export async function uploadUserAvatarImage(
     if (error instanceof Error) {
       errorMessage = error.message;
     } else if (typeof error === "object" && error !== null) {
-      const errorObj = error as any;
+      const errorObj = error as unknown as Record<string, unknown>;
       errorMessage = 
-        errorObj.message || 
+        (errorObj.message || 
         errorObj.error_description ||
         errorObj.error ||
         errorObj.statusMessage ||
-        JSON.stringify(errorObj);
+        JSON.stringify(errorObj)) as string;
     } else {
       errorMessage = String(error);
     }
@@ -194,7 +191,7 @@ export async function uploadMemoryImage(
     let responseBody = "";
     
     try {
-      const errorObj = error as any;
+      const errorObj = error as unknown as Record<string, unknown>;
       
       // Try to read the Response body
       if (errorObj.originalError) {
@@ -211,7 +208,7 @@ export async function uploadMemoryImage(
               try {
                 const parsed = JSON.parse(responseBody);
                 console.error("🔴 Parsed response:", parsed);
-                errorMessage = parsed.message || parsed.error || JSON.stringify(parsed);
+                errorMessage = (parsed.message || parsed.error || JSON.stringify(parsed)) as string;
               } catch {
                 errorMessage = responseBody;
               }
@@ -227,8 +224,8 @@ export async function uploadMemoryImage(
         keys: Object.keys(errorObj),
         name: errorObj.name,
         message: errorObj.message,
-        status: (errorObj as any)?.originalError?.status,
-        statusText: (errorObj as any)?.originalError?.statusText,
+        status: (errorObj.originalError as unknown as Record<string, unknown>)?.status,
+        statusText: (errorObj.originalError as unknown as Record<string, unknown>)?.statusText,
         bodyLength: responseBody.length,
         responseBody: responseBody.substring(0, 200),
       });

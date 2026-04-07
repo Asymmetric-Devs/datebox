@@ -15,6 +15,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
+import eleLoading from "@/assets/images/ele-celular-loading.png";
 
 
 const screenWidth = Dimensions.get("window").width;
@@ -178,7 +179,6 @@ const RecuerdoItemComponent = React.memo(
               />
               <ActivityIndicator
                 size="small"
-                source={dateboxLogo}
                 style={{ position: "absolute", bottom: 6 }}
               />
             </View>

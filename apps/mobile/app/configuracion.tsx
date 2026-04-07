@@ -24,7 +24,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { useGetFamilyGroupIdGroupMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
-import dateboxLogo from "@/assets/images/logo/datebox-sinfondo.png";
 import asymmetricLogo from "@/assets/images/logo/asymmetric-logo.png";
 import ProfileHeader from "@/components/ProfileHeader";
 import PolaroidPreview from "@/components/Recuerdos/PolaroidPreview";
