@@ -25,7 +25,6 @@ import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
-import DropdownSelect from "../shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
 import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 
@@ -213,10 +212,6 @@ export default function ActivityForm({
   const [error, setError] = useState<string | null>(null);
   const [showFrequencyModal, setShowFrequencyModal] = useState(false);
 
-  // Filtrar solo adultos mayores (elders) para el selector
-  const elders = familyMembers.filter((member) => member.elder === true);
-
-  // Fetch available frequencies
   const frequenciesQuery = useGetFrequencies();
 
   // Extract frequencies from response
@@ -298,7 +293,7 @@ export default function ActivityForm({
           endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
           completed: initial?.completed ?? false,
           frequencyId: frequencyId || null,
-          groupId: (initial as any)?.groupId || userElepad?.groupId || "",
+          groupId: (initial && 'groupId' in initial ? initial.groupId : null) || userElepad?.groupId || "",
         }),
         timeoutPromise,
       ]);

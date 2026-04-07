@@ -30,7 +30,6 @@ interface ActivityItemProps {
   }>;
   shouldOpen?: boolean;
   onOpened?: () => void;
-  showTargetUser?: boolean;
 }
 
 export default function ActivityItem({
@@ -45,7 +44,6 @@ export default function ActivityItem({
   familyMembers = [],
   shouldOpen = false,
   onOpened,
-  showTargetUser = true,
 }: ActivityItemProps) {
   const { userElepad } = useAuth();
   const userTimezone = userElepad?.timezone;

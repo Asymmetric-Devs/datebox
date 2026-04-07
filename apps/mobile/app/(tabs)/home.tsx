@@ -175,11 +175,6 @@ const HomeScreen = () => {
 
     if (!Array.isArray(activities)) return [];
 
-    interface DateItem {
-      id: string;
-      startsAt: string;
-    }
-
     return activities
       .filter((activity: DateEvent) => new Date(activity.startsAt) >= now)
       .sort(

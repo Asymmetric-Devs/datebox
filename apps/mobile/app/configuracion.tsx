@@ -356,7 +356,7 @@ export default function ConfiguracionScreen() {
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: "center" }}
               onPress={() => {
-                router.navigate("/group" as any);
+                router.navigate("/group");
               }}
             />
           </List.Section>
