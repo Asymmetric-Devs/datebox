@@ -1127,7 +1127,6 @@ export type Database = {
           email: string
           google_calendar_enabled: boolean | null
           google_calendar_id: string | null
-          groupId: string | null
           id: string
           points_balance: number
           timezone: string | null
@@ -1141,7 +1140,6 @@ export type Database = {
           email: string
           google_calendar_enabled?: boolean | null
           google_calendar_id?: string | null
-          groupId?: string | null
           id: string
           points_balance?: number
           timezone?: string | null
@@ -1155,21 +1153,12 @@ export type Database = {
           email?: string
           google_calendar_enabled?: boolean | null
           google_calendar_id?: string | null
-          groupId?: string | null
           id?: string
           points_balance?: number
           timezone?: string | null
           updatedAt?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_group_fk"
-            columns: ["groupId"]
-            isOneToOne: false
-            referencedRelation: "groups"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {

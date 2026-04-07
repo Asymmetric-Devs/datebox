@@ -596,20 +596,21 @@ Este recuerdo nos muestra...`;
     limit: number,
     offset: number,
   ): Promise<Album[]> {
-    const { data: userGroup, error: userGroupError } = await this.supabase
-      .from("users")
+    // Get user's group membership
+    const { data: groupMember, error: memberError } = await this.supabase
+      .from("group_members")
       .select("groupId")
-      .eq("id", userId)
+      .eq("userId", userId)
       .single();
 
-    if (!userGroup?.groupId || userGroupError) {
-      throw new ApiException(404, "User family group not found");
+    if (!groupMember?.groupId || memberError) {
+      throw new ApiException(404, "User is not a member of any group");
     }
 
     const { data: albums, error: albumsError } = await this.supabase
       .from("memoriesAlbums")
       .select("*, memoriesAlbumPages(imageUrl, order)")
-      .eq("groupId", userGroup.groupId)
+      .eq("groupId", groupMember.groupId)
       .eq("status", "ready")
       .range(offset, offset + limit - 1);
 

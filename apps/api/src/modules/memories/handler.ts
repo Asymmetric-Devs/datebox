@@ -108,19 +108,16 @@ memoriesApp.openapi(
     const { groupId } = c.req.valid("query");
     const user = c.var.user;
 
-    // Asegurar que el usuario pertenece a ese grupo
-    const { data: userRow, error: userErr } = await c.var.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", user.id)
+    // Verify user belongs to the group
+    const { data: membership, error: memberErr } = await c.var.supabase
+      .from("group_members")
+      .select("id")
+      .eq("userId", user.id)
+      .eq("groupId", groupId)
       .single();
 
-    if (userErr) {
-      throw new ApiException(500, "Error fetching user");
-    }
-
-    if (!userRow?.groupId || userRow.groupId !== groupId) {
-      throw new ApiException(403, "Forbidden");
+    if (memberErr || !membership) {
+      throw new ApiException(403, "User is not a member of this group");
     }
 
     const books = await c.var.memoriesService.getMemoriesBooks(groupId);
@@ -164,16 +161,16 @@ memoriesApp.openapi(
     const body = c.req.valid("json");
     const user = c.var.user;
 
-    const { data: userRow, error: userErr } = await c.var.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", user.id)
+    // Verify user belongs to the group
+    const { data: membership, error: memberErr } = await c.var.supabase
+      .from("group_members")
+      .select("id")
+      .eq("userId", user.id)
+      .eq("groupId", body.groupId)
       .single();
-    if (userErr) {
-      throw new ApiException(500, "Error fetching user");
-    }
-    if (!userRow?.groupId || userRow.groupId !== body.groupId) {
-      throw new ApiException(403, "Forbidden");
+
+    if (memberErr || !membership) {
+      throw new ApiException(403, "User is not a member of this group");
     }
 
     const created = await c.var.memoriesService.createMemoriesBook(body);
