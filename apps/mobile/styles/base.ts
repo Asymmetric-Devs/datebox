@@ -209,6 +209,13 @@ export const STYLES = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: FONT.semiBold,
+    color: COLORS.text,
+    textAlign: "left",
+    letterSpacing: -0.3,
+  },
   footerText: {
     marginTop: 18,
     color: COLORS.textLight,

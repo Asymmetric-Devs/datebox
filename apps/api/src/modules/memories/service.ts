@@ -34,7 +34,7 @@ export class MemoriesService {
   }
 
   private async assertUserInGroup(userId: string, groupId: string) {
-    const { data, error } = await this.supabase
+    const { error } = await this.supabase
       .from("group_members")
       .select("id")
       .eq("userId", userId)
