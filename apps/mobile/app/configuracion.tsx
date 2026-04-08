@@ -17,6 +17,7 @@ import {
   Text,
   Modal,
   ActivityIndicator,
+  TextInput,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,6 +36,8 @@ import {
   useGetShopItems,
   usePostShopEquip,
   usePostShopUnequip,
+  usePostGroupsCreate,
+  usePostGroupsLink,
 } from "@elepad/api-client";
 import { useGroup } from "@/context/GroupContext";
 import { Menu } from "react-native-paper";
@@ -61,8 +64,15 @@ export default function ConfiguracionScreen() {
     updateUserTimezone,
   } = useAuth();
   
-  const { selectedGroupId, setSelectedGroupId, availableGroups } = useGroup();
+  const { selectedGroupId, setSelectedGroupId, availableGroups, refreshGroups } = useGroup();
   const [groupMenuVisible, setGroupMenuVisible] = useState(false);
+  const [addGroupModalVisible, setAddGroupModalVisible] = useState(false);
+  const [addGroupMode, setAddGroupMode] = useState<"menu" | "create" | "join">("menu");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [invitationCode, setInvitationCode] = useState("");
+
+  const createGroup = usePostGroupsCreate();
+  const joinGroup = usePostGroupsLink();
   // shop hooks for frames
   const inventoryResponse = useGetShopInventory();
   const inventoryData = normalizeData(inventoryResponse.data) as
@@ -137,6 +147,85 @@ export default function ConfiguracionScreen() {
 
   const groupInfo = availableGroups.find(g => g.id === selectedGroupId);
   const familyName = groupInfo?.name || "Sin grupo";
+
+  const isAddingGroup = createGroup.isPending || joinGroup.isPending;
+
+  const closeAddGroupModal = () => {
+    if (isAddingGroup) return;
+    setAddGroupModalVisible(false);
+    setAddGroupMode("menu");
+    setNewGroupName(userElepad?.displayName || "");
+    setInvitationCode("");
+  };
+
+  const openAddGroupModal = () => {
+    setNewGroupName(userElepad?.displayName || "");
+    setInvitationCode("");
+    setAddGroupMode("menu");
+    setAddGroupModalVisible(true);
+  };
+
+  const handleCreateGroupFromSettings = async () => {
+    try {
+      if (!userElepad?.id) {
+        showToast({ message: "No se pudo obtener tu usuario", type: "error" });
+        return;
+      }
+
+      const safeName = newGroupName.trim();
+      if (!safeName) {
+        showToast({ message: "Ingresa un nombre para el grupo", type: "error" });
+        return;
+      }
+
+      await createGroup.mutateAsync({
+        data: {
+          name: safeName,
+          ownerUserId: userElepad.id,
+        },
+      });
+
+      refreshGroups();
+      closeAddGroupModal();
+      showToast({ message: "Grupo creado correctamente", type: "success" });
+    } catch (e: unknown) {
+      type MaybeApiError = { data?: { error?: { message?: string } }; message?: string };
+      const err = e as MaybeApiError;
+      const msg = err?.data?.error?.message ?? err?.message ?? "No se pudo crear el grupo";
+      showToast({ message: msg, type: "error" });
+    }
+  };
+
+  const handleJoinGroupFromSettings = async () => {
+    try {
+      if (!userElepad?.id) {
+        showToast({ message: "No se pudo obtener tu usuario", type: "error" });
+        return;
+      }
+
+      const code = invitationCode.trim().toUpperCase();
+      if (!code) {
+        showToast({ message: "Ingresa un código de invitación", type: "error" });
+        return;
+      }
+
+      await joinGroup.mutateAsync({
+        data: {
+          userId: userElepad.id,
+          invitationCode: code,
+        },
+      });
+
+      refreshGroups();
+      closeAddGroupModal();
+      showToast({ message: "Te uniste al grupo correctamente", type: "success" });
+    } catch (e: unknown) {
+      type MaybeApiError = { data?: { error?: { message?: string } }; message?: string };
+      const err = e as MaybeApiError;
+      const msg = err?.data?.error?.message ?? err?.message ?? "No se pudo unir al grupo";
+      showToast({ message: msg, type: "error" });
+    }
+  };
 
   const [editNameModalVisible, setEditNameModalVisible] = useState(false);
   const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
@@ -398,6 +487,14 @@ export default function ConfiguracionScreen() {
                   }} 
                   title="Gestionar Grupos" 
                   leadingIcon="cog"
+                />
+                <Menu.Item
+                  onPress={() => {
+                    setGroupMenuVisible(false);
+                    openAddGroupModal();
+                  }}
+                  title="Añadir grupo"
+                  leadingIcon="plus-circle-outline"
                 />
               </Menu>
             </View>
@@ -677,6 +774,103 @@ export default function ConfiguracionScreen() {
               </View>
             )}
           </Modal>
+
+          <Dialog
+            visible={addGroupModalVisible}
+            onDismiss={closeAddGroupModal}
+            style={{ backgroundColor: COLORS.white }}
+          >
+            <Dialog.Title style={{ textAlign: "center" }}>
+              {addGroupMode === "menu"
+                ? "Añadir Grupo"
+                : addGroupMode === "create"
+                  ? "Crear Nuevo Grupo"
+                  : "Unirme con Código"}
+            </Dialog.Title>
+            <Dialog.Content>
+              {addGroupMode === "menu" ? (
+                <View style={{ gap: 12 }}>
+                  <Text style={{ color: COLORS.textSecondary, textAlign: "center" }}>
+                    Elige cómo quieres añadir un nuevo grupo familiar
+                  </Text>
+                  <Button
+                    mode="contained"
+                    icon="plus"
+                    onPress={() => setAddGroupMode("create")}
+                  >
+                    Crear grupo nuevo
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    icon="account-multiple-plus"
+                    onPress={() => setAddGroupMode("join")}
+                  >
+                    Unirme con código
+                  </Button>
+                </View>
+              ) : addGroupMode === "create" ? (
+                <View style={{ gap: 12 }}>
+                  <TextInput
+                    mode="outlined"
+                    label="Nombre del grupo"
+                    value={newGroupName}
+                    onChangeText={setNewGroupName}
+                    autoCapitalize="words"
+                    disabled={isAddingGroup}
+                  />
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <Button
+                      mode="text"
+                      style={{ flex: 1 }}
+                      onPress={() => setAddGroupMode("menu")}
+                      disabled={isAddingGroup}
+                    >
+                      Atrás
+                    </Button>
+                    <Button
+                      mode="contained"
+                      style={{ flex: 1 }}
+                      onPress={handleCreateGroupFromSettings}
+                      loading={isAddingGroup}
+                      disabled={isAddingGroup}
+                    >
+                      Crear
+                    </Button>
+                  </View>
+                </View>
+              ) : (
+                <View style={{ gap: 12 }}>
+                  <TextInput
+                    mode="outlined"
+                    label="Código de invitación"
+                    value={invitationCode}
+                    onChangeText={(value) => setInvitationCode(value.toUpperCase())}
+                    autoCapitalize="characters"
+                    disabled={isAddingGroup}
+                  />
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <Button
+                      mode="text"
+                      style={{ flex: 1 }}
+                      onPress={() => setAddGroupMode("menu")}
+                      disabled={isAddingGroup}
+                    >
+                      Atrás
+                    </Button>
+                    <Button
+                      mode="contained"
+                      style={{ flex: 1 }}
+                      onPress={handleJoinGroupFromSettings}
+                      loading={isAddingGroup}
+                      disabled={isAddingGroup}
+                    >
+                      Unirme
+                    </Button>
+                  </View>
+                </View>
+              )}
+            </Dialog.Content>
+          </Dialog>
 
         </Portal>
       </ScrollView>

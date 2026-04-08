@@ -42,6 +42,28 @@ export class MemoriesAlbumService {
     this.supabase = supabase;
   }
 
+  private async getUserGroupIds(userId: string): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from("group_members")
+      .select("groupId")
+      .eq("userId", userId);
+
+    if (error) {
+      console.error("Error fetching user group memberships:", error);
+      throw new ApiException(500, "Error fetching user group memberships");
+    }
+
+    const groupIds = (data ?? [])
+      .map((row) => row.groupId)
+      .filter((id): id is string => Boolean(id));
+
+    if (groupIds.length === 0) {
+      throw new ApiException(404, "User is not a member of any group");
+    }
+
+    return groupIds;
+  }
+
   async transcribeAudio(file: File): Promise<string> {
     if (!this.apiKey) {
       throw new ApiException(500, "Gemini API key not configured");
@@ -144,21 +166,13 @@ export class MemoriesAlbumService {
    * Create an album and process it with AI-generated narratives
    */
   async createAlbum(userId: string, data: CreateAlbumRequest) {
-    const { data: userGroup, error: userGroupError } = await this.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", userId)
-      .single();
-
-    if (!userGroup?.groupId || userGroupError) {
-      throw new ApiException(404, "User family group not found");
-    }
+    const userGroupIds = await this.getUserGroupIds(userId);
 
     const { data: memories, error: memoriesError } = await this.supabase
       .from("memories")
       .select("id, groupId, title, caption, mediaUrl, mimeType")
       .in("id", data.memoryIds)
-      .eq("groupId", userGroup.groupId);
+      .in("groupId", userGroupIds);
 
     if (memoriesError) {
       console.error("Error fetching memories:", memoriesError);
@@ -170,6 +184,26 @@ export class MemoriesAlbumService {
         400,
         "Some memories not found or don't belong to your group",
       );
+    }
+
+    const memoryGroupIds = Array.from(
+      new Set(
+        memories
+          .map((m) => m.groupId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+
+    if (memoryGroupIds.length !== 1) {
+      throw new ApiException(
+        400,
+        "All selected memories must belong to the same group",
+      );
+    }
+
+    const targetGroupId = memoryGroupIds[0];
+    if (!targetGroupId) {
+      throw new ApiException(400, "Could not resolve target group for album");
     }
 
     // Filter only image memories
@@ -195,7 +229,7 @@ export class MemoriesAlbumService {
     const { data: album, error: albumError } = await this.supabase
       .from("memoriesAlbums")
       .insert({
-        groupId: userGroup.groupId,
+        groupId: targetGroupId,
         createdBy: userId,
         title: data.title,
         description: data.description,
@@ -243,7 +277,7 @@ export class MemoriesAlbumService {
     await this.processAlbumNarratives(
       album.id,
       userId,
-      userGroup.groupId,
+      targetGroupId,
       data.tags,
     ).catch((err) => {
       console.error("Error processing album narratives:", err);
@@ -596,21 +630,12 @@ Este recuerdo nos muestra...`;
     limit: number,
     offset: number,
   ): Promise<Album[]> {
-    // Get user's group membership
-    const { data: groupMember, error: memberError } = await this.supabase
-      .from("group_members")
-      .select("groupId")
-      .eq("userId", userId)
-      .single();
-
-    if (!groupMember?.groupId || memberError) {
-      throw new ApiException(404, "User is not a member of any group");
-    }
+    const groupIds = await this.getUserGroupIds(userId);
 
     const { data: albums, error: albumsError } = await this.supabase
       .from("memoriesAlbums")
       .select("*, memoriesAlbumPages(imageUrl, order)")
-      .eq("groupId", groupMember.groupId)
+      .in("groupId", groupIds)
       .eq("status", "ready")
       .range(offset, offset + limit - 1);
 
@@ -657,21 +682,13 @@ Este recuerdo nos muestra...`;
   }
 
   async getAlbumById(userId: string, albumId: string): Promise<AlbumWithPages> {
-    const { data: userGroup, error: userGroupError } = await this.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", userId)
-      .single();
-
-    if (!userGroup?.groupId || userGroupError) {
-      throw new ApiException(404, "User family group not found");
-    }
+    const groupIds = await this.getUserGroupIds(userId);
 
     const { data: album, error: albumError } = await this.supabase
       .from("memoriesAlbums")
       .select("*")
       .eq("id", albumId)
-      .eq("groupId", userGroup.groupId)
+      .in("groupId", groupIds)
       .single();
 
     if (albumError || !album) {
@@ -705,17 +722,6 @@ Este recuerdo nos muestra...`;
    * Export album to PDF using pdf-lib
    */
   async exportAlbumToPDF(userId: string, albumId: string): Promise<string> {
-    // Get user's family group
-    const { data: userGroup, error: userGroupError } = await this.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", userId)
-      .single();
-
-    if (!userGroup?.groupId || userGroupError) {
-      throw new ApiException(404, "User family group not found");
-    }
-
     // Get album with pages
     const albumWithPages = await this.getAlbumById(userId, albumId);
 
@@ -727,7 +733,7 @@ Este recuerdo nos muestra...`;
     const { data: familyGroup } = await this.supabase
       .from("groups")
       .select("name")
-      .eq("id", userGroup.groupId)
+      .eq("id", albumWithPages.groupId)
       .single();
 
     const familyName = familyGroup?.name || "Tu familia";
@@ -742,7 +748,7 @@ Este recuerdo nos muestra...`;
       // Upload to Supabase Storage
       const pdfUrl = await uploadAlbumPDF(
         this.supabase,
-        userGroup.groupId,
+        albumWithPages.groupId,
         albumId,
         pdfBuffer,
       );
@@ -1145,21 +1151,13 @@ Este recuerdo nos muestra...`;
    */
   async deleteAlbum(userId: string, albumId: string): Promise<void> {
     // First, verify the album exists and user has access to it
-    const { data: userGroup } = await this.supabase
-      .from("users")
-      .select("groupId")
-      .eq("id", userId)
-      .single();
-
-    if (!userGroup?.groupId) {
-      throw new ApiException(404, "User is not part of any family group");
-    }
+    const groupIds = await this.getUserGroupIds(userId);
 
     const { data: album, error: albumError } = await this.supabase
       .from("memoriesAlbums")
       .select("id, groupId")
       .eq("id", albumId)
-      .eq("groupId", userGroup.groupId)
+      .in("groupId", groupIds)
       .single();
 
     if (albumError || !album) {

@@ -6,7 +6,6 @@ export const UserSchema = z
     email: z.email(),
     displayName: z.string().min(1),
     avatarUrl: z.url().nullable(),
-    groupId: z.uuid().nullable(),
     elder: z.boolean(),
     timezone: z.string().nullable(),
   })

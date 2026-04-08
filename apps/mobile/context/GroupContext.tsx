@@ -31,8 +31,12 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     },
   });
 
-  // Extract the actual groups array from the response
-  const groups = (response && 'data' in response && Array.isArray(response.data)) ? response.data : null;
+  // Accept both wrapped ({ data: [...] }) and plain ([...]) response formats
+  const groups: Group[] | null = Array.isArray(response)
+    ? (response as Group[])
+    : response && typeof response === "object" && "data" in response && Array.isArray((response as { data?: unknown }).data)
+      ? ((response as { data: Group[] }).data)
+      : null;
 
   // Load persisted selection on mount
   useEffect(() => {

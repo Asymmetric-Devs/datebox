@@ -109,18 +109,18 @@ shopApp.openapi(
     const { itemId } = c.req.valid("param");
     const userId = c.var.user.id;
 
-    // Get user's group
-    const { data: userData, error: userError } = await c.var.supabase
-      .from("users")
+    // Get user's group from group_members
+    const { data: groupMember, error: memberError } = await c.var.supabase
+      .from("group_members")
       .select("groupId")
-      .eq("id", userId)
+      .eq("userId", userId)
       .single();
 
-    if (userError || !userData || !userData.groupId) {
+    if (memberError || !groupMember || !groupMember.groupId) {
       return c.json({ error: { message: "User not in a family group" } }, 404);
     }
 
-    const ownership = await c.var.shopService.getItemOwnership(itemId, userData.groupId);
+    const ownership = await c.var.shopService.getItemOwnership(itemId, groupMember.groupId);
     return c.json(ownership, 200);
   }
 );

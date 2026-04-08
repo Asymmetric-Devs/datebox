@@ -41,11 +41,6 @@
             "nullable": true,
             "format": "uri"
           },
-          "groupId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          },
           "elder": {
             "type": "boolean"
           },
@@ -59,7 +54,6 @@
           "email",
           "displayName",
           "avatarUrl",
-          "groupId",
           "elder",
           "timezone"
         ]
@@ -113,7 +107,8 @@
             "type": "string"
           },
           "role": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "joinedAt": {
             "type": "string",

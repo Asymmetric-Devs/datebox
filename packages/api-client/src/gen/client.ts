@@ -32,7 +32,6 @@ export interface User {
   /** @minLength 1 */
   displayName: string;
   avatarUrl: string | null;
-  groupId: string | null;
   elder: boolean;
   timezone: string | null;
 }
@@ -56,7 +55,7 @@ export interface UpdateUser {
 export interface UserGroup {
   id: string;
   name: string;
-  role: string;
+  role: string | null;
   joinedAt: string | null;
   ownerUserId: string;
 }

@@ -53,7 +53,7 @@ export const UserGroupSchema = z
   .object({
     id: z.string().uuid(),
     name: z.string(),
-    role: z.string(),
+    role: z.string().nullable(),
     joinedAt: z.string().nullable(),
     ownerUserId: z.string().uuid(),
   })

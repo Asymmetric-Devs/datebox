@@ -315,23 +315,22 @@ export class AttemptService {
     startDate?: string,
     endDate?: string,
   ) {
-    // Primero obtener el groupId del usuario
-    const { data: userData, error: userError } = await this.supabase
-      .from("users")
+    // Get user's group from group_members
+    const { data: groupMember, error: memberError } = await this.supabase
+      .from("group_members")
       .select("groupId")
-      .eq("id", userId)
+      .eq("userId", userId)
       .single();
 
-    if (userError || !userData?.groupId) {
+    if (memberError || !groupMember?.groupId) {
       throw new ApiException(404, "Usuario no pertenece a un grupo familiar");
     }
 
-    // Obtener todos los usuarios elder del grupo
+    // Get all elder users in the group
     const { data: elderUsers, error: elderError } = await this.supabase
-      .from("users")
-      .select("id")
-      .eq("groupId", userData.groupId)
-      .eq("elder", true);
+      .from("group_members")
+      .select("userId")
+      .eq("groupId", groupMember.groupId);
 
     if (elderError) {
       throw new ApiException(500, "Error al obtener usuarios elder", elderError);
@@ -341,7 +340,9 @@ export class AttemptService {
       return [];
     }
 
-    const elderIds = elderUsers.map(u => u.id);
+    const elderIds = elderUsers
+      .map(u => u.userId)
+      .filter((id): id is string => id !== null);
 
     // Ahora buscar los intentos de todos los elder
     let query = this.supabase

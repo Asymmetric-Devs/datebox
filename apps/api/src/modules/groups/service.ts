@@ -417,13 +417,15 @@ export class GroupService {
       throw new ApiException(500, "Error listing user groups");
     }
 
-    return (data ?? []).map(m => ({
-      id: m.groups?.id,
-      name: m.groups?.name,
-      role: m.role,
-      joinedAt: m.joinedAt,
-      ownerUserId: m.groups?.ownerUserId,
-    }));
+    return (data ?? [])
+      .filter(m => m.groups && m.groups.id && m.groups.name && m.groups.ownerUserId)
+      .map(m => ({
+        id: m.groups!.id,
+        name: m.groups!.name,
+        role: m.role,
+        joinedAt: m.joinedAt,
+        ownerUserId: m.groups!.ownerUserId,
+      }));
   }
 
   private async createGroup(
