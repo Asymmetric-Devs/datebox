@@ -41,8 +41,14 @@ const customFetch: typeof fetch = (url, options) => {
 };
 
 // Run the Hono API as a NodeJS server.
-const server = serve({ fetch: app.fetch, port: Number(PORT) }, (info) => {
-  console.log(`🚀 API running on http://localhost:${info.port}`);
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: Number(PORT),
+    hostname: "0.0.0.0", // Permitir conexiones externas
+  },
+  (info) => {
+    console.log(`🚀 API running on http://${info.address}:${info.port}`);
   console.log(`📜 Swagger UI at http://localhost:${info.port}`);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

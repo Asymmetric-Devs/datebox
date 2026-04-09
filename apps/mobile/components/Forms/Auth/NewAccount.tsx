@@ -16,7 +16,7 @@ export default function NewAccount() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [familyCode, setFamilyCode] = useState("");
-  const [isElder, setIsElder] = useState(false);
+  const [isElder, setIsElder] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -261,15 +261,6 @@ export default function NewAccount() {
           dense
         />
 
-        <View style={styles.switchContainer}>
-          <Text style={styles.switchLabel}>¿Es adulto mayor?</Text>
-          <Switch
-            value={isElder}
-            onValueChange={setIsElder}
-            color={COLORS.primary}
-            disabled={loading}
-          />
-        </View>
 
         <TextInput
           mode="outlined"

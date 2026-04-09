@@ -20,6 +20,17 @@ export const LAYOUT = {
   bottomNavHeight: 110,
 } as const;
 
+/** Layout constants for consistent spacing. */
+export const SPACING = {
+  xs: 4,
+  s: 8,
+  m: 16,
+  l: 24,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+} as const;
+
 /** Centralized color palette for the app - Datebox y2k/8-bit minimalist design.
  * Core palette: black (#000000), white (#FFFFFF), light gray tones
  */
