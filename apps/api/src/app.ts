@@ -25,6 +25,7 @@ import { albumApp } from "./modules/memoriesAlbum/handler.js";
 import { pushTokensApp } from "./modules/pushTokens/handler.js";
 import { calendarApp } from "./modules/calendar/handler.js";
 import { spotifyApp } from "./modules/spotify/handler.js";
+import { tagsApp } from "./modules/tags/handler.js";
 import { ScheduledEvent, ExecutionContext } from "@cloudflare/workers-types";
 
 // Configurar fetch personalizado para Node.js en desarrollo
@@ -91,23 +92,23 @@ declare module "hono" {
 // Add a supabase client to each request context.
 app.use("*", async (c, next) => {
   // `env` from 'hono/adapter' can read env variables in a Supabase Edge Function.
-  const {
-    SUPABASE_URL = "https://sdnmoweppzszpxyggdyg.supabase.co",
-    SUPABASE_SERVICE_ROLE_KEY,
-  } = env<{
-    SUPABASE_URL: string;
-    SUPABASE_SERVICE_ROLE_KEY: string;
-  }>(c);
+    const {
+      SUPABASE_URL = process.env.SUPABASE_URL ?? "https://cfhhwmruhqtyxyzcxcxc.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY,
+    } = env<{
+      SUPABASE_URL: string;
+      SUPABASE_SERVICE_ROLE_KEY: string;
+    }>(c);
 
-  const supabaseOptions = customFetch
-    ? { global: { fetch: customFetch } }
-    : undefined;
+    const supabaseOptions = customFetch
+      ? { global: { fetch: customFetch } }
+      : undefined;
 
-  const supabase = createClient(
-    SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY,
-    supabaseOptions,
-  );
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY ?? "",
+      supabaseOptions,
+    );
   c.set("supabase", supabase);
   await next();
 });
@@ -141,6 +142,7 @@ app.route("/", notificationsApp);
 app.use("/push-tokens/*", withAuth);
 app.use("/devices/*", withAuth);
 app.route("/", pushTokensApp);
+app.route("/", tagsApp);
 
 app.use("/shop/*", withAuth);
 app.route("/", shopApp);

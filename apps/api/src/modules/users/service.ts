@@ -4,51 +4,77 @@ import { uploadUserAvatarImage as uploadUserAvatar } from "@/services/storage";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 
-/**
- * Service class to handle user-related operations.
- * While more complex applications might use a repository layer to separate data access logic,
- * elepad services will connect directly to Supabase to avoid having anemic services.
- */
 export class UserService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
-  /**
-   * Get a user by their ID.
-   */
   async getUserById(id: string) {
     const { data, error } = await this.supabase
       .from("users")
-      .select("id, email, displayName, avatarUrl, elder, timezone")
+      .select(`
+        id, email, displayName, avatarUrl, elder, timezone,
+        user_interests (
+          tags (id, name, category, description)
+        )
+      `)
       .eq("id", id)
       .maybeSingle();
 
     if (error) {
-      console.error("Error finding the user: ", error);
       throw new ApiException(500, "Error finding the user");
     }
+    
     if (!data) {
       throw new ApiException(404, "User not found");
     }
-    return data;
+
+    // Map nested junction table data to flat interests array
+    const interests = (data.user_interests || [])
+      .map((ui: any) => ui.tags)
+      .filter(Boolean);
+
+    return {
+      ...data,
+      interests,
+    };
   }
 
-  /**
-   * Update a user's information (except their avatar).
-   */
+  async saveInterests(userId: string, tagIds: string[]) {
+    // 1. Delete existing interests
+    const { error: deleteError } = await this.supabase
+      .from("user_interests")
+      .delete()
+      .eq("user_id", userId);
+
+    if (deleteError) {
+      console.error("Error deleting interests: ", deleteError);
+      throw new ApiException(500, "Error updating interests");
+    }
+
+    // 2. Insert new interests
+    if (tagIds.length > 0) {
+      const inserts = tagIds.map(tagId => ({
+        user_id: userId,
+        tag_id: tagId
+      }));
+
+      const { error: insertError } = await this.supabase
+        .from("user_interests")
+        .insert(inserts);
+
+      if (insertError) {
+        console.error("Error inserting interests: ", insertError);
+        throw new ApiException(500, "Error saving interests");
+      }
+    }
+
+    return this.getUserById(userId);
+  }
+
   async update(id: string, payload: UpdateUser) {
-    const updates: { displayName?: string; avatarUrl?: string; timezone?: string } = {};
-
-    if (payload.displayName !== undefined) {
-      updates.displayName = payload.displayName;
-    }
-
-    if (payload.avatarUrl !== undefined) {
-      updates.avatarUrl = payload.avatarUrl;
-    }
-
-    if (payload.timezone !== undefined) {
-      updates.timezone = payload.timezone;
-    }
+    const updates: any = {};
+    if (payload.displayName !== undefined) updates.displayName = payload.displayName;
+    if (payload.avatarUrl !== undefined) updates.avatarUrl = payload.avatarUrl;
+    if (payload.timezone !== undefined) updates.timezone = payload.timezone;
 
     const { data, error } = await this.supabase
       .from("users")
@@ -62,31 +88,16 @@ export class UserService {
       throw new ApiException(500, "Error updating the user");
     }
 
-    return data ?? undefined;
+    return data ? this.getUserById(id) : undefined;
   }
 
-  /**
-   * Verify if a FormDataEntryValue is a File (as opposed to a string).
-   */
-  isFile(value: FormDataEntryValue | null): value is File {
-    return !!value && typeof value === "object" && "arrayBuffer" in value;
-  }
-
-  /**
-   * Update ONLY the user's avatar.
-   */
   async updateUserAvatar(id: string, form: FormData) {
     const avatarFile = form.get("avatarFile");
-    console.log(JSON.stringify(avatarFile, null, 2));
-    console.log(avatarFile instanceof File);
-
-    if (!this.isFile(avatarFile)) {
+    if (!(avatarFile instanceof File)) {
       throw new ApiException(400, "Invalid or missing avatar file");
     }
 
     const avatarUrl = await uploadUserAvatar(this.supabase, id, avatarFile);
-
-    // Updating the avatar image implies updating the avatar url.
     return this.update(id, { avatarUrl });
   }
 }

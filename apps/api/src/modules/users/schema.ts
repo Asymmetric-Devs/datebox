@@ -1,13 +1,15 @@
 import { z } from "@hono/zod-openapi";
+import { TagSchema } from "../tags/schema.js";
 
 export const UserSchema = z
   .object({
     id: z.uuid(),
     email: z.email(),
     displayName: z.string().min(1),
-    avatarUrl: z.url().nullable(),
+    avatarUrl: z.string().nullable(),
     elder: z.boolean(),
     timezone: z.string().nullable(),
+    interests: z.array(TagSchema).optional(),
   })
   .openapi("User");
 
@@ -23,3 +25,9 @@ export const UpdateUserSchema = z
   .openapi("UpdateUser");
 
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
+
+export const SaveInterestsSchema = z
+  .object({
+    tagIds: z.array(z.string().uuid()),
+  })
+  .openapi("SaveInterests");

@@ -12,7 +12,7 @@ import "./emit-openapi.js";
 dotenv.config();
 const {
   PORT = "8787",
-  SUPABASE_URL = "https://sdnmoweppzszpxyggdyg.supabase.co",
+  SUPABASE_URL = "https://cfhhwmruhqtyxyzcxcxc.supabase.co",
   SUPABASE_SERVICE_ROLE_KEY,
 } = process.env;
 
