@@ -38,8 +38,7 @@
           },
           "avatarUrl": {
             "type": "string",
-            "nullable": true,
-            "format": "uri"
+            "nullable": true
           },
           "elder": {
             "type": "boolean"
@@ -47,6 +46,12 @@
           "timezone": {
             "type": "string",
             "nullable": true
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
           }
         },
         "required": [
@@ -56,6 +61,32 @@
           "avatarUrl",
           "elder",
           "timezone"
+        ]
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "category",
+          "description"
         ]
       },
       "Error": {
@@ -78,6 +109,21 @@
         },
         "required": [
           "error"
+        ]
+      },
+      "SaveInterests": {
+        "type": "object",
+        "properties": {
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "tagIds"
         ]
       },
       "UpdateUser": {
@@ -1850,7 +1896,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User",
+            "description": "User with interests",
             "content": {
               "application/json": {
                 "schema": {
@@ -1860,7 +1906,24 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -1892,6 +1955,76 @@
         "responses": {
           "200": {
             "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/interests": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveInterests"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User with updated interests",
             "content": {
               "application/json": {
                 "schema": {
@@ -6324,6 +6457,31 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "tags": [
+          "tags"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available tags/interests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tag"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

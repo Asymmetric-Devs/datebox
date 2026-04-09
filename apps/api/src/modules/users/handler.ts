@@ -1,5 +1,5 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { UpdateUserSchema, UserSchema } from "./schema";
+import { SaveInterestsSchema, UpdateUserSchema, UserSchema } from "./schema";
 import { UserService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 
@@ -11,13 +11,14 @@ declare module "hono" {
   }
 }
 
-// Add a UserService instance to each request context.
+// Global User Service injection
 usersApp.use("/users/*", async (c, next) => {
   const userService = new UserService(c.var.supabase);
   c.set("userService", userService);
   await next();
 });
 
+// GET /users/{id}
 usersApp.openapi(
   {
     method: "get",
@@ -26,19 +27,57 @@ usersApp.openapi(
     request: { params: z.object({ id: z.uuid() }) },
     responses: {
       200: {
-        description: "User",
+        description: "User with interests",
         content: { "application/json": { schema: UserSchema } },
       },
-      404: { description: "Not found" },
+      404: openApiErrorResponse("User not found"),
+      500: openApiErrorResponse("Internal Server Error"),
     },
   },
   async (c) => {
     const { id } = c.req.valid("param");
     const user = await c.var.userService.getUserById(id);
-    return c.json(user);
+    return c.json(user, 200);
   },
 );
 
+// POST /users/{id}/interests
+usersApp.openapi(
+  {
+    method: "post",
+    path: "/users/{id}/interests",
+    tags: ["users"],
+    request: {
+      params: z.object({ id: z.uuid() }),
+      body: {
+        content: {
+          "application/json": {
+            schema: SaveInterestsSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "User with updated interests",
+        content: { "application/json": { schema: UserSchema } },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      404: openApiErrorResponse("User not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const { tagIds } = c.req.valid("json");
+
+    const updatedUser = await c.var.userService.saveInterests(id, tagIds);
+    return c.json(updatedUser, 200);
+  },
+);
+
+// PATCH /users/{id}
 usersApp.openapi(
   {
     method: "patch",
@@ -78,6 +117,7 @@ usersApp.openapi(
   },
 );
 
+// PATCH /users/{id}/avatar
 usersApp.openapi(
   {
     method: "patch",

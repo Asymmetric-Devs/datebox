@@ -107,6 +107,10 @@ export default function RootLayout() {
                           options={{ headerShown: false, animation: "fade" }}
                         />
                         <Stack.Screen
+                          name="onboarding/interests"
+                          options={{ headerShown: false, animation: "fade" }}
+                        />
+                        <Stack.Screen
                           name="group"
                           options={{
                             headerShown: false,

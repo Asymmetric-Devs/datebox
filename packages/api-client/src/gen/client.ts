@@ -26,6 +26,13 @@ export interface Health {
   timestamp: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  category: string | null;
+  description: string | null;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -34,6 +41,7 @@ export interface User {
   avatarUrl: string | null;
   elder: boolean;
   timezone: string | null;
+  interests?: Tag[];
 }
 
 export type ErrorError = {
@@ -43,6 +51,10 @@ export type ErrorError = {
 
 export interface Error {
   error: ErrorError;
+}
+
+export interface SaveInterests {
+  tagIds: string[];
 }
 
 export interface UpdateUser {
@@ -1188,14 +1200,22 @@ export type getUsersIdResponse200 = {
 };
 
 export type getUsersIdResponse404 = {
-  data: void;
+  data: Error;
   status: 404;
+};
+
+export type getUsersIdResponse500 = {
+  data: Error;
+  status: 500;
 };
 
 export type getUsersIdResponseSuccess = getUsersIdResponse200 & {
   headers: Headers;
 };
-export type getUsersIdResponseError = getUsersIdResponse404 & {
+export type getUsersIdResponseError = (
+  | getUsersIdResponse404
+  | getUsersIdResponse500
+) & {
   headers: Headers;
 };
 
@@ -1223,7 +1243,7 @@ export const getGetUsersIdQueryKey = (id: string) => {
 
 export const getGetUsersIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void
+  TError = Error
 >(
   id: string,
   options?: {
@@ -1256,11 +1276,11 @@ export const getGetUsersIdQueryOptions = <
 export type GetUsersIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUsersId>>
 >;
-export type GetUsersIdQueryError = void;
+export type GetUsersIdQueryError = Error;
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void
+  TError = Error
 >(
   id: string,
   options: {
@@ -1283,7 +1303,7 @@ export function useGetUsersId<
 };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void
+  TError = Error
 >(
   id: string,
   options?: {
@@ -1306,7 +1326,7 @@ export function useGetUsersId<
 };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void
+  TError = Error
 >(
   id: string,
   options?: {
@@ -1322,7 +1342,7 @@ export function useGetUsersId<
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void
+  TError = Error
 >(
   id: string,
   options?: {
@@ -1459,6 +1479,126 @@ export const usePatchUsersId = <TError = Error, TContext = unknown>(
   TContext
 > => {
   return useMutation(getPatchUsersIdMutationOptions(options), queryClient);
+};
+
+export type postUsersIdInterestsResponse200 = {
+  data: User;
+  status: 200;
+};
+
+export type postUsersIdInterestsResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postUsersIdInterestsResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type postUsersIdInterestsResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postUsersIdInterestsResponseSuccess =
+  postUsersIdInterestsResponse200 & {
+    headers: Headers;
+  };
+export type postUsersIdInterestsResponseError = (
+  | postUsersIdInterestsResponse400
+  | postUsersIdInterestsResponse404
+  | postUsersIdInterestsResponse500
+) & {
+  headers: Headers;
+};
+
+export type postUsersIdInterestsResponse =
+  | postUsersIdInterestsResponseSuccess
+  | postUsersIdInterestsResponseError;
+
+export const getPostUsersIdInterestsUrl = (id: string) => {
+  return `/users/${id}/interests`;
+};
+
+export const postUsersIdInterests = async (
+  id: string,
+  saveInterests: SaveInterests,
+  options?: RequestInit
+): Promise<postUsersIdInterestsResponse> => {
+  return rnFetch<postUsersIdInterestsResponse>(getPostUsersIdInterestsUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(saveInterests),
+  });
+};
+
+export const getPostUsersIdInterestsMutationOptions = <
+  TError = Error,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postUsersIdInterests>>,
+    TError,
+    { id: string; data: SaveInterests },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postUsersIdInterests>>,
+  TError,
+  { id: string; data: SaveInterests },
+  TContext
+> => {
+  const mutationKey = ["postUsersIdInterests"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postUsersIdInterests>>,
+    { id: string; data: SaveInterests }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return postUsersIdInterests(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostUsersIdInterestsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postUsersIdInterests>>
+>;
+export type PostUsersIdInterestsMutationBody = SaveInterests;
+export type PostUsersIdInterestsMutationError = Error;
+
+export const usePostUsersIdInterests = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postUsersIdInterests>>,
+      TError,
+      { id: string; data: SaveInterests },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postUsersIdInterests>>,
+  TError,
+  { id: string; data: SaveInterests },
+  TContext
+> => {
+  return useMutation(
+    getPostUsersIdInterestsMutationOptions(options),
+    queryClient
+  );
 };
 
 export type patchUsersIdAvatarResponse200 = {
@@ -11214,6 +11354,154 @@ export const useDeletePushTokens = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(getDeletePushTokensMutationOptions(options), queryClient);
 };
+
+export type getTagsResponse200 = {
+  data: Tag[];
+  status: 200;
+};
+
+export type getTagsResponse500 = {
+  data: void;
+  status: 500;
+};
+
+export type getTagsResponseSuccess = getTagsResponse200 & {
+  headers: Headers;
+};
+export type getTagsResponseError = getTagsResponse500 & {
+  headers: Headers;
+};
+
+export type getTagsResponse = getTagsResponseSuccess | getTagsResponseError;
+
+export const getGetTagsUrl = () => {
+  return `/tags`;
+};
+
+export const getTags = async (
+  options?: RequestInit
+): Promise<getTagsResponse> => {
+  return rnFetch<getTagsResponse>(getGetTagsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTagsQueryKey = () => {
+  return [`/tags`] as const;
+};
+
+export const getGetTagsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTags>>,
+  TError = void
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTagsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTags>>> = ({
+    signal,
+  }) => getTags({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTags>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetTagsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTags>>
+>;
+export type GetTagsQueryError = void;
+
+export function useGetTags<
+  TData = Awaited<ReturnType<typeof getTags>>,
+  TError = void
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTags>>,
+          TError,
+          Awaited<ReturnType<typeof getTags>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTags<
+  TData = Awaited<ReturnType<typeof getTags>>,
+  TError = void
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTags>>,
+          TError,
+          Awaited<ReturnType<typeof getTags>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetTags<
+  TData = Awaited<ReturnType<typeof getTags>>,
+  TError = void
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetTags<
+  TData = Awaited<ReturnType<typeof getTags>>,
+  TError = void
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTags>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTagsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List available shop items

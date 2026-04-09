@@ -465,9 +465,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 hasInitialized.current &&
                 !hasRedirectedAfterSignIn.current
               ) {
-                console.log(`✅ Redirigiendo a home después de ${event} (Usuario listo, carga asíncrona)`);
+                console.log(`✅ Evaluando redirección para ${event}`);
                 hasRedirectedAfterSignIn.current = true;
-                router.replace("/(tabs)/home");
+                
+                // Si no tiene intereses, al onboarding
+                if (!user.interests || user.interests.length === 0) {
+                  console.log("🎨 Usuario sin intereses, enviando a onboarding");
+                  router.replace("/onboarding/interests");
+                } else {
+                  console.log("🏠 Usuario con intereses, enviando a home");
+                  router.replace("/(tabs)/home");
+                }
               } else if (!user && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
                 console.log(`⏳ Usuario no listo aún tras carga asíncrona.`);
               }
@@ -590,4 +598,5 @@ export type ElepadUser = {
   elder: boolean;
   timezone?: string;
   activeFrameUrl?: string;
+  interests?: any[]; // Añadido para onboarding
 };
