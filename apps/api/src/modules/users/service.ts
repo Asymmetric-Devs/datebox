@@ -29,7 +29,7 @@ export class UserService {
 
     // Map nested junction table data to flat interests array
     const interests = (data.user_interests || [])
-      .map((ui: any) => ui.tags)
+      .map((ui) => (ui as unknown as { tags: Database["public"]["Tables"]["tags"]["Row"] }).tags)
       .filter(Boolean);
 
     return {
@@ -71,7 +71,7 @@ export class UserService {
   }
 
   async update(id: string, payload: UpdateUser) {
-    const updates: any = {};
+    const updates: Database["public"]["Tables"]["users"]["Update"] = {};
     if (payload.displayName !== undefined) updates.displayName = payload.displayName;
     if (payload.avatarUrl !== undefined) updates.avatarUrl = payload.avatarUrl;
     if (payload.timezone !== undefined) updates.timezone = payload.timezone;
