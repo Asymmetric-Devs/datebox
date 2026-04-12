@@ -169,6 +169,36 @@ export type Database = {
           },
         ]
       }
+      date_tags: {
+        Row: {
+          date_id: string
+          tag_id: string
+        }
+        Insert: {
+          date_id: string
+          tag_id: string
+        }
+        Update: {
+          date_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "date_tags_date_id_fkey"
+            columns: ["date_id"]
+            isOneToOne: false
+            referencedRelation: "dates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "date_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dates: {
         Row: {
           completed: boolean
@@ -937,6 +967,30 @@ export type Database = {
           },
         ]
       }
+      tags: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievementId: string
@@ -1040,6 +1094,36 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_interests: {
+        Row: {
+          tag_id: string
+          user_id: string
+        }
+        Insert: {
+          tag_id: string
+          user_id: string
+        }
+        Update: {
+          tag_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_interests_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_interests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_inventory: {
         Row: {

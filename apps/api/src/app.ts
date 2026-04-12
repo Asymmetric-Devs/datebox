@@ -270,7 +270,15 @@ export default {
         console.log(completedError);
       }
 
-      const currentToNotify = [];
+      interface ActivityToNotify {
+        id: string;
+        title: string;
+        description: string | null;
+        groupId: string | null;
+        startsAt: string;
+      }
+
+      const currentToNotify: ActivityToNotify[] = [];
       if (singleDayActivities && singleDayActivities.length > 0) {
         for (const activity of singleDayActivities) {
           currentToNotify.push(activity);
@@ -282,7 +290,7 @@ export default {
       );
 
       // Filtrar actividades recurrentes que corresponden para hoy y la ventana horaria
-      const recurringToNotify = [];
+      const recurringToNotify: ActivityToNotify[] = [];
       if (recurringActivities && recurringActivities.length > 0) {
         const [tYear, tMonth, tDay] = todayStr.split("-").map(Number);
         if (tYear && tMonth && tDay) {

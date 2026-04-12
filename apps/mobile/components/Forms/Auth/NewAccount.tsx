@@ -3,7 +3,7 @@ import { postGroupsCreate, postGroupsLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { TextInput, Button, Text, Switch } from "react-native-paper";
+import { TextInput, Button, Text } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/shared/Toast";
@@ -16,7 +16,7 @@ export default function NewAccount() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [familyCode, setFamilyCode] = useState("");
-  const [isElder, setIsElder] = useState(true);
+  const [isElder] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

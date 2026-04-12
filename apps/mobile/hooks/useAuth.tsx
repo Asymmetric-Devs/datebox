@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { getUsersId } from "@elepad/api-client/src/gen/client";
-import { useGetStreaksMe, GetStreaksMe200 } from "@elepad/api-client";
+import { useGetStreaksMe, GetStreaksMe200, Tag } from "@elepad/api-client";
 import { useRouter, useSegments } from "expo-router";
 import {
   PropsWithChildren,
@@ -598,5 +598,5 @@ export type ElepadUser = {
   elder: boolean;
   timezone?: string;
   activeFrameUrl?: string;
-  interests?: any[]; // Añadido para onboarding
+  interests?: Tag[]; // Añadido para onboarding
 };
