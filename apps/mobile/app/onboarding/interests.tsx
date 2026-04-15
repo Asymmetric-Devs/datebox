@@ -1,18 +1,17 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   View,
   StyleSheet,
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  Dimensions,
 } from "react-native";
 import {
   Text,
   ActivityIndicator,
 } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useGetTags, usePostUsersIdInterests } from "@elepad/api-client";
+import { useGetTags, usePostUsersIdInterests, Tag } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { COLORS, SPACING, SHADOWS, FONT } from "@/styles/base";
 import { LinearGradient } from "expo-linear-gradient";
@@ -27,31 +26,29 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const { width } = Dimensions.get("window");
-
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-function AnimatedChip({ tag, isSelected, onPress }: { tag: any, isSelected: boolean, onPress: () => void }) {
+const AnimatedChip = React.memo(function AnimatedChip({ tag, isSelected, onPress }: { tag: Tag, isSelected: boolean, onPress: (id: string) => void }) {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       scale: withSpring(isSelected ? 1.05 : 1),
-      backgroundColor: withTiming(isSelected ? COLORS.primary : COLORS.backgroundSecondary),
-      borderColor: withTiming(isSelected ? COLORS.primary : COLORS.border),
+      backgroundColor: withTiming(isSelected ? COLORS.primary : COLORS.backgroundSecondary, { duration: 200 }),
+      borderColor: withTiming(isSelected ? COLORS.primary : COLORS.border, { duration: 200 }),
     };
-  });
+  }, [isSelected]);
 
   const textStyle = useAnimatedStyle(() => {
     return {
-      color: withTiming(isSelected ? "#FFFFFF" : COLORS.text),
+      color: withTiming(isSelected ? "#FFFFFF" : COLORS.text, { duration: 200 }),
     };
-  });
+  }, [isSelected]);
 
   return (
     <AnimatedTouchableOpacity
       activeOpacity={0.7}
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        onPress();
+        onPress(tag.id);
       }}
       style={[styles.chip, animatedStyle]}
     >
@@ -60,7 +57,9 @@ function AnimatedChip({ tag, isSelected, onPress }: { tag: any, isSelected: bool
       </Animated.Text>
     </AnimatedTouchableOpacity>
   );
-}
+});
+
+// const { width } = Dimensions.get("window");
 
 export default function InterestsOnboarding() {
   const router = useRouter();
@@ -79,11 +78,11 @@ export default function InterestsOnboarding() {
     }
   }, [loadingTags, tags]);
 
-  const handleToggleTag = (tagId: string) => {
+  const handleToggleTag = useCallback((tagId: string) => {
     setSelectedTags((prev) =>
       prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
     );
-  };
+  }, []);
 
   const handleFinish = () => {
     if (!user?.id) return;
@@ -117,7 +116,12 @@ export default function InterestsOnboarding() {
   };
 
   const groupedTags = useMemo(() => {
-    return tags?.reduce((acc: Record<string, any[]>, tag) => {
+    // some Orval/Hono setups return the array directly, others wrap it
+    const tagsArray = Array.isArray(tags) 
+      ? (tags as unknown as Tag[]) 
+      : (tags && typeof tags === 'object' && "data" in (tags as object) ? (tags as { data: Tag[] }).data : []) as Tag[];
+    
+    return tagsArray.reduce((acc: Record<string, Tag[]>, tag: Tag) => {
       const category = tag.category || "Otros";
       if (!acc[category]) acc[category] = [];
       acc[category].push(tag);
@@ -180,7 +184,7 @@ export default function InterestsOnboarding() {
                 <Text style={styles.subtitle}>Selecciona al menos 3 intereses.</Text>
               </View>
 
-              {Object.entries(groupedTags).map(([category, categoryTags]) => (
+              {(Object.entries(groupedTags) as [string, Tag[]][]).map(([category, categoryTags]) => (
                 <View key={category} style={styles.categorySection}>
                   <Text style={styles.categoryTitle}>{category}</Text>
                   <View style={styles.chipContainer}>
@@ -189,7 +193,7 @@ export default function InterestsOnboarding() {
                         key={tag.id}
                         tag={tag}
                         isSelected={selectedTags.includes(tag.id)}
-                        onPress={() => handleToggleTag(tag.id)}
+                        onPress={handleToggleTag}
                       />
                     ))}
                   </View>
