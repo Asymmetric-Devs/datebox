@@ -99,13 +99,14 @@ export class GroupService {
 
   async getMembers(groupId: string): Promise<{
     name: string;
-    owner: { id: string; displayName: string; avatarUrl: string | null; elder: boolean; activeFrameUrl: string | null };
+    owner: { id: string; displayName: string; avatarUrl: string | null; elder: boolean; activeFrameUrl: string | null; interests: Array<{ id: string; name: string; category: string | null; description: string | null }> };
     members: Array<{
       id: string;
       displayName: string;
       avatarUrl: string | null;
       elder: boolean;
       activeFrameUrl: string | null;
+      interests: Array<{ id: string; name: string; category: string | null; description: string | null }>;
     }>;
   }> {
     const { data: group, error: groupErr } = await this.supabase
@@ -156,9 +157,31 @@ export class GroupService {
       }
     }
 
+    // Fetch interests/tags for all members in a single query
+    let interestsMap: Record<string, Array<{ id: string; name: string; category: string | null; description: string | null }>> = {};
+    if (memberIds.length > 0) {
+      const { data: userInterests } = await this.supabase
+        .from("user_interests")
+        .select("user_id, tags (id, name, category, description)")
+        .in("user_id", memberIds);
+
+      if (userInterests) {
+        userInterests.forEach((ui) => {
+          const tag = ui.tags as unknown as { id: string; name: string; category: string | null; description: string | null } | null;
+          if (tag) {
+            if (!interestsMap[ui.user_id]) {
+              interestsMap[ui.user_id] = [];
+            }
+            interestsMap[ui.user_id]!.push(tag);
+          }
+        });
+      }
+    }
+
     const enrichMember = (m: (typeof membersList)[number]) => ({
         ...m,
-        activeFrameUrl: framesMap[m.id] || null
+        activeFrameUrl: framesMap[m.id] || null,
+        interests: interestsMap[m.id] || [],
     });
     
     const enrichedMembers = membersList.map(enrichMember);
@@ -180,6 +203,18 @@ export class GroupService {
         throw new ApiException(404, "Group owner not found");
       }
       ownerToReturn = ownerUser;
+
+      // Also fetch interests for the owner if they weren't in the members list
+      const { data: ownerInterests } = await this.supabase
+        .from("user_interests")
+        .select("user_id, tags (id, name, category, description)")
+        .eq("user_id", ownerUser.id);
+
+      if (ownerInterests) {
+        interestsMap[ownerUser.id] = ownerInterests
+          .map((ui) => (ui.tags as unknown as { id: string; name: string; category: string | null; description: string | null } | null))
+          .filter(Boolean) as Array<{ id: string; name: string; category: string | null; description: string | null }>;
+      }
     }
 
     if (ownerToReturn) {
@@ -187,10 +222,15 @@ export class GroupService {
       
       return {
         name: group.name,
-        owner: { ...ownerToReturn, activeFrameUrl: ownerFrame },
+        owner: {
+          ...ownerToReturn,
+          activeFrameUrl: ownerFrame,
+          interests: interestsMap[ownerToReturn.id] || [],
+        },
         members: filteredMembers.map(m => ({
           ...m,
-          activeFrameUrl: framesMap[m.id] || null
+          activeFrameUrl: framesMap[m.id] || null,
+          interests: interestsMap[m.id] || [],
         })),
       };
     }

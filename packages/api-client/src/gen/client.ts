@@ -665,12 +665,27 @@ export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
 
+export type GetGroupsGroupIdMembers200OwnerInterestsItem = {
+  id: string;
+  name: string;
+  category: string | null;
+  description: string | null;
+};
+
 export type GetGroupsGroupIdMembers200Owner = {
   id: string;
   displayName: string;
   avatarUrl: string | null;
   elder: boolean;
   activeFrameUrl: string | null;
+  interests: GetGroupsGroupIdMembers200OwnerInterestsItem[];
+};
+
+export type GetGroupsGroupIdMembers200MembersItemInterestsItem = {
+  id: string;
+  name: string;
+  category: string | null;
+  description: string | null;
 };
 
 export type GetGroupsGroupIdMembers200MembersItem = {
@@ -679,6 +694,7 @@ export type GetGroupsGroupIdMembers200MembersItem = {
   avatarUrl: string | null;
   elder: boolean;
   activeFrameUrl: string | null;
+  interests: GetGroupsGroupIdMembers200MembersItemInterestsItem[];
 };
 
 export type GetGroupsGroupIdMembers200 = {

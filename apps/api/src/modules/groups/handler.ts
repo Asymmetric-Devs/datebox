@@ -170,6 +170,14 @@ groupApp.openapi(
                 avatarUrl: z.string().nullable(),
                 elder: z.boolean(),
                 activeFrameUrl: z.string().nullable(),
+                interests: z.array(
+                  z.object({
+                    id: z.string().uuid(),
+                    name: z.string(),
+                    category: z.string().nullable(),
+                    description: z.string().nullable(),
+                  }),
+                ),
               }),
               members: z.array(
                 z.object({
@@ -178,6 +186,14 @@ groupApp.openapi(
                   avatarUrl: z.string().nullable(),
                   elder: z.boolean(),
                   activeFrameUrl: z.string().nullable(),
+                  interests: z.array(
+                    z.object({
+                      id: z.string().uuid(),
+                      name: z.string(),
+                      category: z.string().nullable(),
+                      description: z.string().nullable(),
+                    }),
+                  ),
                 }),
               ),
             }),

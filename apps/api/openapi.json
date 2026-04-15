@@ -2378,6 +2378,35 @@
                         "activeFrameUrl": {
                           "type": "string",
                           "nullable": true
+                        },
+                        "interests": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "category": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "category",
+                              "description"
+                            ]
+                          }
                         }
                       },
                       "required": [
@@ -2385,7 +2414,8 @@
                         "displayName",
                         "avatarUrl",
                         "elder",
-                        "activeFrameUrl"
+                        "activeFrameUrl",
+                        "interests"
                       ]
                     },
                     "members": {
@@ -2410,6 +2440,35 @@
                           "activeFrameUrl": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "interests": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "category": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "category",
+                                "description"
+                              ]
+                            }
                           }
                         },
                         "required": [
@@ -2417,7 +2476,8 @@
                           "displayName",
                           "avatarUrl",
                           "elder",
-                          "activeFrameUrl"
+                          "activeFrameUrl",
+                          "interests"
                         ]
                       }
                     }
