@@ -49,6 +49,127 @@ export class DateService {
     return dates || [];
   }
 
+  async getDatesWithTags(options: {
+    page: number;
+    pageSize: number;
+    category?: string;
+  }) {
+    const { page, pageSize, category } = options;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    if (category) {
+      // When filtering by category, we need to find date IDs that have at least
+      // one tag in the given category, then fetch those dates with ALL their tags.
+
+      // Step 1: Get distinct date IDs matching the category filter
+      const { data: matchingDateTags, error: filterError } = await this.supabase
+        .from("date_tags")
+        .select("date_id, tags!inner(category)")
+        .eq("tags.category", category);
+
+      if (filterError) {
+        throw new ApiException(500, "Error al filtrar citas por categoría", filterError);
+      }
+
+      const matchingDateIds = [...new Set((matchingDateTags || []).map(dt => dt.date_id))];
+      const total = matchingDateIds.length;
+      const totalPages = Math.ceil(total / pageSize);
+
+      if (matchingDateIds.length === 0) {
+        return { data: [], page, pageSize, total: 0, totalPages: 0 };
+      }
+
+      // Step 2: Paginate over those date IDs
+      const paginatedIds = matchingDateIds.slice(from, to + 1);
+
+      const { data: dates, error: datesError } = await this.supabase
+        .from("dates")
+        .select("*")
+        .in("id", paginatedIds)
+        .order("startsAt", { ascending: false });
+
+      if (datesError) {
+        throw new ApiException(500, "Error al obtener las citas", datesError);
+      }
+
+      // Step 3: Fetch ALL tags for the paginated dates
+      const dateIds = (dates || []).map(d => d.id);
+      const tagsMap = await this.getTagsForDates(dateIds);
+
+      const datesWithTags = (dates || []).map(date => ({
+        ...date,
+        tags: tagsMap[date.id] || [],
+      }));
+
+      return { data: datesWithTags, page, pageSize, total, totalPages };
+    }
+
+    // No category filter — simple paginated query
+    // Step 1: Get total count
+    const { count, error: countError } = await this.supabase
+      .from("dates")
+      .select("*", { count: "exact", head: true });
+
+    if (countError) {
+      throw new ApiException(500, "Error al contar las citas", countError);
+    }
+
+    const total = count ?? 0;
+    const totalPages = Math.ceil(total / pageSize);
+
+    // Step 2: Fetch paginated dates
+    const { data: dates, error: datesError } = await this.supabase
+      .from("dates")
+      .select("*")
+      .order("startsAt", { ascending: false })
+      .range(from, to);
+
+    if (datesError) {
+      throw new ApiException(500, "Error al obtener las citas", datesError);
+    }
+
+    // Step 3: Fetch tags for the paginated dates
+    const dateIds = (dates || []).map(d => d.id);
+    const tagsMap = await this.getTagsForDates(dateIds);
+
+    const datesWithTags = (dates || []).map(date => ({
+      ...date,
+      tags: tagsMap[date.id] || [],
+    }));
+
+    return { data: datesWithTags, page, pageSize, total, totalPages };
+  }
+
+  /**
+   * Batch-fetch tags for a list of date IDs via the date_tags junction table.
+   */
+  private async getTagsForDates(dateIds: string[]): Promise<Record<string, Array<{ id: string; name: string; category: string | null; description: string | null }>>> {
+    const tagsMap: Record<string, Array<{ id: string; name: string; category: string | null; description: string | null }>> = {};
+
+    if (dateIds.length === 0) return tagsMap;
+
+    const { data: dateTags } = await this.supabase
+      .from("date_tags")
+      .select("date_id, tags (id, name, category, description)")
+      .in("date_id", dateIds);
+
+    if (dateTags) {
+      dateTags.forEach((dt) => {
+        const tag = dt.tags as unknown as { id: string; name: string; category: string | null; description: string | null } | null;
+        if (tag) {
+          if (!tagsMap[dt.date_id]) {
+            tagsMap[dt.date_id] = [];
+          }
+          tagsMap[dt.date_id]!.push(tag);
+        }
+      });
+    }
+
+    return tagsMap;
+  }
+
+
   async create(payload: NewDateEvent) {
     const { data, error } = await this.supabase
       .from("dates")

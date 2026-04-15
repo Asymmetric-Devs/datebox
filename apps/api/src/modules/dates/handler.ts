@@ -4,6 +4,7 @@ import {
   DateEventSchema,
   NewDateEventSchema,
   UpdateDateEventSchema,
+  PaginatedDatesSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { GoogleCalendarService } from "@/services/google-calendar";
@@ -24,6 +25,47 @@ datesApp.use("/dates/*", async (c, next) => {
   c.set("googleCalendarService", googleCalendarService);
   await next();
 });
+
+// GET /dates/explore — Paginated dates with tags, optional category filter
+datesApp.openapi(
+  {
+    method: "get",
+    path: "/dates/explore",
+    tags: ["dates"],
+    request: {
+      query: z.object({
+        page: z.string().optional().default("1"),
+        pageSize: z.string().optional().default("20"),
+        category: z.string().optional(),
+      }),
+    },
+    responses: {
+      200: {
+        description: "Paginated dates with their tags",
+        content: {
+          "application/json": {
+            schema: PaginatedDatesSchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid query parameters"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const { page: pageStr, pageSize: pageSizeStr, category } = c.req.valid("query");
+    const page = Math.max(1, parseInt(pageStr, 10) || 1);
+    const pageSize = Math.min(100, Math.max(1, parseInt(pageSizeStr, 10) || 20));
+
+    const result = await c.var.dateService.getDatesWithTags({
+      page,
+      pageSize,
+      category: category || undefined,
+    });
+
+    return c.json(result, 200);
+  },
+);
 
 datesApp.openapi(
   {
