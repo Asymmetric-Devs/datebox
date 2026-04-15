@@ -21,23 +21,20 @@ interface Tag {
   description: string | null;
 }
 
-interface DateWithTags {
+interface EventWithTags {
   id: string;
   title: string;
   description: string | null;
   startsAt: string;
   endsAt: string | null;
-  completed: boolean;
   createdBy: string;
-  groupId: string | null;
   createdAt: string;
   updatedAt: string;
-  frequencyId: string | null;
   tags: Tag[];
 }
 
-interface PaginatedDates {
-  data: DateWithTags[];
+interface PaginatedEvents {
+  data: EventWithTags[];
   page: number;
   pageSize: number;
   total: number;
@@ -46,8 +43,8 @@ interface PaginatedDates {
 
 // ── API fetch ────────────────────────────────────────────────────────
 function fetchDatesExplore(page: number, pageSize: number) {
-  return rnFetch<PaginatedDates>(
-    `/dates/explore?page=${page}&pageSize=${pageSize}`,
+  return rnFetch<PaginatedEvents>(
+    `/events?page=${page}&pageSize=${pageSize}`,
   );
 }
 
@@ -75,7 +72,7 @@ function DateCard({
   expanded,
   onToggle,
 }: {
-  date: DateWithTags;
+  date: EventWithTags;
   expanded: boolean;
   onToggle: () => void;
 }) {
@@ -90,7 +87,7 @@ function DateCard({
         <View style={styles.cardHeaderLeft}>
           <View style={styles.iconCircle}>
             <Icon
-              source={date.completed ? "check-circle" : "calendar-clock"}
+              source="calendar-clock"
               size={22}
               color={COLORS.primary}
             />

@@ -233,13 +233,13 @@
         ],
         "additionalProperties": false
       },
-      "PaginatedDates": {
+      "PaginatedEvents": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DateWithTags"
+              "$ref": "#/components/schemas/EventWithTags"
             }
           },
           "page": {
@@ -263,7 +263,7 @@
           "totalPages"
         ]
       },
-      "DateWithTags": {
+      "EventWithTags": {
         "type": "object",
         "properties": {
           "id": {
@@ -278,38 +278,21 @@
             "nullable": true
           },
           "startsAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "endsAt": {
             "type": "string",
-            "nullable": true,
-            "format": "date-time"
-          },
-          "completed": {
-            "type": "boolean"
+            "nullable": true
           },
           "createdBy": {
             "type": "string",
             "format": "uuid"
           },
-          "groupId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          },
           "createdAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "frequencyId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
+            "type": "string"
           },
           "tags": {
             "type": "array",
@@ -322,9 +305,7 @@
           "id",
           "title",
           "startsAt",
-          "completed",
           "createdBy",
-          "groupId",
           "createdAt",
           "updatedAt",
           "tags"
@@ -346,13 +327,11 @@
             "nullable": true
           },
           "startsAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "endsAt": {
             "type": "string",
-            "nullable": true,
-            "format": "date-time"
+            "nullable": true
           },
           "completed": {
             "type": "boolean"
@@ -367,12 +346,10 @@
             "format": "uuid"
           },
           "createdAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "updatedAt": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "frequencyId": {
             "type": "string",
@@ -2952,10 +2929,10 @@
         }
       }
     },
-    "/dates/explore": {
+    "/events": {
       "get": {
         "tags": [
-          "dates"
+          "events"
         ],
         "parameters": [
           {
@@ -2983,15 +2960,31 @@
             "required": false,
             "name": "category",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "startDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "endDate",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Paginated dates with their tags",
+            "description": "Paginated events with their tags",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedDates"
+                  "$ref": "#/components/schemas/PaginatedEvents"
                 }
               }
             }

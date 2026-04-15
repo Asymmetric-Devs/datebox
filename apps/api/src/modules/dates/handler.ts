@@ -4,7 +4,7 @@ import {
   DateEventSchema,
   NewDateEventSchema,
   UpdateDateEventSchema,
-  PaginatedDatesSchema,
+  PaginatedEventsSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { GoogleCalendarService } from "@/services/google-calendar";
@@ -26,25 +26,35 @@ datesApp.use("/dates/*", async (c, next) => {
   await next();
 });
 
-// GET /dates/explore — Paginated dates with tags, optional category filter
+datesApp.use("/events", async (c, next) => {
+  const dateService = new DateService(c.var.supabase);
+  const googleCalendarService = new GoogleCalendarService(c.var.supabase);
+  c.set("dateService", dateService);
+  c.set("googleCalendarService", googleCalendarService);
+  await next();
+});
+
+// GET /events — Paginated events with tags, optional category and date filters
 datesApp.openapi(
   {
     method: "get",
-    path: "/dates/explore",
-    tags: ["dates"],
+    path: "/events",
+    tags: ["events"],
     request: {
       query: z.object({
         page: z.string().optional().default("1"),
         pageSize: z.string().optional().default("20"),
         category: z.string().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
       }),
     },
     responses: {
       200: {
-        description: "Paginated dates with their tags",
+        description: "Paginated events with their tags",
         content: {
           "application/json": {
-            schema: PaginatedDatesSchema,
+            schema: PaginatedEventsSchema,
           },
         },
       },
@@ -53,14 +63,16 @@ datesApp.openapi(
     },
   },
   async (c) => {
-    const { page: pageStr, pageSize: pageSizeStr, category } = c.req.valid("query");
+    const { page: pageStr, pageSize: pageSizeStr, category, startDate, endDate } = c.req.valid("query");
     const page = Math.max(1, parseInt(pageStr, 10) || 1);
     const pageSize = Math.min(100, Math.max(1, parseInt(pageSizeStr, 10) || 20));
 
-    const result = await c.var.dateService.getDatesWithTags({
+    const result = await c.var.dateService.getEventsWithTags({
       page,
       pageSize,
       category: category || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
     });
 
     return c.json(result, 200);

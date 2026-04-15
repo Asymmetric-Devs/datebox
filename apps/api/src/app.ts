@@ -70,11 +70,21 @@ app.use(
 
 // Log errors globally.
 app.onError((err, c) => {
-  console.error(err);
+  console.error("🔥 Global Error Handler:", err);
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
-  return c.json(err, 500);
+  // For other errors, return the message instead of an empty object {}
+  return c.json(
+    {
+      error: {
+        message: err.message || "Internal Server Error",
+        name: err.name,
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+      },
+    },
+    500,
+  );
 });
 
 // Add type definitions to the Hono context. See: https://hono.dev/docs/api/context#contextvariablemap.

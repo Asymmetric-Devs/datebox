@@ -169,80 +169,41 @@ export type Database = {
           },
         ]
       }
-      date_tags: {
-        Row: {
-          date_id: string
-          tag_id: string
-        }
-        Insert: {
-          date_id: string
-          tag_id: string
-        }
-        Update: {
-          date_id?: string
-          tag_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "date_tags_date_id_fkey"
-            columns: ["date_id"]
-            isOneToOne: false
-            referencedRelation: "dates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "date_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       dates: {
         Row: {
           completed: boolean
           createdAt: string
           createdBy: string
-          description: string | null
-          endsAt: string | null
+          eventId: string
           frequencyId: string | null
           google_event_id: string | null
           google_sync_status: string | null
           groupId: string | null
           id: string
-          startsAt: string
-          title: string
           updatedAt: string
         }
         Insert: {
           completed?: boolean
           createdAt?: string
           createdBy: string
-          description?: string | null
-          endsAt?: string | null
+          eventId: string
           frequencyId?: string | null
           google_event_id?: string | null
           google_sync_status?: string | null
           groupId?: string | null
           id?: string
-          startsAt: string
-          title: string
           updatedAt?: string
         }
         Update: {
           completed?: boolean
           createdAt?: string
           createdBy?: string
-          description?: string | null
-          endsAt?: string | null
+          eventId?: string
           frequencyId?: string | null
           google_event_id?: string | null
           google_sync_status?: string | null
           groupId?: string | null
           id?: string
-          startsAt?: string
-          title?: string
           updatedAt?: string
         }
         Relationships: [
@@ -251,6 +212,13 @@ export type Database = {
             columns: ["createdBy"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dates_eventId_fkey"
+            columns: ["eventId"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -304,6 +272,77 @@ export type Database = {
           {
             foreignKeyName: "device_tokens_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tags: {
+        Row: {
+          event_id: string
+          tag_id: string
+        }
+        Insert: {
+          event_id: string
+          tag_id: string
+        }
+        Update: {
+          event_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tags_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          createdAt: string
+          createdBy: string
+          description: string | null
+          endsAt: string | null
+          id: string
+          startsAt: string
+          title: string
+          updatedAt: string
+        }
+        Insert: {
+          createdAt?: string
+          createdBy: string
+          description?: string | null
+          endsAt?: string | null
+          id?: string
+          startsAt: string
+          title: string
+          updatedAt?: string
+        }
+        Update: {
+          createdAt?: string
+          createdBy?: string
+          description?: string | null
+          endsAt?: string | null
+          id?: string
+          startsAt?: string
+          title?: string
+          updatedAt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_createdBy_fkey"
+            columns: ["createdBy"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]

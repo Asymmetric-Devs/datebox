@@ -93,23 +93,20 @@ export interface TransferOwnership {
   newOwnerId: string;
 }
 
-export interface DateWithTags {
+export interface EventWithTags {
   id: string;
   title: string;
   description?: string | null;
   startsAt: string;
   endsAt?: string | null;
-  completed: boolean;
   createdBy: string;
-  groupId: string | null;
   createdAt: string;
   updatedAt: string;
-  frequencyId?: string | null;
   tags: Tag[];
 }
 
-export interface PaginatedDates {
-  data: DateWithTags[];
+export interface PaginatedEvents {
+  data: EventWithTags[];
   page: number;
   pageSize: number;
   total: number;
@@ -758,10 +755,12 @@ export type TransferGroupOwnership200 = {
   newOwner: TransferGroupOwnership200NewOwner;
 };
 
-export type GetDatesExploreParams = {
+export type GetEventsParams = {
   page?: string;
   pageSize?: string;
   category?: string;
+  startDate?: string;
+  endDate?: string;
 };
 
 export type PostDatesGoogleCalendarEnableBody = {
@@ -2966,36 +2965,36 @@ export const useTransferGroupOwnership = <TError = Error, TContext = unknown>(
   );
 };
 
-export type getDatesExploreResponse200 = {
-  data: PaginatedDates;
+export type getEventsResponse200 = {
+  data: PaginatedEvents;
   status: 200;
 };
 
-export type getDatesExploreResponse400 = {
+export type getEventsResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type getDatesExploreResponse500 = {
+export type getEventsResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type getDatesExploreResponseSuccess = getDatesExploreResponse200 & {
+export type getEventsResponseSuccess = getEventsResponse200 & {
   headers: Headers;
 };
-export type getDatesExploreResponseError = (
-  | getDatesExploreResponse400
-  | getDatesExploreResponse500
+export type getEventsResponseError = (
+  | getEventsResponse400
+  | getEventsResponse500
 ) & {
   headers: Headers;
 };
 
-export type getDatesExploreResponse =
-  | getDatesExploreResponseSuccess
-  | getDatesExploreResponseError;
+export type getEventsResponse =
+  | getEventsResponseSuccess
+  | getEventsResponseError;
 
-export const getGetDatesExploreUrl = (params?: GetDatesExploreParams) => {
+export const getGetEventsUrl = (params?: GetEventsParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -3007,78 +3006,70 @@ export const getGetDatesExploreUrl = (params?: GetDatesExploreParams) => {
   const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0
-    ? `/dates/explore?${stringifiedParams}`
-    : `/dates/explore`;
+    ? `/events?${stringifiedParams}`
+    : `/events`;
 };
 
-export const getDatesExplore = async (
-  params?: GetDatesExploreParams,
+export const getEvents = async (
+  params?: GetEventsParams,
   options?: RequestInit
-): Promise<getDatesExploreResponse> => {
-  return rnFetch<getDatesExploreResponse>(getGetDatesExploreUrl(params), {
+): Promise<getEventsResponse> => {
+  return rnFetch<getEventsResponse>(getGetEventsUrl(params), {
     ...options,
     method: "GET",
   });
 };
 
-export const getGetDatesExploreQueryKey = (params?: GetDatesExploreParams) => {
-  return [`/dates/explore`, ...(params ? [params] : [])] as const;
+export const getGetEventsQueryKey = (params?: GetEventsParams) => {
+  return [`/events`, ...(params ? [params] : [])] as const;
 };
 
-export const getGetDatesExploreQueryOptions = <
-  TData = Awaited<ReturnType<typeof getDatesExplore>>,
+export const getGetEventsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getEvents>>,
   TError = Error
 >(
-  params?: GetDatesExploreParams,
+  params?: GetEventsParams,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDatesExplore>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
   }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetDatesExploreQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getGetEventsQueryKey(params);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getDatesExplore>>> = ({
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEvents>>> = ({
     signal,
-  }) => getDatesExplore(params, { signal, ...requestOptions });
+  }) => getEvents(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getDatesExplore>>,
+    Awaited<ReturnType<typeof getEvents>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetDatesExploreQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getDatesExplore>>
+export type GetEventsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getEvents>>
 >;
-export type GetDatesExploreQueryError = Error;
+export type GetEventsQueryError = Error;
 
-export function useGetDatesExplore<
-  TData = Awaited<ReturnType<typeof getDatesExplore>>,
+export function useGetEvents<
+  TData = Awaited<ReturnType<typeof getEvents>>,
   TError = Error
 >(
-  params: undefined | GetDatesExploreParams,
+  params: undefined | GetEventsParams,
   options: {
     query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDatesExplore>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getDatesExplore>>,
+          Awaited<ReturnType<typeof getEvents>>,
           TError,
-          Awaited<ReturnType<typeof getDatesExplore>>
+          Awaited<ReturnType<typeof getEvents>>
         >,
         "initialData"
       >;
@@ -3088,24 +3079,20 @@ export function useGetDatesExplore<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetDatesExplore<
-  TData = Awaited<ReturnType<typeof getDatesExplore>>,
+export function useGetEvents<
+  TData = Awaited<ReturnType<typeof getEvents>>,
   TError = Error
 >(
-  params?: GetDatesExploreParams,
+  params?: GetEventsParams,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDatesExplore>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getDatesExplore>>,
+          Awaited<ReturnType<typeof getEvents>>,
           TError,
-          Awaited<ReturnType<typeof getDatesExplore>>
+          Awaited<ReturnType<typeof getEvents>>
         >,
         "initialData"
       >;
@@ -3115,18 +3102,14 @@ export function useGetDatesExplore<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetDatesExplore<
-  TData = Awaited<ReturnType<typeof getDatesExplore>>,
+export function useGetEvents<
+  TData = Awaited<ReturnType<typeof getEvents>>,
   TError = Error
 >(
-  params?: GetDatesExploreParams,
+  params?: GetEventsParams,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDatesExplore>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
@@ -3135,18 +3118,14 @@ export function useGetDatesExplore<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetDatesExplore<
-  TData = Awaited<ReturnType<typeof getDatesExplore>>,
+export function useGetEvents<
+  TData = Awaited<ReturnType<typeof getEvents>>,
   TError = Error
 >(
-  params?: GetDatesExploreParams,
+  params?: GetEventsParams,
   options?: {
     query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDatesExplore>>,
-        TError,
-        TData
-      >
+      UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
@@ -3154,7 +3133,7 @@ export function useGetDatesExplore<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetDatesExploreQueryOptions(params, options);
+  const queryOptions = getGetEventsQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

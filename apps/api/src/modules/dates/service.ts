@@ -20,7 +20,7 @@ export class DateService {
   async getDateById(id: string) {
     const { data, error } = await this.supabase
       .from("dates")
-      .select("*")
+      .select("*, events(*)")
       .eq("id", id)
       .single();
     if (error) {
@@ -29,13 +29,16 @@ export class DateService {
     if (!data) {
       throw new ApiException(404, "Cita no encontrada");
     }
-    return data;
+    
+    // Flatten result to maintain compatibility
+    const { events, ...dateData } = data as any;
+    return { ...dateData, ...events };
   }
 
   async getDatesWithGroupId(groupId: string) {
-    const { data: dates, error: datesError } = await this.supabase
+    const { data, error: datesError } = await this.supabase
       .from("dates")
-      .select("*")
+      .select("*, events(*)")
       .eq("groupId", groupId);
 
     if (datesError) {
@@ -46,122 +49,146 @@ export class DateService {
       );
     }
 
-    return dates || [];
+    // Flatten results to maintain compatibility
+    return (data || []).map((d: any) => {
+      const { events, ...dateData } = d;
+      return { ...dateData, ...events };
+    });
   }
 
-  async getDatesWithTags(options: {
+  async getEventsWithTags(options: {
     page: number;
     pageSize: number;
     category?: string;
+    startDate?: string;
+    endDate?: string;
   }) {
-    const { page, pageSize, category } = options;
+    const { page, pageSize, category, startDate, endDate } = options;
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
     if (category) {
-      // When filtering by category, we need to find date IDs that have at least
-      // one tag in the given category, then fetch those dates with ALL their tags.
-
-      // Step 1: Get distinct date IDs matching the category filter
-      const { data: matchingDateTags, error: filterError } = await this.supabase
-        .from("date_tags")
-        .select("date_id, tags!inner(category)")
+      // Filter: find event IDs that have at least one tag in the given category
+      const { data: matchingEventTags, error: filterError } = await this.supabase
+        .from("event_tags")
+        .select("event_id, tags!inner(category)")
         .eq("tags.category", category);
 
       if (filterError) {
-        throw new ApiException(500, "Error al filtrar citas por categoría", filterError);
+        throw new ApiException(500, "Error al filtrar eventos por categoría", filterError);
       }
 
-      const matchingDateIds = [...new Set((matchingDateTags || []).map(dt => dt.date_id))];
-      const total = matchingDateIds.length;
+      let matchingEventIds = [...new Set((matchingEventTags || []).map(et => et.event_id))];
+
+      // If we also have date filters, narrow down by startsAt
+      if (matchingEventIds.length > 0 && (startDate || endDate)) {
+        let dateQuery = this.supabase
+          .from("events")
+          .select("id")
+          .in("id", matchingEventIds);
+
+        if (startDate) dateQuery = dateQuery.gte("startsAt", startDate);
+        if (endDate) dateQuery = dateQuery.lte("startsAt", endDate);
+
+        const { data: filteredEvents } = await dateQuery;
+        matchingEventIds = (filteredEvents || []).map(e => e.id);
+      }
+
+      const total = matchingEventIds.length;
       const totalPages = Math.ceil(total / pageSize);
 
-      if (matchingDateIds.length === 0) {
+      if (matchingEventIds.length === 0) {
         return { data: [], page, pageSize, total: 0, totalPages: 0 };
       }
 
-      // Step 2: Paginate over those date IDs
-      const paginatedIds = matchingDateIds.slice(from, to + 1);
+      // Paginate over those event IDs
+      const paginatedIds = matchingEventIds.slice(from, to + 1);
 
-      const { data: dates, error: datesError } = await this.supabase
-        .from("dates")
+      const { data: events, error: eventsError } = await this.supabase
+        .from("events")
         .select("*")
         .in("id", paginatedIds)
         .order("startsAt", { ascending: false });
 
-      if (datesError) {
-        throw new ApiException(500, "Error al obtener las citas", datesError);
+      if (eventsError) {
+        throw new ApiException(500, "Error al obtener los eventos", eventsError);
       }
 
-      // Step 3: Fetch ALL tags for the paginated dates
-      const dateIds = (dates || []).map(d => d.id);
-      const tagsMap = await this.getTagsForDates(dateIds);
+      const eventIds = (events || []).map(e => e.id);
+      const tagsMap = await this.getTagsForEvents(eventIds);
 
-      const datesWithTags = (dates || []).map(date => ({
-        ...date,
-        tags: tagsMap[date.id] || [],
+      const eventsWithTags = (events || []).map(event => ({
+        ...event,
+        tags: tagsMap[event.id] || [],
       }));
 
-      return { data: datesWithTags, page, pageSize, total, totalPages };
+      return { data: eventsWithTags, page, pageSize, total, totalPages };
     }
 
-    // No category filter — simple paginated query
-    // Step 1: Get total count
-    const { count, error: countError } = await this.supabase
-      .from("dates")
+    // No category filter — query events directly with optional date filter
+    let countQuery = this.supabase
+      .from("events")
       .select("*", { count: "exact", head: true });
 
+    if (startDate) countQuery = countQuery.gte("startsAt", startDate);
+    if (endDate) countQuery = countQuery.lte("startsAt", endDate);
+
+    const { count, error: countError } = await countQuery;
+
     if (countError) {
-      throw new ApiException(500, "Error al contar las citas", countError);
+      throw new ApiException(500, "Error al contar los eventos", countError);
     }
 
     const total = count ?? 0;
     const totalPages = Math.ceil(total / pageSize);
 
-    // Step 2: Fetch paginated dates
-    const { data: dates, error: datesError } = await this.supabase
-      .from("dates")
+    let eventsQuery = this.supabase
+      .from("events")
       .select("*")
       .order("startsAt", { ascending: false })
       .range(from, to);
 
-    if (datesError) {
-      throw new ApiException(500, "Error al obtener las citas", datesError);
+    if (startDate) eventsQuery = eventsQuery.gte("startsAt", startDate);
+    if (endDate) eventsQuery = eventsQuery.lte("startsAt", endDate);
+
+    const { data: events, error: eventsError } = await eventsQuery;
+
+    if (eventsError) {
+      throw new ApiException(500, "Error al obtener los eventos", eventsError);
     }
 
-    // Step 3: Fetch tags for the paginated dates
-    const dateIds = (dates || []).map(d => d.id);
-    const tagsMap = await this.getTagsForDates(dateIds);
+    const eventIds = (events || []).map(e => e.id);
+    const tagsMap = await this.getTagsForEvents(eventIds);
 
-    const datesWithTags = (dates || []).map(date => ({
-      ...date,
-      tags: tagsMap[date.id] || [],
+    const eventsWithTags = (events || []).map(event => ({
+      ...event,
+      tags: tagsMap[event.id] || [],
     }));
 
-    return { data: datesWithTags, page, pageSize, total, totalPages };
+    return { data: eventsWithTags, page, pageSize, total, totalPages };
   }
 
   /**
-   * Batch-fetch tags for a list of date IDs via the date_tags junction table.
+   * Batch-fetch tags for a list of event IDs via the event_tags junction table.
    */
-  private async getTagsForDates(dateIds: string[]): Promise<Record<string, Array<{ id: string; name: string; category: string | null; description: string | null }>>> {
+  private async getTagsForEvents(eventIds: string[]): Promise<Record<string, Array<{ id: string; name: string; category: string | null; description: string | null }>>> {
     const tagsMap: Record<string, Array<{ id: string; name: string; category: string | null; description: string | null }>> = {};
 
-    if (dateIds.length === 0) return tagsMap;
+    if (eventIds.length === 0) return tagsMap;
 
-    const { data: dateTags } = await this.supabase
-      .from("date_tags")
-      .select("date_id, tags (id, name, category, description)")
-      .in("date_id", dateIds);
+    const { data: eventTags } = await this.supabase
+      .from("event_tags")
+      .select("event_id, tags (id, name, category, description)")
+      .in("event_id", eventIds);
 
-    if (dateTags) {
-      dateTags.forEach((dt) => {
-        const tag = dt.tags as unknown as { id: string; name: string; category: string | null; description: string | null } | null;
+    if (eventTags) {
+      eventTags.forEach((et) => {
+        const tag = et.tags as unknown as { id: string; name: string; category: string | null; description: string | null } | null;
         if (tag) {
-          if (!tagsMap[dt.date_id]) {
-            tagsMap[dt.date_id] = [];
+          if (!tagsMap[et.event_id]) {
+            tagsMap[et.event_id] = [];
           }
-          tagsMap[dt.date_id]!.push(tag);
+          tagsMap[et.event_id]!.push(tag);
         }
       });
     }
@@ -171,11 +198,37 @@ export class DateService {
 
 
   async create(payload: NewDateEvent) {
-    const { data, error } = await this.supabase
-      .from("dates")
-      .insert(payload)
+    // 1. Create the event definition
+    const { data: event, error: eventError } = await this.supabase
+      .from("events")
+      .insert({
+        title: payload.title,
+        description: payload.description,
+        startsAt: payload.startsAt,
+        endsAt: payload.endsAt,
+        createdBy: payload.createdBy,
+      })
       .select("*")
       .single();
+
+    if (eventError) {
+      console.error(eventError);
+      throw new ApiException(500, "Error al crear el evento", eventError);
+    }
+
+    // 2. Create the date junction
+    const { data, error } = await this.supabase
+      .from("dates")
+      .insert({
+        eventId: event.id,
+        groupId: payload.groupId,
+        createdBy: payload.createdBy,
+        completed: payload.completed ?? false,
+        frequencyId: payload.frequencyId,
+      })
+      .select("*")
+      .single();
+
     if (error) {
       console.error(error);
       throw new ApiException(500, "Error al crear la cita", error);
@@ -260,10 +313,10 @@ export class DateService {
       if (isEnabled) {
         await this.googleCalendarService.createEvent(payload.createdBy, {
           id: data.id,
-          title: data.title,
-          description: data.description || undefined,
-          startsAt: new Date(data.startsAt),
-          endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
+          title: event.title,
+          description: event.description || undefined,
+          startsAt: new Date(event.startsAt),
+          endsAt: event.endsAt ? new Date(event.endsAt) : undefined,
         });
 
         console.log("Google Calendar event created for date:", data.id);
@@ -272,20 +325,62 @@ export class DateService {
       console.error("Google Calendar sync failed:", googleError);
     }
 
-    return data;
+    return { ...data, ...event };
   }
 
   async update(id: string, payload: UpdateDateEvent) {
-    const { data, error } = await this.supabase
+    // 1. Find the date to get the eventId
+    const { data: dateRec, error: fetchError } = await this.supabase
       .from("dates")
-      .update({ ...payload })
+      .select("eventId, createdBy")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !dateRec) {
+      throw new ApiException(404, "Cita no encontrada");
+    }
+
+    // 2. Update the event if any event-related fields are present
+    let updatedEvent: any = null;
+    const eventPayload: any = {};
+    if (payload.title !== undefined) eventPayload.title = payload.title;
+    if (payload.description !== undefined) eventPayload.description = payload.description;
+    if (payload.startsAt !== undefined) eventPayload.startsAt = payload.startsAt;
+    if (payload.endsAt !== undefined) eventPayload.endsAt = payload.endsAt;
+
+    if (Object.keys(eventPayload).length > 0) {
+      const { data: ev, error: evErr } = await this.supabase
+        .from("events")
+        .update(eventPayload)
+        .eq("id", dateRec.eventId)
+        .select("*")
+        .single();
+      if (evErr) throw new ApiException(500, "Error al actualizar el evento", evErr);
+      updatedEvent = ev;
+    } else {
+      // Fetch current event to return full object
+      const { data: ev, error: fetchEvErr } = await this.supabase.from("events").select("*").eq("id", dateRec.eventId).single();
+      if (fetchEvErr || !ev) throw new ApiException(404, "Evento no encontrado");
+      updatedEvent = ev;
+    }
+
+    // 3. Update the date
+    const datePayload: any = {};
+    if (payload.completed !== undefined) datePayload.completed = payload.completed;
+    if (payload.groupId !== undefined) datePayload.groupId = payload.groupId;
+    if (payload.frequencyId !== undefined) datePayload.frequencyId = payload.frequencyId;
+
+    const { data: updatedDate, error: updateDateErr } = await this.supabase
+      .from("dates")
+      .update(datePayload)
       .eq("id", id)
       .select("*")
       .maybeSingle();
-    if (error) {
-      throw new ApiException(500, "Error al actualizar la cita", error);
+
+    if (updateDateErr) {
+      throw new ApiException(500, "Error al actualizar la cita", updateDateErr);
     }
-    if (!data) {
+    if (!updatedDate) {
       throw new ApiException(404, "Cita no encontrada");
     }
 
@@ -293,32 +388,32 @@ export class DateService {
     try {
       await this.mentionsService.syncMentions(
         "date",
-        data.id,
-        data.title,
-        data.description
+        updatedDate.id,
+        updatedEvent.title,
+        updatedEvent.description
       );
 
       // Extract mentioned user IDs and create notifications
       const mentionedIds = [
-        ...this.mentionsService.extractMentionIds(data.title),
-        ...this.mentionsService.extractMentionIds(data.description),
+        ...this.mentionsService.extractMentionIds(updatedEvent.title),
+        ...this.mentionsService.extractMentionIds(updatedEvent.description),
       ];
 
       if (mentionedIds.length > 0) {
         const { data: actor, error: actorError } = await this.supabase
           .from("users")
           .select("displayName")
-          .eq("id", data.createdBy)
+          .eq("id", dateRec.createdBy)
           .single();
 
         if (!actorError && actor) {
           await this.notificationsService.notifyMentionedUsers(
             mentionedIds,
-            data.createdBy,
+            dateRec.createdBy,
             actor.displayName || "Un usuario",
             "date",
-            data.id,
-            data.title || "Sin título"
+            updatedDate.id,
+            updatedEvent.title || "Sin título"
           );
         }
       }
@@ -329,7 +424,7 @@ export class DateService {
     try {
       const isEnabled =
         await this.googleCalendarService.isGoogleCalendarEnabled(
-          data.createdBy,
+          dateRec.createdBy,
         );
       if (isEnabled) {
         console.log("Would sync Google Calendar update for date:", id);
@@ -338,7 +433,7 @@ export class DateService {
       console.error("Google Calendar sync failed:", googleError);
     }
 
-    return data;
+    return { ...updatedDate, ...updatedEvent };
   }
 
   async remove(id: string) {
