@@ -22,10 +22,9 @@ export class CalendarService {
 
     const { data: datesRecord, error: datesError } = await this.supabase
       .from("dates")
-      .select("*")
-      // .or(`createdBy.eq.${userId},groupId.eq.${userId}`) <-- not correct, groupId is not a user
-      .gte("startsAt", `${startDate}T00:00:00.000Z`)
-      .lte("startsAt", `${endDate}T23:59:59.999Z`);
+      .select("*, events!inner(*)")
+      .gte("events.startsAt", `${startDate}T00:00:00.000Z`)
+      .lte("events.startsAt", `${endDate}T23:59:59.999Z`);
 
     if (datesError) {
       throw new ApiException(
@@ -42,7 +41,8 @@ export class CalendarService {
       );
     }
 
-    const events: EventAttributes[] = datesRecord.map((act) => {
+    const events: EventAttributes[] = (datesRecord as unknown as Array<Database["public"]["Tables"]["dates"]["Row"] & { events: Database["public"]["Tables"]["events"]["Row"] }>).map((dateEntry) => {
+      const act = dateEntry.events;
       const start = new Date(act.startsAt);
       const startTuple: [number, number, number, number, number] = [
         start.getUTCFullYear(),
@@ -53,7 +53,7 @@ export class CalendarService {
       ];
 
       const sharedFields = {
-        uid: act.id,
+        uid: dateEntry.id,
         title: act.title,
         description: act.description ?? undefined,
         start: startTuple,

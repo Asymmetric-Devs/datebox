@@ -31,7 +31,8 @@ export class DateService {
     }
     
     // Flatten result to maintain compatibility
-    const { events, ...dateData } = data as any;
+    const dateWithEvent = data as unknown as { events: Database["public"]["Tables"]["events"]["Row"] } & Database["public"]["Tables"]["dates"]["Row"];
+    const { events, ...dateData } = dateWithEvent;
     return { ...dateData, ...events };
   }
 
@@ -50,8 +51,9 @@ export class DateService {
     }
 
     // Flatten results to maintain compatibility
-    return (data || []).map((d: any) => {
-      const { events, ...dateData } = d;
+    return (data || []).map((d) => {
+      const dateWithEvent = d as unknown as { events: Database["public"]["Tables"]["events"]["Row"] } & Database["public"]["Tables"]["dates"]["Row"];
+      const { events, ...dateData } = dateWithEvent;
       return { ...dateData, ...events };
     });
   }
@@ -341,8 +343,8 @@ export class DateService {
     }
 
     // 2. Update the event if any event-related fields are present
-    let updatedEvent: any = null;
-    const eventPayload: any = {};
+    let updatedEvent: Database["public"]["Tables"]["events"]["Row"];
+    const eventPayload: Database["public"]["Tables"]["events"]["Update"] = {};
     if (payload.title !== undefined) eventPayload.title = payload.title;
     if (payload.description !== undefined) eventPayload.description = payload.description;
     if (payload.startsAt !== undefined) eventPayload.startsAt = payload.startsAt;
@@ -365,7 +367,7 @@ export class DateService {
     }
 
     // 3. Update the date
-    const datePayload: any = {};
+    const datePayload: Database["public"]["Tables"]["dates"]["Update"] = {};
     if (payload.completed !== undefined) datePayload.completed = payload.completed;
     if (payload.groupId !== undefined) datePayload.groupId = payload.groupId;
     if (payload.frequencyId !== undefined) datePayload.frequencyId = payload.frequencyId;
