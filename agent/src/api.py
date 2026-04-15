@@ -4,7 +4,7 @@ Handles HTTP requests and manages conversation state.
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from uuid import uuid4
 import time
 
@@ -20,6 +20,41 @@ from src.utils import log_debug, log_info, log_error
 # In-memory conversation store
 # In production, this would be backed by a database (Supabase)
 _conversation_store: dict[str, AgentState] = {}
+
+
+def _coerce_state(raw_state: Any, fallback_state: AgentState) -> AgentState:
+    """Normalize LangGraph output to AgentState.
+
+    Newer LangGraph versions may return dict-like state objects.
+    """
+    if isinstance(raw_state, AgentState):
+        return raw_state
+
+    if isinstance(raw_state, dict):
+        raw_messages = raw_state.get("messages", fallback_state.messages)
+        messages: list[Message] = []
+        for msg in raw_messages:
+            if isinstance(msg, Message):
+                messages.append(msg)
+            elif isinstance(msg, dict):
+                role_value = msg.get("role", MessageRole.USER.value)
+                try:
+                    role = MessageRole(role_value)
+                except ValueError:
+                    role = MessageRole.USER
+                messages.append(
+                    Message(
+                        role=role,
+                        content=str(msg.get("content", "")),
+                        timestamp=msg.get("timestamp"),
+                    )
+                )
+
+        metadata = fallback_state.metadata
+        context = fallback_state.context
+        return AgentState(messages=messages, context=context, metadata=metadata)
+
+    return fallback_state
 
 
 async def invoke_agent_handler(
@@ -65,7 +100,8 @@ async def invoke_agent_handler(
     start_time = time.time()
     
     # Invoke the graph
-    result_state = await graph.ainvoke(state)
+    raw_result_state = await graph.ainvoke(state)
+    result_state = _coerce_state(raw_result_state, state)
     
     execution_time = time.time() - start_time
     

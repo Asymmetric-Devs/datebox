@@ -21,7 +21,7 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
         """Process messages and generate response."""
         try:
             # Convert stored messages to LangChain format
-            lc_messages = []
+            lc_messages = [SystemMessage(content=DEFAULT_SYSTEM_PROMPT)]
             
             for msg in state.messages:
                 if msg.role == MessageRole.USER:
@@ -31,17 +31,16 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
                 elif msg.role == MessageRole.SYSTEM:
                     lc_messages.append(SystemMessage(content=msg.content))
             
-            # Build system prompt with context
-            system_prompt = DEFAULT_SYSTEM_PROMPT
-            
             if state.metadata and state.metadata.user_id:
-                system_prompt += f"\n\nUser ID: {state.metadata.user_id}"
-            
+                lc_messages.append(
+                    HumanMessage(content=f"User ID: {state.metadata.user_id}")
+                )
+
             if state.context:
                 context_str = "\n".join(
                     f"- {k}: {v}" for k, v in state.context.items()
                 )
-                system_prompt += f"\n\nContext:\n{context_str}"
+                lc_messages.append(HumanMessage(content=f"Context:\n{context_str}"))
             
             log_debug("Processing message", {
                 "message_count": len(state.messages),
@@ -49,13 +48,22 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
             })
             
             # Invoke the model
-            response = await model.ainvoke(
-                lc_messages,
-                config={"system": system_prompt}
-            )
+            response = await model.ainvoke(lc_messages)
             
             # Extract response content
-            assistant_message = response.content or "I apologize, but I could not generate a response."
+            response_content = response.content
+            if isinstance(response_content, str):
+                assistant_message = response_content
+            elif isinstance(response_content, list):
+                assistant_message = "\n".join(
+                    str(block.get("text", "")) if isinstance(block, dict) else str(block)
+                    for block in response_content
+                ).strip()
+            else:
+                assistant_message = str(response_content or "")
+
+            if not assistant_message:
+                assistant_message = "I apologize, but I could not generate a response."
             
             log_debug("Response generated", {
                 "response_length": len(assistant_message)
