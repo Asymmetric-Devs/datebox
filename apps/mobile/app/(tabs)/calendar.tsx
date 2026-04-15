@@ -28,6 +28,9 @@ import { toLocalDateString, getTodayLocal } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
 import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
 import { LAYOUT } from "@/styles/base";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const DATEBOT_WELCOME_KEY = "datebot_welcome_seen_v1";
 
 function CalendarScreenContent() {
   const { userElepad } = useAuth();
@@ -336,6 +339,22 @@ function CalendarScreenContent() {
     setEventToDelete(null);
   };
 
+  const handleResetDateBotWelcome = async () => {
+    try {
+      await AsyncStorage.removeItem(DATEBOT_WELCOME_KEY);
+      showToast({
+        message: "Tutorial de DateBot reiniciado",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Error reseteando tutorial de DateBot:", error);
+      showToast({
+        message: "No se pudo reiniciar DateBot",
+        type: "error",
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={baseStyles.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
@@ -472,26 +491,45 @@ function CalendarScreenContent() {
           <Text
             numberOfLines={1}
             style={{
-              fontSize: 16,
-              minWidth: 110,
+              fontSize: 14,
+              minWidth: 120,
               textAlign: "right",
             }}
           >
             <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
-              Histor
+              Reiniciar
             </Text>
-            <Text style={{ color: COLORS.secondary, fontWeight: "700" }}>
-              IA
+            <Text style={{ color: COLORS.secondary, fontWeight: "800" }}>
+              DateBot
             </Text>
-            <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
-              s
-            </Text>
+          </Text>
+        }
+        icon="refresh"
+        onPress={() => {
+          void handleResetDateBotWelcome();
+        }}
+        bottom={LAYOUT.bottomNavHeight + 16}
+        left={16}
+        autoCollapseDelay={4000}
+      />
+
+      <ExpandableFAB
+        label={
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 16,
+              minWidth: 120,
+            }}
+          >
+            <Text style={{ color: COLORS.primary, fontWeight: "700" }}>Date</Text>
+            <Text style={{ color: COLORS.secondary, fontWeight: "800" }}>Bot</Text>
           </Text>
         }
         icon="robot"
         onPress={() => router.push("../historias")}
         bottom={LAYOUT.bottomNavHeight + 16}
-        left={16}
+        right={16}
         autoCollapseDelay={5000}
       />
     </SafeAreaView>

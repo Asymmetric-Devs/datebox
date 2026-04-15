@@ -43,7 +43,7 @@ export function useActivitiesRealtime(
       return;
     }
 
-    const channelName = `activities-realtime-${String(queryKey[0])}`;
+    const channelName = `activities-realtime-${String(queryKey[0])}-${Date.now()}`;
 
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
@@ -77,9 +77,12 @@ export function useActivitiesRealtime(
           if (status === "SUBSCRIBED") {
             console.log("📡 Realtime activities: conectado");
           } else if (status === "CHANNEL_ERROR") {
-            console.error("📡 Realtime activities: error de canal", err);
+            const details = err ? JSON.stringify(err) : "sin detalle de error";
+            console.error(`📡 Realtime activities: error de canal (${details})`);
           } else if (status === "TIMED_OUT") {
             console.warn("📡 Realtime activities: timeout");
+          } else if (status === "CLOSED") {
+            console.warn("📡 Realtime activities: canal cerrado");
           }
         });
     };
