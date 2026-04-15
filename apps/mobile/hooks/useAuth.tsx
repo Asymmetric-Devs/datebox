@@ -471,7 +471,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 // Si no tiene intereses, al onboarding
                 if (!user.interests || user.interests.length === 0) {
                   console.log("🎨 Usuario sin intereses, enviando a onboarding");
-                  router.replace("/onboarding/interests");
+                  router.replace("/onboarding/interests" as never);
                 } else {
                   console.log("🏠 Usuario con intereses, enviando a home");
                   router.replace("/(tabs)/home");

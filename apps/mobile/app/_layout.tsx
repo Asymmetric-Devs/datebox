@@ -132,6 +132,13 @@ export default function RootLayout() {
                           }}
                         />
                         <Stack.Screen
+                          name="historias"
+                          options={{
+                            headerShown: false,
+                            animation: "fade",
+                          }}
+                        />
+                        <Stack.Screen
                           name="focus-game"
                           options={{
                             headerShown: false,

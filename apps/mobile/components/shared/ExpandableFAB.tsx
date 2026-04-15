@@ -23,6 +23,8 @@ interface ExpandableFABProps {
   bottom?: number;
   /** Posición desde el lado derecho de la pantalla */
   right?: number;
+  /** Posición desde el lado izquierdo de la pantalla */
+  left?: number;
   /** Ancho de la parte expandible */
   expandedWidth?: number;
   /** Tiempo en ms antes de colapsar automáticamente (0 para desactivar) */
@@ -41,6 +43,7 @@ export const ExpandableFAB = forwardRef<View, ExpandableFABProps>(
       expandedBackgroundColor = COLORS.white,
       bottom = 16,
       right = 16,
+      left,
       expandedWidth = 130,
       autoCollapseDelay = 3000,
     },
@@ -103,7 +106,7 @@ export const ExpandableFAB = forwardRef<View, ExpandableFABProps>(
       ref={ref}
       style={{
         position: "absolute",
-        right,
+        ...(left !== undefined ? { left } : { right }),
         bottom,
       }}
     >
@@ -112,13 +115,25 @@ export const ExpandableFAB = forwardRef<View, ExpandableFABProps>(
         style={[
           {
             position: "absolute",
-            right: 28, // Alineado con el centro del círculo (56/2)
+            ...(left !== undefined
+              ? {
+                  left: 28,
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                  borderTopRightRadius: 28,
+                  borderBottomRightRadius: 28,
+                  paddingLeft: 0,
+                  paddingRight: 20,
+                }
+              : {
+                  right: 28,
+                  borderTopLeftRadius: 28,
+                  borderBottomLeftRadius: 28,
+                  paddingLeft: 20,
+                }),
             backgroundColor: expandedBackgroundColor,
-            borderTopLeftRadius: 28,
-            borderBottomLeftRadius: 28,
             height: 56,
             justifyContent: "center",
-            paddingLeft: 20,
             overflow: "hidden",
             zIndex: 1,
             ...SHADOWS.medium,
@@ -133,6 +148,7 @@ export const ExpandableFAB = forwardRef<View, ExpandableFABProps>(
               color: textColor,
               fontSize: 16,
               fontWeight: "600",
+              textAlign: left !== undefined ? "right" : "left",
               minWidth: expandedWidth - 20,
             }}
           >

@@ -26,6 +26,8 @@ import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
 import { toLocalDateString, getTodayLocal } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
+import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
+import { LAYOUT } from "@/styles/base";
 
 function CalendarScreenContent() {
   const { userElepad } = useAuth();
@@ -464,6 +466,34 @@ function CalendarScreenContent() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
+      <ExpandableFAB
+        label={
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 16,
+              minWidth: 110,
+              textAlign: "right",
+            }}
+          >
+            <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
+              Histor
+            </Text>
+            <Text style={{ color: COLORS.secondary, fontWeight: "700" }}>
+              IA
+            </Text>
+            <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
+              s
+            </Text>
+          </Text>
+        }
+        icon="robot"
+        onPress={() => router.push("../historias")}
+        bottom={LAYOUT.bottomNavHeight + 16}
+        left={16}
+        autoCollapseDelay={5000}
+      />
     </SafeAreaView>
   );
 }
