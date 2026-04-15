@@ -6,6 +6,7 @@ import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
 import CalendarScreen from "./calendar";
+import DatesScreen from "./dates";
 import { COLORS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import SidebarNavigation from "@/components/navigation/SidebarNavigation";
@@ -94,6 +95,7 @@ function TabLayoutContent() {
     calendar: CalendarScreen,
     juegos: JuegosScreen,
     recuerdos: RecuerdosScreen,
+    dates: DatesScreen,
   }), []);
 
   // Detect global keyboard visibility to hide tab bar

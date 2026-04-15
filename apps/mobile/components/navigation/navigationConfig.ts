@@ -30,6 +30,12 @@ export const routes: TabRoute[] = [
     focusedIcon: "puzzle",
     unfocusedIcon: "puzzle-outline",
   },
+  {
+    key: "dates",
+    title: "Dates",
+    focusedIcon: "heart",
+    unfocusedIcon: "heart-outline",
+  },
 ];
 
 /** @deprecated Use `routes` instead — there is no longer a differentiation between elder and non-elder users. */
