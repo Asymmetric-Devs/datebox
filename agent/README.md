@@ -167,10 +167,13 @@ export function getAvailableTools(): Tool[] {
 
 - `AGENT_PORT` - Server port (default: 3001)
 - `GEMINI_API_KEY` - API key for Gemini (required)
-- `GEMINI_MODEL` - Model to use (default: gemini-2.0-flash)
+- `GEMINI_MODEL` - Model to use (default: gemini-3-flash-preview)
 - `GEMINI_TEMPERATURE` - Temperature for sampling (0-2, default: 0.7)
 - `GEMINI_MAX_TOKENS` - Maximum tokens per response (default: 2048)
 - `GEMINI_TOP_P` - Nucleus sampling parameter (default: 0.9)
+- `AGENT_API_BASE_URL` - Elepad API base URL used by tools (default: http://127.0.0.1:8787)
+- `AGENT_API_TIMEOUT_SECONDS` - Timeout for API tool calls in seconds (default: 20)
+- `AGENT_API_BEARER_TOKEN` - Optional bearer token for protected API endpoints
 - `DEBUG` - Enable debug logging (default: false)
 
 ## Best Practices

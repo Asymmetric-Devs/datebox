@@ -5,11 +5,15 @@ Main agent logic with message processing and state management.
 
 from typing import Any
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph
 from src.types import AgentState, Message, MessageRole
 from src.config import DEFAULT_SYSTEM_PROMPT
 from src.utils import log_error, log_debug
+from src.tools import build_date_planning_tools
+
+
+MAX_TOOL_ROUNDS = 6
 
 
 def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
@@ -41,14 +45,59 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
                     f"- {k}: {v}" for k, v in state.context.items()
                 )
                 lc_messages.append(HumanMessage(content=f"Context:\n{context_str}"))
+
+            tools = build_date_planning_tools(state)
+            llm = model.bind_tools(tools)
+            tool_by_name = {tool.name: tool for tool in tools}
             
             log_debug("Processing message", {
                 "message_count": len(state.messages),
-                "has_context": bool(state.context)
+                "has_context": bool(state.context),
+                "tool_count": len(tools),
             })
-            
-            # Invoke the model
-            response = await model.ainvoke(lc_messages)
+
+            response = await llm.ainvoke(lc_messages)
+
+            rounds = 0
+            while getattr(response, "tool_calls", None) and rounds < MAX_TOOL_ROUNDS:
+                rounds += 1
+                lc_messages.append(response)
+
+                for call in response.tool_calls:
+                    tool_name = call.get("name", "")
+                    tool_id = call.get("id", "")
+                    tool_args = call.get("args", {})
+
+                    selected_tool = tool_by_name.get(tool_name)
+                    if not selected_tool:
+                        tool_result = f"Tool '{tool_name}' not available"
+                    else:
+                        try:
+                            tool_result = await selected_tool.ainvoke(tool_args)
+                        except Exception as tool_error:
+                            tool_result = f"Tool '{tool_name}' error: {str(tool_error)}"
+                            log_error("Tool execution failed", tool_error)
+
+                    lc_messages.append(
+                        ToolMessage(
+                            content=str(tool_result),
+                            tool_call_id=tool_id,
+                            name=tool_name,
+                        )
+                    )
+
+                response = await llm.ainvoke(lc_messages)
+
+            if rounds >= MAX_TOOL_ROUNDS and getattr(response, "tool_calls", None):
+                lc_messages.append(
+                    HumanMessage(
+                        content=(
+                            "Deten la ejecucion de herramientas y responde con la mejor "
+                            "propuesta posible con los datos obtenidos."
+                        )
+                    )
+                )
+                response = await llm.ainvoke(lc_messages)
             
             # Extract response content
             response_content = response.content

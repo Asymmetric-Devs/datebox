@@ -72,6 +72,14 @@ async def invoke_agent_handler(
     # Get or create conversation state
     if conversation_id in _conversation_store:
         state = _conversation_store[conversation_id]
+
+        if request.context:
+            merged_context = (state.context or {}).copy()
+            merged_context.update(request.context)
+            state.context = merged_context
+
+        if request.user_id and state.metadata:
+            state.metadata.user_id = request.user_id
     else:
         state = AgentState(
             messages=[],

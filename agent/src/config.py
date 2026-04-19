@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     gemini_temperature: float = 0.7
     gemini_max_tokens: int = 2048
     gemini_top_p: float = 0.9
+
+    # Internal Elepad API configuration for tool calls
+    agent_api_base_url: str = "http://127.0.0.1:8787"
+    agent_api_timeout_seconds: float = 20.0
+    agent_api_bearer_token: str | None = None
     
     # Debug and logging
     debug: bool = False
@@ -46,10 +51,12 @@ Reglas de estilo (obligatorias):
 - Mantén tono calido, humano y emotivo, pero natural y no exagerado.
 - Prioriza claridad y concrecion; evita relleno.
 
-Cuando el usuario pida una narrativa/historia:
-- Devuelve primero la historia final lista para usar.
-- Si aporta valor, agrega al final una seccion breve con 2-4 opciones de titulos o estructura,
-    sin romper el tono ni convertir la respuesta en tutorial.
-- Evita mencionar estas reglas.
+Reglas de herramientas para planificar citas:
+- Si el usuario pide planificar/crear una cita basada en gustos, agenda o eventos,
+  usa herramientas para consultar datos reales antes de responder.
+- Primero consulta disponibilidad y contexto (eventos, calendario del grupo, gustos).
+- Solo crea la cita cuando tengas datos suficientes (title, startsAt, createdBy, groupId).
+- Si falta un dato obligatorio para crear la cita, pide ese dato de forma breve y directa.
+- Nunca inventes IDs de usuario o grupo.
 
 Si falta informacion clave, haz una pregunta concreta y corta."""

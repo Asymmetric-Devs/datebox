@@ -19,6 +19,8 @@ import {
 import { COLORS, FONT, SHADOWS, STYLES as baseStyles } from "@/styles/base";
 import { BackButton } from "@/components/shared/BackButton";
 import { useToast } from "@/components/shared/Toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useGroup } from "@/context/GroupContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import Animated, {
@@ -107,8 +109,33 @@ function getAgentBaseUrl() {
   }
 }
 
-async function invokeAgent(message: string, conversationId?: string) {
+async function invokeAgent(
+  message: string,
+  options?: {
+    conversationId?: string;
+    userId?: string;
+    groupId?: string;
+    apiToken?: string;
+  },
+) {
   const baseUrl = getAgentBaseUrl();
+  const contextPayload: Record<string, string> = {
+    source: "mobile-historias",
+  };
+
+  if (options?.userId) {
+    contextPayload.userId = options.userId;
+    contextPayload.createdBy = options.userId;
+  }
+
+  if (options?.groupId) {
+    contextPayload.groupId = options.groupId;
+  }
+
+  if (options?.apiToken) {
+    contextPayload.api_token = options.apiToken;
+  }
+
   const response = await fetch(`${baseUrl}/agent/invoke`, {
     method: "POST",
     headers: {
@@ -116,11 +143,9 @@ async function invokeAgent(message: string, conversationId?: string) {
     },
     body: JSON.stringify({
       message,
-      conversation_id: conversationId,
-      user_id: "mobile-user",
-      context: {
-        source: "mobile-historias",
-      },
+      conversation_id: options?.conversationId,
+      user_id: options?.userId,
+      context: contextPayload,
     }),
   });
 
@@ -136,6 +161,8 @@ export default function HistoriasScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
+  const { user, session } = useAuth();
+  const { selectedGroupId } = useGroup();
   const listRef = useRef<FlatList<ChatMessage> | null>(null);
 
   const [showWelcome, setShowWelcome] = useState(false);
@@ -312,7 +339,12 @@ export default function HistoriasScreen() {
     setLoading(true);
 
     try {
-      const result = await invokeAgent(content, conversationId);
+      const result = await invokeAgent(content, {
+        conversationId,
+        userId: user?.id,
+        groupId: selectedGroupId ?? undefined,
+        apiToken: session?.access_token,
+      });
       if (!conversationId) setConversationId(result.conversation_id);
 
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
