@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     agent_api_base_url: str = "http://127.0.0.1:8787"
     agent_api_timeout_seconds: float = 20.0
     agent_api_bearer_token: str | None = None
+
+    # Agent observability / tracing
+    agent_trace_enabled: bool = True
+    agent_trace_preview_chars: int = 260
     
     # Debug and logging
     debug: bool = False

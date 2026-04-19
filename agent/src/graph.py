@@ -8,12 +8,33 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph
 from src.types import AgentState, Message, MessageRole
-from src.config import DEFAULT_SYSTEM_PROMPT
-from src.utils import log_error, log_debug
+from src.config import DEFAULT_SYSTEM_PROMPT, get_settings
+from src.utils import log_error, log_debug, log_info
 from src.tools import build_date_planning_tools
 
 
 MAX_TOOL_ROUNDS = 6
+
+
+def _preview(value: Any, max_chars: int) -> str:
+    text = str(value).replace("\n", " ").strip()
+    if len(text) <= max_chars:
+        return text
+    return f"{text[:max_chars]}..."
+
+
+def _sanitize_tool_args(tool_args: Any) -> Any:
+    if not isinstance(tool_args, dict):
+        return tool_args
+
+    redacted: dict[str, Any] = {}
+    for key, value in tool_args.items():
+        key_lower = key.lower()
+        if any(secret in key_lower for secret in ["token", "authorization", "password", "secret"]):
+            redacted[key] = "***redacted***"
+        else:
+            redacted[key] = value
+    return redacted
 
 
 def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
@@ -24,6 +45,11 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
     async def process_messages_node(state: AgentState) -> AgentState:
         """Process messages and generate response."""
         try:
+            settings = get_settings()
+            trace_enabled = settings.agent_trace_enabled
+            preview_chars = max(80, settings.agent_trace_preview_chars)
+            conversation_id = state.metadata.conversation_id if state.metadata else "unknown"
+
             # Convert stored messages to LangChain format
             lc_messages = [SystemMessage(content=DEFAULT_SYSTEM_PROMPT)]
             
@@ -56,17 +82,45 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
                 "tool_count": len(tools),
             })
 
+            if trace_enabled:
+                log_info("Agent turn started", {
+                    "conversation_id": conversation_id,
+                    "messages_in_memory": len(state.messages),
+                    "tool_count": len(tools),
+                })
+
             response = await llm.ainvoke(lc_messages)
 
             rounds = 0
+            total_tool_calls = 0
             while getattr(response, "tool_calls", None) and rounds < MAX_TOOL_ROUNDS:
                 rounds += 1
                 lc_messages.append(response)
+
+                if trace_enabled:
+                    log_info("Model requested tools", {
+                        "conversation_id": conversation_id,
+                        "round": rounds,
+                        "tool_calls": len(response.tool_calls),
+                    })
 
                 for call in response.tool_calls:
                     tool_name = call.get("name", "")
                     tool_id = call.get("id", "")
                     tool_args = call.get("args", {})
+                    total_tool_calls += 1
+
+                    if trace_enabled:
+                        log_info("Tool call", {
+                            "conversation_id": conversation_id,
+                            "round": rounds,
+                            "tool": tool_name,
+                            "tool_call_id": tool_id,
+                            "args_preview": _preview(
+                                _sanitize_tool_args(tool_args),
+                                preview_chars,
+                            ),
+                        })
 
                     selected_tool = tool_by_name.get(tool_name)
                     if not selected_tool:
@@ -77,6 +131,14 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
                         except Exception as tool_error:
                             tool_result = f"Tool '{tool_name}' error: {str(tool_error)}"
                             log_error("Tool execution failed", tool_error)
+
+                    if trace_enabled:
+                        log_info("Tool result", {
+                            "conversation_id": conversation_id,
+                            "round": rounds,
+                            "tool": tool_name,
+                            "result_preview": _preview(tool_result, preview_chars),
+                        })
 
                     lc_messages.append(
                         ToolMessage(
@@ -117,6 +179,14 @@ def create_agent_graph(model: ChatGoogleGenerativeAI) -> StateGraph:
             log_debug("Response generated", {
                 "response_length": len(assistant_message)
             })
+
+            if trace_enabled:
+                log_info("Agent turn completed", {
+                    "conversation_id": conversation_id,
+                    "tool_rounds": rounds,
+                    "total_tool_calls": total_tool_calls,
+                    "response_preview": _preview(assistant_message, preview_chars),
+                })
             
             # Create new state with assistant message added
             new_messages = state.messages.copy()

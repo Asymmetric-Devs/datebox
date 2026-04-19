@@ -512,26 +512,6 @@ function CalendarScreenContent() {
         left={16}
         autoCollapseDelay={4000}
       />
-
-      <ExpandableFAB
-        label={
-          <Text
-            numberOfLines={1}
-            style={{
-              fontSize: 16,
-              minWidth: 120,
-            }}
-          >
-            <Text style={{ color: COLORS.primary, fontWeight: "700" }}>Date</Text>
-            <Text style={{ color: COLORS.secondary, fontWeight: "800" }}>Bot</Text>
-          </Text>
-        }
-        icon="robot"
-        onPress={() => router.push("../historias")}
-        bottom={LAYOUT.bottomNavHeight + 16}
-        right={16}
-        autoCollapseDelay={5000}
-      />
     </SafeAreaView>
   );
 }

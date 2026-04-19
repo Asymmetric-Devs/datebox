@@ -58,6 +58,11 @@ type SuggestionGroup = {
   prompts: string[];
 };
 
+type HistoriasScreenProps = {
+  embedded?: boolean;
+  embeddedBottomInset?: number;
+};
+
 const DATEBOT_WELCOME_KEY = "datebot_welcome_seen_v1";
 
 const SUGGESTION_GROUPS: SuggestionGroup[] = [
@@ -157,7 +162,10 @@ async function invokeAgent(
   return (await response.json()) as AgentInvokeResponse;
 }
 
-export default function HistoriasScreen() {
+export default function HistoriasScreen({
+  embedded = false,
+  embeddedBottomInset = 0,
+}: HistoriasScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
@@ -178,6 +186,8 @@ export default function HistoriasScreen() {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+
+  const extraBottomInset = embedded ? Math.max(0, embeddedBottomInset) : 0;
 
   const hasMessages = messages.length > 0;
 
@@ -296,7 +306,7 @@ export default function HistoriasScreen() {
   const composerShellStyle = useAnimatedStyle(() => {
     const compact = !(isKeyboardOpen || isInputFocused);
     const inset = compact ? 22 : 12;
-    const defaultBottom = Math.max(insets.bottom - 8, 8);
+    const defaultBottom = Math.max(insets.bottom - 8, 8) + extraBottomInset;
     const keyboardBottom = keyboardHeight + 8;
 
     return {
@@ -449,11 +459,13 @@ export default function HistoriasScreen() {
     );
   };
 
-  return (
-    <SafeAreaView style={baseStyles.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-
-      <View style={{ flex: 1 }}>
+  const content = (
+    <View style={{ flex: 1 }}>
+      {embedded ? (
+        <View style={styles.embeddedHeaderWrap}>
+          <Text style={styles.embeddedHeaderTitle}>DateBot</Text>
+        </View>
+      ) : (
         <View style={styles.headerWrap}>
           <View style={styles.headerRow}>
             <BackButton size={28} onPress={() => router.back()} />
@@ -461,6 +473,7 @@ export default function HistoriasScreen() {
             <View style={{ width: 28 }} />
           </View>
         </View>
+      )}
 
         {!hasMessages && welcomeChecked ? (
           <View style={styles.suggestionsWrapper}>
@@ -522,7 +535,9 @@ export default function HistoriasScreen() {
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingTop: 14,
-            paddingBottom: isKeyboardOpen ? keyboardHeight + 140 : 170,
+            paddingBottom: isKeyboardOpen
+              ? keyboardHeight + 140
+              : 170 + extraBottomInset,
             flexGrow: 1,
           }}
         />
@@ -604,12 +619,38 @@ export default function HistoriasScreen() {
             </Animated.View>
           </Animated.View>
         ) : null}
-      </View>
+    </View>
+  );
+
+  if (embedded) {
+    return <View style={styles.embeddedRoot}>{content}</View>;
+  }
+
+  return (
+    <SafeAreaView style={baseStyles.safeArea} edges={["top", "left", "right"]}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      {content}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  embeddedRoot: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  embeddedHeaderWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
+    alignItems: "center",
+  },
+  embeddedHeaderTitle: {
+    fontFamily: FONT.bold,
+    fontSize: 22,
+    color: COLORS.text,
+    letterSpacing: -0.3,
+  },
   headerWrap: {
     paddingHorizontal: 24,
     paddingTop: 18,

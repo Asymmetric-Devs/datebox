@@ -22,6 +22,13 @@ from src.utils import log_debug, log_info, log_error
 _conversation_store: dict[str, AgentState] = {}
 
 
+def _preview_text(text: str, max_chars: int = 260) -> str:
+    cleaned = text.replace("\n", " ").strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+    return f"{cleaned[:max_chars]}..."
+
+
 def _coerce_state(raw_state: Any, fallback_state: AgentState) -> AgentState:
     """Normalize LangGraph output to AgentState.
 
@@ -99,6 +106,13 @@ async def invoke_agent_handler(
             timestamp=datetime.now().isoformat()
         )
     )
+
+    log_info("Agent request received", {
+        "conversation_id": conversation_id,
+        "user_id": request.user_id,
+        "message_preview": _preview_text(request.message),
+        "context_keys": sorted(list((state.context or {}).keys())),
+    })
     
     log_debug("Processing message", {
         "conversation_id": conversation_id,
@@ -128,6 +142,12 @@ async def invoke_agent_handler(
     ]
     
     last_message = assistant_messages[-1].content if assistant_messages else "No response generated"
+
+    log_info("Agent response", {
+        "conversation_id": conversation_id,
+        "response_preview": _preview_text(last_message),
+        "response_length": len(last_message),
+    })
     
     return InvokeAgentResponse(
         conversation_id=conversation_id,

@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { rnFetch } from "@elepad/api-client/src/mutator";
 import { COLORS, STYLES, SHADOWS, LAYOUT, FONT, SPACING } from "@/styles/base";
+import HistoriasScreen from "../historias";
 
 // ── Types ────────────────────────────────────────────────────────────
 interface Tag {
@@ -168,6 +169,7 @@ function DateCard({
 
 // ── Screen ───────────────────────────────────────────────────────────
 export default function DatesScreen() {
+  const [viewMode, setViewMode] = useState<"explore" | "chat">("explore");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const {
@@ -206,14 +208,69 @@ export default function DatesScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dates</Text>
-          {(data?.total ?? 0) > 0 && (
+          {viewMode === "explore" && (data?.total ?? 0) > 0 && (
             <View style={styles.countBadge}>
               <Text style={styles.countText}>{data?.total}</Text>
             </View>
           )}
         </View>
 
-        {dates.length === 0 ? (
+        <View style={styles.modeSelectorWrap}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => setViewMode("explore")}
+            style={[
+              styles.modeButton,
+              viewMode === "explore" ? styles.modeButtonActive : undefined,
+            ]}
+          >
+            <Icon
+              source="calendar-search"
+              size={16}
+              color={viewMode === "explore" ? COLORS.white : COLORS.textSecondary}
+            />
+            <Text
+              style={[
+                styles.modeButtonText,
+                viewMode === "explore" ? styles.modeButtonTextActive : undefined,
+              ]}
+            >
+              Explorar
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => setViewMode("chat")}
+            style={[
+              styles.modeButton,
+              viewMode === "chat" ? styles.modeButtonActive : undefined,
+            ]}
+          >
+            <Icon
+              source="robot"
+              size={16}
+              color={viewMode === "chat" ? COLORS.white : COLORS.textSecondary}
+            />
+            <Text
+              style={[
+                styles.modeButtonText,
+                viewMode === "chat" ? styles.modeButtonTextActive : undefined,
+              ]}
+            >
+              DateBot
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {viewMode === "chat" ? (
+          <View style={styles.chatContainer}>
+            <HistoriasScreen
+              embedded
+              embeddedBottomInset={LAYOUT.bottomNavHeight - 24}
+            />
+          </View>
+        ) : dates.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
               <Icon source="heart-outline" size={40} color={COLORS.textSecondary} />
@@ -285,6 +342,38 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontFamily: FONT.bold,
     fontSize: 14,
+  },
+  modeSelectorWrap: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.m,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 14,
+    padding: 6,
+    flexDirection: "row",
+    gap: 8,
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  modeButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  modeButtonText: {
+    fontFamily: FONT.semiBold,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  modeButtonTextActive: {
+    color: COLORS.white,
+  },
+  chatContainer: {
+    flex: 1,
   },
 
   // ── Card ─────────────────────────────────────────────────────────

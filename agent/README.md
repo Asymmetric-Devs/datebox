@@ -174,6 +174,8 @@ export function getAvailableTools(): Tool[] {
 - `AGENT_API_BASE_URL` - Elepad API base URL used by tools (default: http://127.0.0.1:8787)
 - `AGENT_API_TIMEOUT_SECONDS` - Timeout for API tool calls in seconds (default: 20)
 - `AGENT_API_BEARER_TOKEN` - Optional bearer token for protected API endpoints
+- `AGENT_TRACE_ENABLED` - Enable per-request trace logs (default: true)
+- `AGENT_TRACE_PREVIEW_CHARS` - Max chars in log previews for args/results/responses (default: 260)
 - `DEBUG` - Enable debug logging (default: false)
 
 ## Best Practices
