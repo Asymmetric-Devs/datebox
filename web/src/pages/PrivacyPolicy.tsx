@@ -174,7 +174,7 @@ export default function PrivacyPolicy() {
           <Button 
             variant="contained" 
             size="large"
-            href="mailto:proyectoelepad@gmail.com"
+            href="mailto:asymmetricdevs@gmail.com"
             sx={{ 
               backgroundColor: 'white', 
               color: 'primary.main',

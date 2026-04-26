@@ -42,7 +42,7 @@ const LanguageSelector = () => {
           color: 'primary.main',
           '&:hover': {
             borderColor: 'primary.dark',
-            backgroundColor: 'rgba(154, 158, 206, 0.04)',
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
           },
           minWidth: 'auto',
           px: 2,

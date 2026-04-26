@@ -7,33 +7,33 @@
   },
   "hero": {
     "title": "Welcome to",
-    "elepad": "Elepad",
-    "subtitle": "The platform that connects generations through cognitive games, shared memories and special moments."
+    "elepad": "datebox",
+    "subtitle": "The family app to play, save memories, and organize important moments in one place."
   },
   "features": {
     "title": "Everything you need in",
     "highlight": "one place",
-    "description": "Elepad combines entertainment, cognitive health and family connection in a unique experience.",
+    "description": "With datebox you can train your mind, share content with your group, and keep your family routine active.",
     "cognitiveGames": {
       "title": "Cognitive Games",
-      "description": "Exercise your mind with games specifically designed to stimulate memory and thinking."
+      "description": "Train with games like Memory, Sudoku, NET, and Focus to keep your mind active every day."
     },
     "achievementsStreaks": {
       "title": "Achievements and Streaks",
-      "description": "Keep your motivation with an achievement and streak system that rewards your consistency."
+      "description": "Track daily progress, unlock achievements, and keep your streak alive over time."
     },
     "familyConnection": {
       "title": "Family Connection",
-      "description": "Share special moments with your loved ones and strengthen family bonds."
+      "description": "Create your family group, share albums, and stay close to the people who matter most."
     },
     "memoriesEvents": {
       "title": "Memories and Events",
-      "description": "Save your most precious memories and plan important family events."
+      "description": "Save memories, plan events, and get reminders so you never miss important dates."
     }
   },
   "cta": {
-    "title": "Start your journey today",
-    "description": "Download Elepad for free and discover a new way to keep your mind active while sharing unique moments with your family.",
+    "title": "Start today with datebox",
+    "description": "Download datebox and enjoy an app built for games, memories, and family planning in one experience.",
     "appStore": "App Store",
     "googlePlay": "Google Play"
   },
@@ -50,12 +50,12 @@
   },
   "about": {
     "title": "About Us",
-    "description": "We are 5 software developers and systems engineers, graduates from UTN Regional Resistencia. We seek to transform families through technology, creating tools that strengthen bonds and generate meaningful experiences between generations.",
+    "description": "datebox is an app built to connect generations. We combine cognitive games, memories, and family organization to make everyday life simpler and more meaningful.",
     "team": "Our Team"
   },
   "contact": {
     "title": "Contact",
-    "description": "If you have questions, suggestions or want to contact us, fill out the following form and we will respond as soon as possible.",
+    "description": "If you have questions or ideas to improve datebox, send us a message and we will get back to you soon.",
     "name": "Name",
     "email": "Email",
     "message": "Message",
@@ -63,25 +63,25 @@
   },
   "help": {
     "title": "Help",
-    "description": "Here you will find answers to the most frequently asked questions and resources to get support.",
+    "description": "Quick answers to start using datebox and get the most out of its features.",
     "faq": {
       "createAccount": {
-        "question": "How do I create an account?",
-        "answer": "To create an account, click on 'Sign Up' and complete the form with your information."
+        "question": "How do I get started on datebox?",
+        "answer": "Download the app, create your account, and complete your profile to start playing and sharing with your family group."
       },
       "resetPassword": {
-        "question": "How do I reset my password?",
-        "answer": "On the login screen, click on 'Forgot your password?' and follow the indicated steps."
+        "question": "How do I recover my access?",
+        "answer": "From the sign-in screen, choose the password recovery option and follow the steps sent to your email."
       },
       "contactSupport": {
         "question": "How do I contact support?",
-        "answer": "You can write to us from the contact page and we will respond as soon as possible."
+        "answer": "You can message us from this page or by support email, and we will help you as soon as possible."
       }
     }
   },
   "terms": {
     "title": "Terms of Service",
-    "description": "By using Elepad, you accept our terms and conditions. We reserve the right to modify these terms at any time. The use of the platform implies acceptance of privacy policies and commitment to use the service responsibly and respectfully.",
+    "description": "By using datebox, you accept our terms and conditions. We reserve the right to modify these terms at any time. The use of the platform implies acceptance of privacy policies and commitment to use the service responsibly and respectfully.",
     "rules": {
       "rule1": "Do not share third-party personal information without consent.",
       "rule2": "Do not use the platform for illegal or harmful activities.",
@@ -92,7 +92,7 @@
     "title": "Privacy Policy",
     "lastUpdated": "Last updated",
     "introduction": "Introduction",
-    "introductionText": "This privacy policy describes how Elepad collects, uses and protects your personal information.",
+    "introductionText": "This privacy policy describes how datebox collects, uses and protects your personal information.",
     "dataCollection": {
       "title": "What data we collect",
       "personalInfo": "1. Personal Information",
@@ -117,7 +117,7 @@
     },
     "permissions": {
       "title": "Application Permissions",
-      "intro": "Elepad requests the following permissions:",
+      "intro": "datebox requests the following permissions:",
       "camera": "Camera and Photo Gallery",
       "cameraDetails": "To take profile photos and add images to your memories. We only access photos that you select.",
       "calendar": "Calendar (optional)",
@@ -142,7 +142,7 @@
     },
     "whatGetsDeleted": {
       "title": "Data that will be permanently deleted",
-      "description": "When deleting your Elepad account, the following data will be permanently deleted:",
+      "description": "When deleting your datebox account, the following data will be permanently deleted:",
       "accountInfo": "Your Account Information",
       "accountInfoDetails": "Name, email, date of birth, profile picture and authentication credentials.",
       "gameProgress": "Cognitive Games Progress",
@@ -169,19 +169,19 @@
     },
     "deletionProcess": {
       "title": "Account Deletion Process",
-      "description": "Follow these steps to request the deletion of your Elepad account:",
+      "description": "Follow these steps to request the deletion of your datebox account:",
       "step1": {
         "title": "Step 1: Make a copy of your data (Optional)",
         "description": "Before deleting your account, you can export your data from the app:<br /><strong>Profile → Settings → Privacy → Download my data</strong><br />You will receive a file with all your memories, photos and statistics."
       },
       "step2": {
         "title": "Step 2: Send your request",
-        "description": "Send an email from the account registered in Elepad to:",
-        "subject": "Account Deletion Request - Elepad",
+        "description": "Send an email from the account registered in datebox to:",
+        "subject": "Account Deletion Request - datebox",
         "include": "Include in the message:",
         "items": {
           "name": "• Your full name registered in the app",
-          "email": "• Your Elepad account email",
+          "email": "• Your datebox account email",
           "confirmation": "• Confirmation that you understand this action is irreversible",
           "reason": "• Reason for deletion (optional, helps us improve)"
         }

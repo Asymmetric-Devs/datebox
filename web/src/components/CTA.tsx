@@ -8,7 +8,7 @@ export default function CTA() {
     <Box
       sx={{
         py: { xs: 10, md: 14 },
-        background: 'linear-gradient(135deg, #9a9ece 0%, #424a70 100%)',
+        background: 'linear-gradient(135deg, #111111 0%, #2D2D2D 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}

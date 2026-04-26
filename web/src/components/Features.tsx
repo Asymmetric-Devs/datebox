@@ -87,7 +87,7 @@ export default function Features() {
                 backgroundColor: 'background.paper',
                 '&:hover': {
                   transform: 'translateY(-8px)',
-                  boxShadow: '0 12px 32px rgba(154, 158, 206, 0.15)',
+                  boxShadow: '0 12px 32px rgba(0, 0, 0, 0.14)',
                   borderColor: 'primary.main',
                 },
               }}

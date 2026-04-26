@@ -36,7 +36,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
               letterSpacing: '-0.01em',
             }}
           >
-            Elepad
+            datebox
           </Typography>
 
           {variant === 'main' ? (
@@ -51,7 +51,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                   py: 1.5,
                   boxShadow: 'none',
                   '&:hover': {
-                    backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
                     boxShadow: 'none',
                   },
                 }}
@@ -69,7 +69,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                   py: 1.5,
                   boxShadow: 'none',
                   '&:hover': {
-                    backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
                     boxShadow: 'none',
                   },
                 }}
@@ -103,7 +103,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                   py: 1.5,
                   boxShadow: 'none',
                   '&:hover': {
-                    backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
                     boxShadow: 'none',
                   },
                 }}

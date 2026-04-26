@@ -7,33 +7,33 @@
   },
   "hero": {
     "title": "Bienvenido a",
-    "elepad": "Elepad",
-    "subtitle": "La plataforma que conecta generaciones a través de juegos cognitivos, recuerdos compartidos y momentos especiales."
+    "elepad": "datebox",
+    "subtitle": "La app familiar para jugar, guardar recuerdos y organizar momentos importantes en un solo lugar."
   },
   "features": {
     "title": "Todo lo que necesitas en",
     "highlight": "un solo lugar",
-    "description": "Elepad combina entretenimiento, salud cognitiva y conexión familiar en una experiencia única.",
+    "description": "Con datebox puedes entrenar la mente, compartir contenido con tu grupo y mantener activa tu rutina familiar.",
     "cognitiveGames": {
       "title": "Juegos Cognitivos",
-      "description": "Ejercita la mente con juegos diseñados específicamente para estimular la memoria y el pensamiento."
+      "description": "Entrena con juegos como Memoria, Sudoku, NET y Focus para mantener tu mente activa cada día."
     },
     "achievementsStreaks": {
       "title": "Logros y Rachas",
-      "description": "Mantén tu motivación con un sistema de logros y rachas que premia tu constancia."
+      "description": "Sigue tu progreso diario, desbloquea logros y mantén rachas para no perder el ritmo."
     },
     "familyConnection": {
       "title": "Conexión Familiar",
-      "description": "Comparte momentos especiales con tus seres queridos y fortalece los lazos familiares."
+      "description": "Crea tu grupo familiar, comparte álbumes y mantente cerca de quienes más quieres."
     },
     "memoriesEvents": {
       "title": "Recuerdos y Eventos",
-      "description": "Guarda tus memorias más preciadas y planifica eventos familiares importantes."
+      "description": "Guarda recuerdos, organiza eventos y recibe recordatorios para no olvidar fechas clave."
     }
   },
   "cta": {
-    "title": "Comienza tu viaje hoy",
-    "description": "Descarga Elepad gratis y descubre una nueva forma de mantener tu mente activa mientras compartes momentos únicos con tu familia.",
+    "title": "Empieza hoy con datebox",
+    "description": "Descarga datebox y vive una experiencia pensada para juegos, recuerdos y organización familiar desde una sola app.",
     "appStore": "App Store",
     "googlePlay": "Google Play"
   },
@@ -50,12 +50,12 @@
   },
   "about": {
     "title": "Sobre Nosotros",
-    "description": "Somos 5 desarrolladores de software e ingenieros en sistemas, egresados de la UTN Regional Resistencia. Buscamos transformar a las familias a través de la tecnología, creando herramientas que fortalezcan los vínculos y generen experiencias significativas entre generaciones.",
+    "description": "datebox es una app creada para conectar generaciones. Combinamos juegos cognitivos, recuerdos y organización familiar para que cada día sea más simple y significativo.",
     "team": "Nuestro equipo"
   },
   "contact": {
     "title": "Contacto",
-    "description": "Si tienes dudas, sugerencias o quieres comunicarte con nosotros, completa el siguiente formulario y te responderemos a la brevedad.",
+    "description": "Si tienes dudas o ideas para mejorar datebox, escríbenos y te responderemos lo antes posible.",
     "name": "Nombre",
     "email": "Email",
     "message": "Mensaje",
@@ -63,25 +63,25 @@
   },
   "help": {
     "title": "Ayuda",
-    "description": "Aquí encontrarás respuestas a las preguntas más frecuentes y recursos para obtener soporte.",
+    "description": "Respuestas rápidas para empezar a usar datebox y aprovechar todas sus funciones.",
     "faq": {
       "createAccount": {
-        "question": "¿Cómo creo una cuenta?",
-        "answer": "Para crear una cuenta, haz clic en 'Registrarse' y completa el formulario con tus datos."
+        "question": "¿Cómo empiezo en datebox?",
+        "answer": "Descarga la app, crea tu cuenta y completa tu perfil para comenzar a jugar y compartir con tu grupo familiar."
       },
       "resetPassword": {
-        "question": "¿Cómo restablezco mi contraseña?",
-        "answer": "En la pantalla de inicio de sesión, haz clic en '¿Olvidaste tu contraseña?' y sigue los pasos indicados."
+        "question": "¿Cómo recupero mi acceso?",
+        "answer": "Desde el inicio de sesión, selecciona la opción para recuperar contraseña y sigue los pasos enviados a tu correo."
       },
       "contactSupport": {
         "question": "¿Cómo contacto al soporte?",
-        "answer": "Puedes escribirnos desde la página de contacto y te responderemos a la brevedad."
+        "answer": "Puedes escribirnos desde esta página o por correo de soporte, y te ayudaremos a la brevedad."
       }
     }
   },
   "terms": {
     "title": "Términos de Servicio",
-    "description": "Al utilizar Elepad, aceptas nuestros términos y condiciones. Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso de la plataforma implica la aceptación de las políticas de privacidad y el compromiso de utilizar el servicio de manera responsable y respetuosa.",
+    "description": "Al utilizar datebox, aceptas nuestros términos y condiciones. Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso de la plataforma implica la aceptación de las políticas de privacidad y el compromiso de utilizar el servicio de manera responsable y respetuosa.",
     "rules": {
       "rule1": "No compartas información personal de terceros sin consentimiento.",
       "rule2": "No utilices la plataforma para actividades ilícitas o dañinas.",
@@ -92,7 +92,7 @@
     "title": "Política de Privacidad",
     "lastUpdated": "Última actualización",
     "introduction": "Introducción",
-    "introductionText": "Esta política de privacidad describe cómo Elepad recopila, utiliza y protege tu información personal.",
+    "introductionText": "Esta política de privacidad describe cómo datebox recopila, utiliza y protege tu información personal.",
     "dataCollection": {
       "title": "Qué datos recopilamos",
       "personalInfo": "1. Información Personal",
@@ -117,7 +117,7 @@
     },
     "permissions": {
       "title": "Permisos de la Aplicación",
-      "intro": "Elepad solicita los siguientes permisos:",
+      "intro": "datebox solicita los siguientes permisos:",
       "camera": "Cámara y Galería de Fotos",
       "cameraDetails": "Para tomar fotos de perfil y añadir imágenes a tus recuerdos. Solo accedemos a las fotos que tú seleccionas.",
       "calendar": "Calendario (opcional)",
@@ -142,7 +142,7 @@
     },
     "whatGetsDeleted": {
       "title": "Datos que se eliminarán permanentemente",
-      "description": "Al eliminar tu cuenta de Elepad, se borrarán de forma permanente los siguientes datos:",
+      "description": "Al eliminar tu cuenta de datebox, se borrarán de forma permanente los siguientes datos:",
       "accountInfo": "Información de tu Cuenta",
       "accountInfoDetails": "Nombre, email, fecha de nacimiento, foto de perfil y credenciales de autenticación.",
       "gameProgress": "Progreso en Juegos Cognitivos",
@@ -169,19 +169,19 @@
     },
     "deletionProcess": {
       "title": "Proceso de Eliminación de Cuenta",
-      "description": "Sigue estos pasos para solicitar la eliminación de tu cuenta de Elepad:",
+      "description": "Sigue estos pasos para solicitar la eliminación de tu cuenta de datebox:",
       "step1": {
         "title": "Paso 1: Haz una copia de tus datos (Opcional)",
         "description": "Antes de eliminar tu cuenta, puedes exportar tus datos desde la app:<br /><strong>Perfil → Configuración → Privacidad → Descargar mis datos</strong><br />Recibirás un archivo con todos tus recuerdos, fotos y estadísticas."
       },
       "step2": {
         "title": "Paso 2: Envía tu solicitud",
-        "description": "Envía un correo electrónico desde la cuenta registrada en Elepad a:",
-        "subject": "Solicitud de Eliminación de Cuenta - Elepad",
+        "description": "Envía un correo electrónico desde la cuenta registrada en datebox a:",
+        "subject": "Solicitud de Eliminación de Cuenta - datebox",
         "include": "Incluye en el mensaje:",
         "items": {
           "name": "• Tu nombre completo registrado en la app",
-          "email": "• El email de tu cuenta de Elepad",
+          "email": "• El email de tu cuenta de datebox",
           "confirmation": "• Confirmación de que entiendes que esta acción es irreversible",
           "reason": "• Motivo de la eliminación (opcional, nos ayuda a mejorar)"
         }

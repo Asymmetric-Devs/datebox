@@ -188,11 +188,11 @@ export default function AccountDeletion() {
               }}>
                 <Email sx={{ fontSize: 20 }} />
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                  proyectoelepad@gmail.com
+                  asymmetricdevs@gmail.com
                 </Typography>
                 <Button
                   size="small"
-                  onClick={() => navigator.clipboard.writeText('proyectoelepad@gmail.com')}
+                  onClick={() => navigator.clipboard.writeText('asymmetricdevs@gmail.com')}
                   sx={{ 
                     color: 'white', 
                     minWidth: 'auto', 
@@ -279,7 +279,7 @@ export default function AccountDeletion() {
           <Button 
             variant="contained" 
             size="large"
-            href="mailto:proyectoelepad@gmail.com"
+            href="mailto:asymmetricdevs@gmail.com"
             sx={{ 
               backgroundColor: 'white', 
               color: 'primary.main',

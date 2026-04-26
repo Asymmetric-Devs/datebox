@@ -4,28 +4,28 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#9a9ece',
-      dark: '#7374a7',
-      light: '#9eadc8',
+      main: '#000000',
+      dark: '#111111',
+      light: '#333333',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#424a70',
-      light: '#9eadc8',
+      main: '#222222',
+      light: '#555555',
       contrastText: '#ffffff',
     },
     background: {
       default: '#FFFFFF',
-      paper: '#F2F2F7',
+      paper: '#F5F5F5',
     },
     text: {
       primary: '#000000',
-      secondary: '#7374a7',
+      secondary: '#555555',
     },
     success: {
-      main: '#6B8DD6',
+      main: '#2D2D2D',
     },
-    divider: '#E5E5EA',
+    divider: '#E0E0E0',
   },
   typography: {
     fontFamily: '"Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',

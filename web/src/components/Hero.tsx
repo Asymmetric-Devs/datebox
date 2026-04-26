@@ -1,7 +1,7 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward, Download } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import brandImage from '/datebox-brand.jpeg';
+import brandImage from '/datebox-sinfondo.png';
 
 
 export default function Hero() {
@@ -12,7 +12,7 @@ export default function Hero() {
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #F2F2F7 100%)',
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -26,8 +26,8 @@ export default function Hero() {
           width: '500px',
           height: '500px',
           borderRadius: '50%',
-          background: '#9eadc8',
-          opacity: 0.1,
+          background: '#111111',
+          opacity: 0.08,
           filter: 'blur(80px)',
         }}
       />
@@ -39,8 +39,8 @@ export default function Hero() {
           width: '600px',
           height: '600px',
           borderRadius: '50%',
-          background: '#9a9ece',
-          opacity: 0.08,
+          background: '#333333',
+          opacity: 0.06,
           filter: 'blur(100px)',
         }}
       />
@@ -75,7 +75,7 @@ export default function Hero() {
                   display: 'inline-block',
                 }}
               >
-                Datebox
+                datebox
               </Box>
             </Typography>
 
@@ -110,9 +110,9 @@ export default function Hero() {
                   px: 4,
                   py: 1.5,
                   fontSize: '1.1rem',
-                  boxShadow: '0 4px 14px rgba(154, 158, 206, 0.4)',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.28)',
                   '&:hover': {
-                    boxShadow: '0 6px 20px rgba(154, 158, 206, 0.5)',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.34)',
                   },
                 }}
               >
@@ -130,7 +130,7 @@ export default function Hero() {
                   borderWidth: 2,
                   '&:hover': {
                     borderWidth: 2,
-                    backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
                   },
                 }}
               >
@@ -150,8 +150,8 @@ export default function Hero() {
           >
             <Box
               sx={{
-                width: { xs: '340px', sm: '420px', md: '540px' },
-                height: { xs: '340px', sm: '420px', md: '540px' },
+                width: { xs: '380px', sm: '500px', md: '700px' },
+                height: { xs: '380px', sm: '500px', md: '700px' },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -160,10 +160,10 @@ export default function Hero() {
               <Box
                 component="img"
                 src={brandImage}
-                alt="Datebox"
+                alt="datebox"
                 sx={{
-                  width: '84%',
-                  height: '84%',
+                  width: '94%',
+                  height: '94%',
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.12))',
                 }}
